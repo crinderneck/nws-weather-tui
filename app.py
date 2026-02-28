@@ -11,45 +11,31 @@ import re
 import signal
 import subprocess
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 import curses
 
 from client import NWSClient
 from constants import (
-    CONFIG_PATH,
     DEFAULT_CONFIG,
     MIN_COLS,
     MIN_ROWS,
     N_RADAR_COLORS,
     NWS_RADAR_PALETTE,
     RADAR_LAST_PNG_PATH,
-    STATE_PATH,
     ensure_dir,
     load_config,
-    load_json,
     radar_curses_color,
     radar_dual_pair,
     radar_single_pair,
-    save_json,
 )
-from helpers import (
-    bbox_around,
-    clamp,
-    city_overlay_and_hits_for_bbox,
-    dbg,
-    expand_bbox_km,
-    fmt_time,
-    parse_iso,
-    png_to_ascii,
-    png_to_halfblock_radar,
-    png_to_line_overlay,
-    safe_addstr,
-    vector_lines_overlay,
-    parse_first_number,
-    RadarCell,
-)
+from formatting import fmt_time, parse_iso
+from geo import bbox_around, clamp, expand_bbox_km
+from helpers import dbg, safe_addstr
+from overlays import city_overlay_and_hits_for_bbox, png_to_line_overlay, vector_lines_overlay
+from persistence import load_app_state, save_app_config, save_app_state
+from radar_decode import RadarCell, png_to_ascii, png_to_halfblock_radar
 from models import (
     AlertItem,
     CurrentConditions,
@@ -283,136 +269,6 @@ class App:
             dbg(f"RADAR save failed: {e}")
 
     # ------------------------------------------------------------------
-    # Radar color pair helpers
-    # ------------------------------------------------------------------
-
-    def _radar_cell_attr(self, char: str, fg_idx: int, bg_idx: int) -> int:
-        """Return curses attr for a radar halfblock cell."""
-        if fg_idx == 0 and bg_idx == 0:
-            return curses.A_DIM
-        if bg_idx == 0:
-            # Single top or bottom color: use single pair
-            return curses.color_pair(radar_single_pair(fg_idx))
-        # Dual color: fg and bg both set
-        pair_num = radar_dual_pair(fg_idx, bg_idx)
-        if pair_num < 256:
-            return curses.color_pair(pair_num)
-        # Fallback: use fg single pair
-        return curses.color_pair(radar_single_pair(fg_idx))
-
-    def _radar_char_attr_ascii(self, ch: str, ramp: str, kind: str = " ") -> int:
-        """Return curses attr for ASCII-mode radar character."""
-        if not ch or ch == " ":
-            return curses.A_DIM
-        levels = ramp or " .:-=+*#%@"
-        idx = levels.find(ch)
-        if idx < 0:
-            idx = 1
-        t = idx / max(1, len(levels) - 1)
-        base_pair = {"R": 9, "S": 10, "I": 11}.get(kind, 8)
-        base = curses.color_pair(base_pair)
-        if t < 0.25:
-            return base | curses.A_DIM
-        if t < 0.8:
-            return base
-        return base | curses.A_BOLD
-
-    # ------------------------------------------------------------------
-    # Radar draw helpers
-    # ------------------------------------------------------------------
-
-    def _draw_radar_halfblock_line(
-        self, win, y: int, row_cells: List[RadarCell], cols: int, x_off: int = 0
-    ) -> None:
-        max_w = max(0, cols - 1 - x_off)
-        x_base = max(0, x_off)
-        for i, (char, fg_idx, bg_idx) in enumerate(row_cells[:max_w]):
-            attr = self._radar_cell_attr(char, fg_idx, bg_idx)
-            safe_addstr(win, y, x_base + i, char, attr)
-
-    def _draw_radar_ascii_line(
-        self,
-        win,
-        y: int,
-        line: str,
-        kind_line: str,
-        cols: int,
-        ramp: str,
-        x_off: int = 0,
-    ) -> None:
-        max_w = max(0, cols - 1 - x_off)
-        line = (line or "")[:max_w]
-        kind_line = (kind_line or "").ljust(len(line))[:max_w]
-        if not line:
-            return
-        x = max(0, x_off)
-        run_attr = self._radar_char_attr_ascii(line[0], ramp, kind_line[0])
-        run: List[str] = [line[0]]
-        for i, ch in enumerate(line[1:], 1):
-            a = self._radar_char_attr_ascii(ch, ramp, kind_line[i] if i < len(kind_line) else " ")
-            if a == run_attr:
-                run.append(ch)
-            else:
-                safe_addstr(win, y, x, "".join(run), run_attr)
-                x += len(run)
-                run = [ch]
-                run_attr = a
-        safe_addstr(win, y, x, "".join(run), run_attr)
-
-    def _draw_state_overlay_line(
-        self, win, y: int, line: str, cols: int, x_off: int = 0
-    ) -> None:
-        line = (line or "")[: max(0, cols - 1 - x_off)]
-        for x, ch in enumerate(line):
-            if ch != " ":
-                safe_addstr(
-                    win, y, x + max(0, x_off), ch,
-                    curses.color_pair(2) | curses.A_DIM
-                )
-
-    def _draw_city_overlay_line(
-        self, win, y: int, line: str, cols: int, x_off: int = 0
-    ) -> None:
-        line = (line or "")[: max(0, cols - 1 - x_off)]
-        for x, ch in enumerate(line):
-            if ch != " ":
-                attr = {
-                    "O": curses.color_pair(1) | curses.A_BOLD,
-                    "@": curses.color_pair(12) | curses.A_BOLD,
-                }.get(ch, curses.color_pair(3) | curses.A_BOLD)
-                safe_addstr(win, y, x + max(0, x_off), ch, attr)
-
-    # ------------------------------------------------------------------
-    # Radar legend
-    # ------------------------------------------------------------------
-
-    def draw_radar_legend(self, win, y: int, x: int, cols: int) -> None:
-        """Draw a one-line dBZ color legend."""
-        label = "dBZ:"
-        safe_addstr(win, y, x, label, curses.A_DIM)
-        cx = x + len(label) + 1
-        for i, (_, _, _, _, _, _, dbz, lbl) in enumerate(NWS_RADAR_PALETTE):
-            nws_idx = i + 1
-            if cx + 3 > cols - 1:
-                break
-            if self._radar_has_256color:
-                # Draw a solid block using fg=bg=same color
-                pair_num = radar_dual_pair(nws_idx, nws_idx)
-                if pair_num < 256:
-                    safe_addstr(win, y, cx, "▀", curses.color_pair(pair_num))
-                    cx += 1
-            else:
-                safe_addstr(win, y, cx, "█", curses.color_pair(
-                    {1: 8, 2: 8, 3: 8, 4: 9, 5: 9, 6: 9,
-                     7: 2, 8: 2, 9: 2, 10: 4, 11: 4, 12: 4,
-                     13: 5, 14: 5}.get(nws_idx, 8)
-                ))
-                cx += 1
-            if cx + len(lbl) + 1 < cols - 1:
-                safe_addstr(win, y, cx, lbl, curses.A_DIM)
-                cx += len(lbl) + 1
-
-    # ------------------------------------------------------------------
     # Radar timestamp
     # ------------------------------------------------------------------
 
@@ -551,24 +407,11 @@ class App:
         self._radar_map_rows = 0
 
     # ------------------------------------------------------------------
-    # Config / state persistence
+    # Config / state persistence (delegated to persistence module)
     # ------------------------------------------------------------------
 
     def _save_cfg(self) -> None:
-        self.cfg.update({
-            "location_name": self.location_name,
-            "lat": self.lat,
-            "lon": self.lon,
-            "units": self.units,
-            "use_24h": self.use_24h,
-            "auto_refresh_seconds": self.auto_refresh_seconds,
-            "http_timeout": self.timeout,
-            "show_graph_panel_on_current": self.show_graph_panel_on_current,
-            "hourly_hours": self.hourly_hours,
-            "show_radar_map": self.show_radar_map,
-            "favorites": self.favorites,
-        })
-        save_json(CONFIG_PATH, self.cfg)
+        save_app_config(self)
 
     def _load_points(self) -> None:
         self.points_data = self.client.points(self.lat, self.lon)
@@ -600,98 +443,10 @@ class App:
                 self.station_id = sid
 
     def _save_state(self) -> None:
-        def fix_dt(obj: Any) -> Any:
-            if isinstance(obj, dict):
-                return {
-                    k: v.isoformat() if isinstance(v, dt.datetime) else fix_dt(v)
-                    for k, v in obj.items()
-                }
-            if isinstance(obj, list):
-                return [fix_dt(i) for i in obj]
-            return obj
-
-        state = fix_dt({
-            "saved_at": dt.datetime.now().astimezone().isoformat(),
-            "location_name": self.location_name,
-            "lat": self.lat,
-            "lon": self.lon,
-            "units": self.units,
-            "use_24h": self.use_24h,
-            "current": self._serialize_current(),
-            "forecast_periods": [p.__dict__ for p in self.forecast_periods],
-            "hourly_periods": [h.__dict__ for h in self.hourly_periods],
-            "alerts": [a.__dict__ for a in self.alerts],
-            "radar_station": self.radar_station,
-            "state_code": self.state_code,
-        })
-        save_json(STATE_PATH, state)
-
-    def _serialize_current(self) -> Optional[Dict[str, Any]]:
-        if not self.current:
-            return None
-        d = self.current.__dict__.copy()
-        if isinstance(d.get("timestamp"), dt.datetime):
-            d["timestamp"] = d["timestamp"].isoformat()
-        return d
+        save_app_state(self)
 
     def _load_state(self) -> bool:
-        st = load_json(STATE_PATH)
-        if not st:
-            return False
-        self.location_name = str(st.get("location_name") or self.location_name)
-        try:
-            self.lat = float(st.get("lat", self.lat))
-            self.lon = float(st.get("lon", self.lon))
-        except (TypeError, ValueError):
-            pass
-        self.units = str(st.get("units") or self.units)
-        self.use_24h = bool(st.get("use_24h", self.use_24h))
-        self.radar_station = st.get("radar_station", "") or None
-        sc = st.get("state_code")
-        if isinstance(sc, str) and re.fullmatch(r"[A-Za-z]{2}", sc.strip()):
-            self.state_code = sc.strip().upper()
-
-        c = st.get("current")
-        if isinstance(c, dict):
-            ts = parse_iso(c.get("timestamp")) if isinstance(c.get("timestamp"), str) else None
-            try:
-                self.current = CurrentConditions(
-                    station=str(c.get("station") or "—"),
-                    timestamp=ts,
-                    temperature_c=c.get("temperature_c"),
-                    wind_mps=c.get("wind_mps"),
-                    wind_dir_deg=c.get("wind_dir_deg"),
-                    gust_mps=c.get("gust_mps"),
-                    humidity_pct=c.get("humidity_pct"),
-                    pressure_pa=c.get("pressure_pa"),
-                    visibility_m=c.get("visibility_m"),
-                    text_description=str(c.get("text_description") or "—"),
-                    icon_key=str(c.get("icon_key") or "unknown"),
-                )
-            except Exception:
-                self.current = None
-
-        for key, cls, fields in [
-            ("forecast_periods", ForecastPeriod, [
-                "name", "start", "end", "is_daytime", "temperature",
-                "temperature_unit", "wind_speed", "wind_dir",
-                "short_forecast", "detailed_forecast", "icon_key",
-            ]),
-            ("hourly_periods", HourlyPeriod, [
-                "start", "temperature", "temperature_unit", "wind_speed",
-                "wind_speed_num", "wind_dir", "short_forecast", "icon_key", "pop",
-            ]),
-            ("alerts", AlertItem, [
-                "event", "severity", "urgency", "certainty", "headline",
-                "sent", "effective", "expires", "description", "instruction",
-            ]),
-        ]:
-            items = st.get(key, [])
-            setattr(self, key, [
-                cls(**{f: _parse_field(p.get(f), f) for f in fields})
-                for p in items if isinstance(p, dict)
-            ])
-        return True
+        return load_app_state(self)
 
     # ------------------------------------------------------------------
     # Favorites
@@ -1159,25 +914,6 @@ class App:
 
         draw_footer(self, rows, cols)
         self.stdscr.refresh()
-
-
-# ---------------------------------------------------------------------------
-# State loading helpers
-# ---------------------------------------------------------------------------
-
-def _parse_field(value: Any, field_name: str) -> Any:
-    if value is None:
-        return None
-    if field_name in ("start", "end", "sent", "effective", "expires", "timestamp"):
-        return parse_iso(value) if isinstance(value, str) else None
-    if field_name in (
-        "temperature", "wind_speed_num", "pop", "humidity_pct",
-        "pressure_pa", "visibility_m", "wind_mps", "wind_dir_deg", "gust_mps",
-    ):
-        return value if isinstance(value, (int, float)) else None
-    if field_name == "is_daytime":
-        return value if isinstance(value, bool) else None
-    return value
 
 
 # ---------------------------------------------------------------------------

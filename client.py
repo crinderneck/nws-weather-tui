@@ -54,7 +54,9 @@ class NWSClient:
             except Exception as e:
                 last_err = e
                 time.sleep(backoff * (2 ** i))
-        raise last_err or RuntimeError("request failed")
+        if last_err:
+            raise last_err
+        return None
 
     def _get_json(
         self, url: str, ttl: int, tries: int = 3, backoff: float = 0.6
@@ -73,7 +75,9 @@ class NWSClient:
             except Exception as e:
                 last_err = e
                 time.sleep(backoff * (2 ** i))
-        raise last_err or RuntimeError("request failed")
+        if last_err:
+            raise last_err
+        return {}
 
     # ------------------------------------------------------------------
     # NWS API
@@ -376,7 +380,7 @@ class NWSClient:
             f"{rid_u}:{rid_u}_bref",
         ]
         seen: set = set()
-        unique_layers = [l for l in layers_try if l and not (seen.add(l) or l in seen)]
+        unique_layers = [l for l in layers_try if l and l not in seen and not seen.add(l)]
 
         for base in bases:
             for layer in unique_layers:
