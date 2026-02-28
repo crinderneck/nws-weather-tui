@@ -16,23 +16,39 @@ from typing import Any, Dict, List, Optional, Tuple
 from constants import (
     DEBUG_LOG_PATH,
     MAJOR_CITIES,
+    NWS_RADAR_PALETTE,
     ensure_dir,
 )
 
 _FIRST_NUMBER_RE = re.compile(r"(-?\d+(?:\.\d+)?)")
 
+# NWS radar pixel-matching threshold: max squared RGB distance to accept a match.
+# Large enough to handle LANCZOS interpolation blur, small enough to reject
+# background/gray pixels (which are ~37000+ away from any NWS color).
+_NWS_RADAR_MATCH_THRESHOLD = 8000
+
+# Pre-build the RGB lookup table for fast pixel matching.
+# Index i corresponds to NWS palette entry i (0-indexed into NWS_RADAR_PALETTE).
+_NWS_RADAR_RGB: Tuple[Tuple[int, int, int], ...] = tuple(
+    (r, g, b) for r, g, b, *_ in NWS_RADAR_PALETTE
+)
+
 try:
     from PIL import Image
-except Exception:
-    Image = None
+except ImportError:
+    Image = None  # type: ignore[assignment]
 
 try:
     from astral import LocationInfo
     from astral.sun import sun
-except Exception:
-    LocationInfo = None
-    sun = None
+except ImportError:
+    LocationInfo = None  # type: ignore[assignment]
+    sun = None  # type: ignore[assignment]
 
+
+# ---------------------------------------------------------------------------
+# Astronomy
+# ---------------------------------------------------------------------------
 
 def get_sunrise_sunset(
     lat: float, lon: float, date: dt.date
@@ -47,6 +63,10 @@ def get_sunrise_sunset(
         return None, None
 
 
+# ---------------------------------------------------------------------------
+# Debug logging
+# ---------------------------------------------------------------------------
+
 def dbg(msg: str) -> None:
     try:
         ensure_dir(DEBUG_LOG_PATH.replace("debug.log", ""))
@@ -57,12 +77,15 @@ def dbg(msg: str) -> None:
         pass
 
 
+# ---------------------------------------------------------------------------
+# Time utilities
+# ---------------------------------------------------------------------------
+
 def parse_iso(ts: Optional[str]) -> Optional[dt.datetime]:
     if not ts:
         return None
     try:
-        ts = ts.replace("Z", "+00:00")
-        return dt.datetime.fromisoformat(ts)
+        return dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))
     except Exception:
         return None
 
@@ -116,6 +139,10 @@ def wrap_lines(text: str, width: int) -> Tuple[str, ...]:
     return _wrap_lines_cached(text, width)
 
 
+# ---------------------------------------------------------------------------
+# General utilities
+# ---------------------------------------------------------------------------
+
 def clamp(n: int, lo: int, hi: int) -> int:
     return max(lo, min(hi, n))
 
@@ -126,6 +153,10 @@ def safe_addstr(win, y: int, x: int, s: str, attr: int = 0) -> None:
     except Exception:
         pass
 
+
+# ---------------------------------------------------------------------------
+# Unit conversions
+# ---------------------------------------------------------------------------
 
 def mps_to_mph(mps: Optional[float]) -> Optional[float]:
     return None if mps is None else mps * 2.2369362920544
@@ -143,6 +174,24 @@ def m_to_mi(m: Optional[float]) -> Optional[float]:
     return None if m is None else m / 1609.344
 
 
+def dewpoint_c(temp_c: Optional[float], humidity_pct: Optional[float]) -> Optional[float]:
+    """Calculate dew point temperature using the Magnus formula approximation."""
+    if temp_c is None or humidity_pct is None:
+        return None
+    if humidity_pct <= 0:
+        return None
+    a, b = 17.27, 237.7
+    try:
+        gamma = (a * temp_c) / (b + temp_c) + math.log(humidity_pct / 100.0)
+        return (b * gamma) / (a - gamma)
+    except (ValueError, ZeroDivisionError):
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Number formatting
+# ---------------------------------------------------------------------------
+
 def fmt_num(x: Optional[float], digits: int = 0) -> str:
     if x is None:
         return "—"
@@ -159,9 +208,13 @@ def parse_first_number(s: str) -> Optional[float]:
         return None
     try:
         return float(m.group(1))
-    except Exception:
+    except ValueError:
         return None
 
+
+# ---------------------------------------------------------------------------
+# Geographic utilities
+# ---------------------------------------------------------------------------
 
 def bbox_around(
     lat: float, lon: float, radius_km: float
@@ -186,6 +239,107 @@ def expand_bbox_km(
     return (minlon - dlon, minlat - dlat, maxlon + dlon, maxlat + dlat)
 
 
+def _project_to_grid(
+    lon: float,
+    lat: float,
+    bbox4326: Tuple[float, float, float, float],
+    cols: int,
+    rows: int,
+) -> Tuple[int, int]:
+    minlon, minlat, maxlon, maxlat = bbox4326
+    lon_span = max(1e-9, maxlon - minlon)
+    lat_span = max(1e-9, maxlat - minlat)
+    x = int(round((lon - minlon) / lon_span * (cols - 1)))
+    y = int(round((maxlat - lat) / lat_span * (rows - 1)))
+    return clamp(x, 0, cols - 1), clamp(y, 0, rows - 1)
+
+
+# ---------------------------------------------------------------------------
+# NWS Radar color palette — pixel matching
+# ---------------------------------------------------------------------------
+
+def pixel_to_nws_idx(r: int, g: int, b: int, a: int) -> int:
+    """Map a radar PNG pixel to NWS palette index.
+
+    Returns 0 for transparent/no-data, or 1..N for the closest NWS color.
+    The returned index is 1-based into NWS_RADAR_PALETTE.
+    """
+    if a < 10:
+        return 0
+    # Reject near-gray dark pixels (radar background / no-data shading)
+    vmax = max(r, g, b)
+    vmin = min(r, g, b)
+    if vmax - vmin < 15 and vmax < 60:
+        return 0
+    best_dist = _NWS_RADAR_MATCH_THRESHOLD
+    best_idx = 0
+    for i, (cr, cg, cb) in enumerate(_NWS_RADAR_RGB):
+        d = (r - cr) ** 2 + (g - cg) ** 2 + (b - cb) ** 2
+        if d < best_dist:
+            best_dist = d
+            best_idx = i + 1  # 1-based
+    return best_idx
+
+
+# ---------------------------------------------------------------------------
+# Radar PNG → halfblock cell grid (256-color mode)
+# ---------------------------------------------------------------------------
+
+# Each cell: (character, fg_nws_idx, bg_nws_idx)
+#   character: '▀' | '▄' | ' '
+#   fg/bg nws_idx: 0 = transparent, 1..N = NWS palette index (1-based)
+RadarCell = Tuple[str, int, int]
+
+
+def png_to_halfblock_radar(
+    png_bytes: bytes, cols: int, rows: int
+) -> List[List[RadarCell]]:
+    """Convert a radar PNG to a halfblock cell grid for 256-color rendering.
+
+    The image is scaled to cols × (rows*2) so each terminal row represents
+    two image rows rendered as upper/lower half-block characters (▀/▄).
+    This doubles vertical resolution compared to simple ASCII art.
+
+    Returns an empty list if Pillow is not installed.
+    """
+    if Image is None:
+        return []
+    cols = max(1, cols)
+    rows = max(1, rows)
+    img_h = rows * 2
+
+    _resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+    with Image.open(io.BytesIO(png_bytes)) as im:
+        rgba = im.convert("RGBA")
+        small = rgba.resize((cols, img_h), _resample)
+        pixels = list(small.getdata())
+
+    result: List[List[RadarCell]] = []
+    for ty in range(rows):
+        row: List[RadarCell] = []
+        base_top = (ty * 2) * cols
+        base_bot = (ty * 2 + 1) * cols
+        for x in range(cols):
+            r0, g0, b0, a0 = pixels[base_top + x]
+            r1, g1, b1, a1 = pixels[base_bot + x]
+            top = pixel_to_nws_idx(r0, g0, b0, a0)
+            bot = pixel_to_nws_idx(r1, g1, b1, a1)
+            if top == 0 and bot == 0:
+                row.append((" ", 0, 0))
+            elif top != 0 and bot == 0:
+                row.append(("▀", top, 0))
+            elif top == 0 and bot != 0:
+                row.append(("▄", bot, 0))
+            else:
+                row.append(("▀", top, bot))
+        result.append(row)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Radar PNG → ASCII art (fallback when 256-color unavailable)
+# ---------------------------------------------------------------------------
+
 def _classify_precip_kind(r: int, g: int, b: int) -> str:
     vmax = max(r, g, b)
     vmin = min(r, g, b)
@@ -204,6 +358,10 @@ def _classify_precip_kind(r: int, g: int, b: int) -> str:
 def png_to_ascii(
     png_bytes: bytes, cols: int, rows: int, ramp: str
 ) -> Tuple[List[str], List[str]]:
+    """Convert radar PNG to ASCII art with precipitation kind classification.
+
+    Returns (ascii_lines, kind_lines) where kind chars are R/S/I/space.
+    """
     if Image is None:
         return (["(install pillow to render radar map)"], [])
     cols = max(1, cols)
@@ -216,10 +374,8 @@ def png_to_ascii(
     with Image.open(io.BytesIO(png_bytes)) as im:
         rgba = im.convert("RGBA")
         small = rgba.resize((cols, rows), _resample)
-        # Read all pixels at once inside the context to avoid stale access
-        pixel_data = list(small.getdata())  # flat (r,g,b,a) list, row-major
+        pixel_data = list(small.getdata())
 
-    # Single pass: compute scores and store RGBA
     raw_scores: List[float] = []
     for r, g, b, a in pixel_data:
         if a < 2:
@@ -228,15 +384,13 @@ def png_to_ascii(
             vmax = max(r, g, b)
             vmin = min(r, g, b)
             sat = vmax - vmin
-            lum = (0.2126 * r) + (0.7152 * g) + (0.0722 * b)
-            raw_scores.append((0.72 * sat) + (0.28 * (255.0 - lum)))
+            lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+            raw_scores.append(0.72 * sat + 0.28 * (255.0 - lum))
 
     active = [v for v in raw_scores if v >= 14.0]
     if active:
         active_sorted = sorted(active)
-        peak = active_sorted[
-            min(len(active_sorted) - 1, int(0.95 * len(active_sorted)))
-        ]
+        peak = active_sorted[min(len(active_sorted) - 1, int(0.95 * len(active_sorted)))]
     else:
         peak = 255.0
     norm_den = max(20.0, min(255.0, peak))
@@ -265,6 +419,10 @@ def png_to_ascii(
     return (lines, kind_lines)
 
 
+# ---------------------------------------------------------------------------
+# State/county line overlays
+# ---------------------------------------------------------------------------
+
 def png_to_line_overlay(
     png_bytes: bytes,
     cols: int,
@@ -287,13 +445,11 @@ def png_to_line_overlay(
         rgba = im.convert("RGBA")
         img_w, img_h = rgba.size
 
-        # Re-project source image to dst_bbox when extents differ
         if src_bbox is not None and dst_bbox is not None and src_bbox != dst_bbox:
             sx_min, sy_min, sx_max, sy_max = src_bbox
             dx_min, dy_min, dx_max, dy_max = dst_bbox
             sx_span = max(1e-9, sx_max - sx_min)
             sy_span = max(1e-9, sy_max - sy_min)
-            # Image y=0 is north (sy_max), y=img_h is south (sy_min)
             left = (dx_min - sx_min) / sx_span * img_w
             right = (dx_max - sx_min) / sx_span * img_w
             top = (sy_max - dy_max) / sy_span * img_h
@@ -311,55 +467,32 @@ def png_to_line_overlay(
     grid: List[List[bool]] = []
     for y in range(rows):
         base = y * cols
-        row: List[bool] = [pixel_data[base + x][3] >= 36 for x in range(cols)]
-        grid.append(row)
+        grid.append([pixel_data[base + x][3] >= 36 for x in range(cols)])
 
+    # Stitch 1-pixel gaps (both horizontal and vertical)
     stitched = [r[:] for r in grid]
     for y in range(1, rows - 1):
         for x in range(1, cols - 1):
             if grid[y][x]:
                 continue
             if (
-                grid[y][x - 1]
-                and grid[y][x + 1]
-                and not grid[y - 1][x]
-                and not grid[y + 1][x]
+                grid[y][x - 1] and grid[y][x + 1]
+                and not grid[y - 1][x] and not grid[y + 1][x]
             ):
                 stitched[y][x] = True
-                continue
-            if (
-                grid[y - 1][x]
-                and grid[y + 1][x]
-                and not grid[y][x - 1]
-                and not grid[y][x + 1]
+            elif (
+                grid[y - 1][x] and grid[y + 1][x]
+                and not grid[y][x - 1] and not grid[y][x + 1]
             ):
                 stitched[y][x] = True
 
-    lines: List[str] = []
-    for y in range(rows):
-        row = [mark if stitched[y][x] else " " for x in range(cols)]
-        lines.append("".join(row))
-    return lines
-
-
-def _project_to_grid(
-    lon: float,
-    lat: float,
-    bbox4326: Tuple[float, float, float, float],
-    cols: int,
-    rows: int,
-) -> Tuple[int, int]:
-    minlon, minlat, maxlon, maxlat = bbox4326
-    lon_span = max(1e-9, maxlon - minlon)
-    lat_span = max(1e-9, maxlat - minlat)
-    x = int(round((lon - minlon) / lon_span * (cols - 1)))
-    y = int(round((maxlat - lat) / lat_span * (rows - 1)))
-    return clamp(x, 0, cols - 1), clamp(y, 0, rows - 1)
+    return ["".join(mark if stitched[y][x] else " " for x in range(cols)) for y in range(rows)]
 
 
 def _draw_segment(
     grid: List[List[str]], x0: int, y0: int, x1: int, y1: int, mark: str
 ) -> None:
+    """Bresenham line segment draw into a grid."""
     dx = abs(x1 - x0)
     dy = abs(y1 - y0)
     sx = 1 if x0 < x1 else -1
@@ -386,16 +519,17 @@ def vector_lines_overlay(
     rows: int,
     mark: str = "|",
 ) -> List[str]:
+    """Rasterise GeoJSON-style features (rings/paths) into an ASCII overlay."""
     cols = max(1, cols)
     rows = max(1, rows)
     grid: List[List[str]] = [[" "] * cols for _ in range(rows)]
     for f in features:
         g = (f or {}).get("geometry") or {}
-        seqs = []
+        seqs: List[Any] = []
         if isinstance(g.get("rings"), list):
-            seqs.extend(g.get("rings"))
+            seqs.extend(g["rings"])
         if isinstance(g.get("paths"), list):
-            seqs.extend(g.get("paths"))
+            seqs.extend(g["paths"])
         for seq in seqs:
             if not isinstance(seq, list) or len(seq) < 2:
                 continue
@@ -403,11 +537,8 @@ def vector_lines_overlay(
             for pt in seq:
                 if not isinstance(pt, list) or len(pt) < 2:
                     continue
-                lon = pt[0]
-                lat = pt[1]
-                if not isinstance(lon, (int, float)) or not isinstance(
-                    lat, (int, float)
-                ):
+                lon, lat = pt[0], pt[1]
+                if not (isinstance(lon, (int, float)) and isinstance(lat, (int, float))):
                     continue
                 cur = _project_to_grid(float(lon), float(lat), bbox4326, cols, rows)
                 if prev is not None:
@@ -416,6 +547,10 @@ def vector_lines_overlay(
     return ["".join(r).rstrip() for r in grid]
 
 
+# ---------------------------------------------------------------------------
+# City overlay + hit map
+# ---------------------------------------------------------------------------
+
 def city_overlay_and_hits_for_bbox(
     cols: int,
     rows: int,
@@ -423,6 +558,7 @@ def city_overlay_and_hits_for_bbox(
     max_labels: int = 20,
     here: Optional[Tuple[float, float]] = None,
 ) -> Tuple[List[str], Dict[Tuple[int, int], Tuple[str, float, float]]]:
+    """Place city labels on a character grid and return a click hit map."""
     cols = max(1, cols)
     rows = max(1, rows)
     minlon, minlat, maxlon, maxlat = bbox4326
@@ -451,11 +587,11 @@ def city_overlay_and_hits_for_bbox(
             hx, hy = project(hlat, hlon)
             if hy - 1 >= 0:
                 grid[hy - 1][hx] = "O"
-            if hy - 2 >= 0 and hx - 1 >= 0 and hx + 1 < cols:
-                grid[hy - 2][hx - 1] = "/"
-                grid[hy - 2][hx + 1] = "\\"
             if hy >= 0:
                 grid[hy][hx] = "|"
+            if hy >= 0 and hx - 1 >= 0 and hx + 1 < cols:
+                grid[hy][hx - 1] = "/"
+                grid[hy][hx + 1] = "\\"
             if hy + 1 < rows and hx - 1 >= 0 and hx + 1 < cols:
                 grid[hy + 1][hx - 1] = "/"
                 grid[hy + 1][hx + 1] = "\\"

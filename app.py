@@ -11,6 +11,7 @@ import re
 import signal
 import subprocess
 import time
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 import curses
@@ -21,11 +22,16 @@ from constants import (
     DEFAULT_CONFIG,
     MIN_COLS,
     MIN_ROWS,
+    N_RADAR_COLORS,
+    NWS_RADAR_PALETTE,
     RADAR_LAST_PNG_PATH,
     STATE_PATH,
     ensure_dir,
     load_config,
     load_json,
+    radar_curses_color,
+    radar_dual_pair,
+    radar_single_pair,
     save_json,
 )
 from helpers import (
@@ -37,10 +43,12 @@ from helpers import (
     fmt_time,
     parse_iso,
     png_to_ascii,
+    png_to_halfblock_radar,
     png_to_line_overlay,
     safe_addstr,
     vector_lines_overlay,
     parse_first_number,
+    RadarCell,
 )
 from models import (
     AlertItem,
@@ -60,14 +68,26 @@ from views import (
     draw_hourly,
     draw_alerts,
     draw_help,
+    draw_radar_view,
 )
 
 
+@dataclass
+class RadarFrame:
+    """One radar animation frame."""
+    cells: List[List[RadarCell]]   # halfblock cells (empty if 256-color unavailable)
+    ascii_lines: List[str]          # ASCII fallback lines
+    kind_lines: List[str]           # ASCII kind classification lines
+    timestamp_ms: int               # MRMS epoch ms (UTC)
+    source: str = "mrms"            # "mrms" | "iem" | "wms"
+
+
 class App:
-    def __init__(self, stdscr, cfg: Dict[str, Any]):
+    def __init__(self, stdscr, cfg: Dict[str, Any]) -> None:
         self.stdscr = stdscr
         self.cfg = cfg
 
+        # --- Location & preferences ---
         self.location_name: str = str(cfg.get("location_name", "—"))
         self.lat: float = float(cfg.get("lat", 0.0))
         self.lon: float = float(cfg.get("lon", 0.0))
@@ -80,25 +100,27 @@ class App:
         )
         self.hourly_hours: int = int(cfg.get("hourly_hours", 24))
         self.show_radar_map: bool = bool(cfg.get("show_radar_map", True))
-
         self.favorites: List[Dict[str, Any]] = list(cfg.get("favorites", []) or [])
         self.fav_idx: int = 0
 
+        # --- API client ---
         self.client = NWSClient(
             user_agent=str(cfg.get("user_agent", DEFAULT_CONFIG["user_agent"])),
             timeout=self.timeout,
             ttls=dict(cfg.get("cache_ttls", DEFAULT_CONFIG["cache_ttls"])),
         )
 
-        self.view = "current"
-        self.paused = False
-        self.status_msg = ""
-        self.status_until = 0.0
-        self._spinner_idx = 0
+        # --- UI state ---
+        self.view: str = "current"
+        self.paused: bool = False
+        self.status_msg: str = ""
+        self.status_until: float = 0.0
+        self._spinner_idx: int = 0
         self._spinner_frames = ["|", "/", "-", "\\"]
-        self._is_loading = False
-        self._in_refresh = False
+        self._is_loading: bool = False
+        self._in_refresh: bool = False
 
+        # --- NWS data ---
         self.points_data: Optional[Dict[str, Any]] = None
         self.forecast_url: Optional[str] = None
         self.hourly_url: Optional[str] = None
@@ -106,62 +128,85 @@ class App:
         self.station_id: Optional[str] = None
         self.radar_station: Optional[str] = None
         self.state_code: Optional[str] = None
-        self.sunrise: Optional[str] = None
-        self.sunset: Optional[str] = None
 
         self.current: Optional[CurrentConditions] = None
         self.forecast_periods: List[ForecastPeriod] = []
         self.hourly_periods: List[HourlyPeriod] = []
         self.alerts: List[AlertItem] = []
 
-        self.last_refresh = 0.0
-        self.next_refresh = 0.0
-        self.offline_mode = False
-        self.offline_reason = ""
+        self.last_refresh: float = 0.0
+        self.next_refresh: float = 0.0
+        self.offline_mode: bool = False
+        self.offline_reason: str = ""
 
-        self.fc_scroll = 0
-        self.hr_scroll = 0
-        self.alert_scroll = 0
+        # --- Scroll positions ---
+        self.fc_scroll: int = 0
+        self.hr_scroll: int = 0
+        self.alert_scroll: int = 0
 
+        # --- Radar state ---
+        self._radar_frames: List[RadarFrame] = []
+        self._radar_frame_idx: int = 0
+        self._radar_anim_playing: bool = False
+        self._radar_anim_last: float = 0.0
+        self._radar_anim_interval: float = float(
+            dict(cfg.get("radar", {}) or {}).get("animation_interval_s", 0.5)
+        )
+
+        # Current frame display data (derived from _radar_frames[_radar_frame_idx])
+        self._radar_cells: List[List[RadarCell]] = []
         self._radar_ascii: List[str] = []
         self._radar_kind: List[str] = []
+        self._radar_ts_ms: int = 0
+        self._radar_ts_utc: str = ""
+
         self._radar_state_overlay: List[str] = []
         self._radar_city_overlay: List[str] = []
-        self._radar_last = 0.0
+        self._radar_city_hitmap: Dict[Tuple[int, int], Tuple[str, float, float]] = {}
+        self._radar_last: float = 0.0
         self._radar_err: Optional[str] = None
         self._radar_bbox: Optional[Tuple[float, float, float, float]] = None
-        self._radar_src_cols = 0
-        self._radar_src_rows = 0
-        self._radar_city_hitmap: Dict[Tuple[int, int], Tuple[str, float, float]] = {}
-        self._radar_map_x = 0
-        self._radar_map_y = 0
-        self._radar_map_cols = 0
-        self._radar_map_rows = 0
+        self._radar_src_cols: int = 0
+        self._radar_src_rows: int = 0
+        self._radar_map_x: int = 0
+        self._radar_map_y: int = 0
+        self._radar_map_cols: int = 0
+        self._radar_map_rows: int = 0
 
+        # 256-color radar mode
+        self._radar_has_256color: bool = False
+
+        # --- Init curses ---
+        self._init_curses()
+        self._radar_has_256color = self._init_radar_colors()
+
+        self._load_points()
+        self.refresh_all(force=True, allow_offline=True)
+
+    # ------------------------------------------------------------------
+    # Curses initialisation
+    # ------------------------------------------------------------------
+
+    def _init_curses(self) -> None:
         curses.curs_set(0)
         curses.start_color()
         curses.use_default_colors()
-        curses.init_pair(1, curses.COLOR_CYAN, -1)
-        curses.init_pair(2, curses.COLOR_YELLOW, -1)
-        curses.init_pair(3, curses.COLOR_GREEN, -1)
-        curses.init_pair(4, curses.COLOR_RED, -1)
-        curses.init_pair(5, curses.COLOR_MAGENTA, -1)
-        curses.init_pair(6, curses.COLOR_BLUE, -1)
-        curses.init_pair(7, curses.COLOR_RED, -1)
-        try:
-            for i, color in enumerate(
-                [
-                    curses.COLOR_CYAN,
-                    curses.COLOR_GREEN,
-                    curses.COLOR_YELLOW,
-                    curses.COLOR_RED,
-                    curses.COLOR_MAGENTA,
-                ],
-                8,
-            ):
-                curses.init_pair(i, color, -1)
-        except curses.error:
-            pass
+        # UI color pairs 1-19
+        curses.init_pair(1,  curses.COLOR_CYAN,    -1)  # header, info
+        curses.init_pair(2,  curses.COLOR_YELLOW,  -1)  # highlights, forecast header
+        curses.init_pair(3,  curses.COLOR_GREEN,   -1)  # OK, temperature
+        curses.init_pair(4,  curses.COLOR_RED,     -1)  # errors, alerts
+        curses.init_pair(5,  curses.COLOR_MAGENTA, -1)  # header right, PoP bar
+        curses.init_pair(6,  curses.COLOR_BLUE,    -1)  # wind sparkline
+        curses.init_pair(7,  curses.COLOR_RED,     -1)  # temp sparkline
+        curses.init_pair(8,  curses.COLOR_CYAN,    -1)  # radar default (ASCII)
+        curses.init_pair(9,  curses.COLOR_GREEN,   -1)  # radar rain (ASCII)
+        curses.init_pair(10, curses.COLOR_BLUE,    -1)  # radar snow (ASCII)
+        curses.init_pair(11, curses.COLOR_MAGENTA, -1)  # radar sleet (ASCII)
+        curses.init_pair(12, curses.COLOR_WHITE,   -1)  # city dot @
+        curses.init_pair(13, curses.COLOR_YELLOW,  curses.COLOR_BLACK)  # radar anim indicator
+        curses.init_pair(14, curses.COLOR_WHITE,   -1)  # general bold
+        curses.init_pair(15, curses.COLOR_CYAN,    -1)  # radar view title
         try:
             mask = curses.ALL_MOUSE_EVENTS | getattr(curses, "REPORT_MOUSE_POSITION", 0)
             curses.mousemask(mask)
@@ -169,8 +214,46 @@ class App:
         except curses.error:
             pass
 
-        self._load_points()
-        self.refresh_all(force=True, allow_offline=True)
+    def _init_radar_colors(self) -> bool:
+        """Initialise NWS radar colors and all needed pairs for 256-color mode.
+
+        Color IDs 16-29 are assigned to the 14 NWS radar palette entries.
+        Pair  20-33: single-color radar cells (fg=NWS color, bg=default)
+        Pair  34-229: dual-color radar halfblock cells (fg × bg, 14×14)
+
+        Returns True if 256-color mode was successfully initialised.
+        """
+        try:
+            if curses.COLORS < 256 or not curses.can_change_color():
+                return False
+            # Init custom colors
+            for i, (_, _, _, r1k, g1k, b1k, *_rest) in enumerate(NWS_RADAR_PALETTE):
+                curses.init_color(radar_curses_color(i + 1), r1k, g1k, b1k)
+            # Single-color pairs (fg=nws, bg=transparent)
+            for nws_idx in range(1, N_RADAR_COLORS + 1):
+                curses.init_pair(
+                    radar_single_pair(nws_idx),
+                    radar_curses_color(nws_idx),
+                    -1,
+                )
+            # Dual-color pairs (fg=nws_fg, bg=nws_bg) for ▀ halfblocks
+            for fg in range(1, N_RADAR_COLORS + 1):
+                for bg in range(1, N_RADAR_COLORS + 1):
+                    pair_num = radar_dual_pair(fg, bg)
+                    if pair_num < 256:
+                        curses.init_pair(
+                            pair_num,
+                            radar_curses_color(fg),
+                            radar_curses_color(bg),
+                        )
+            return True
+        except curses.error as e:
+            dbg(f"256-color radar init failed: {e}")
+            return False
+
+    # ------------------------------------------------------------------
+    # Status / loading messages
+    # ------------------------------------------------------------------
 
     def _flash(self, msg: str, seconds: float = 2.0) -> None:
         self._is_loading = False
@@ -185,6 +268,10 @@ class App:
         self.status_until = time.time() + 3600
         self._draw()
 
+    # ------------------------------------------------------------------
+    # Radar PNG persistence
+    # ------------------------------------------------------------------
+
     def _save_radar_png(self, png: bytes) -> None:
         try:
             ensure_dir(os.path.dirname(RADAR_LAST_PNG_PATH))
@@ -195,7 +282,26 @@ class App:
         except Exception as e:
             dbg(f"RADAR save failed: {e}")
 
-    def _radar_char_attr(self, ch: str, ramp: str, kind: str = " ") -> int:
+    # ------------------------------------------------------------------
+    # Radar color pair helpers
+    # ------------------------------------------------------------------
+
+    def _radar_cell_attr(self, char: str, fg_idx: int, bg_idx: int) -> int:
+        """Return curses attr for a radar halfblock cell."""
+        if fg_idx == 0 and bg_idx == 0:
+            return curses.A_DIM
+        if bg_idx == 0:
+            # Single top or bottom color: use single pair
+            return curses.color_pair(radar_single_pair(fg_idx))
+        # Dual color: fg and bg both set
+        pair_num = radar_dual_pair(fg_idx, bg_idx)
+        if pair_num < 256:
+            return curses.color_pair(pair_num)
+        # Fallback: use fg single pair
+        return curses.color_pair(radar_single_pair(fg_idx))
+
+    def _radar_char_attr_ascii(self, ch: str, ramp: str, kind: str = " ") -> int:
+        """Return curses attr for ASCII-mode radar character."""
         if not ch or ch == " ":
             return curses.A_DIM
         levels = ramp or " .:-=+*#%@"
@@ -203,19 +309,28 @@ class App:
         if idx < 0:
             idx = 1
         t = idx / max(1, len(levels) - 1)
-        base = {  # kind -> color pair
-            "R": 9,  # rain - green
-            "S": 6,  # snow - blue
-            "I": 5,  # sleet - magenta
-        }.get(kind, 8)  # default - cyan
-        base = curses.color_pair(base)
+        base_pair = {"R": 9, "S": 10, "I": 11}.get(kind, 8)
+        base = curses.color_pair(base_pair)
         if t < 0.25:
             return base | curses.A_DIM
         if t < 0.8:
             return base
         return base | curses.A_BOLD
 
-    def _draw_radar_line(
+    # ------------------------------------------------------------------
+    # Radar draw helpers
+    # ------------------------------------------------------------------
+
+    def _draw_radar_halfblock_line(
+        self, win, y: int, row_cells: List[RadarCell], cols: int, x_off: int = 0
+    ) -> None:
+        max_w = max(0, cols - 1 - x_off)
+        x_base = max(0, x_off)
+        for i, (char, fg_idx, bg_idx) in enumerate(row_cells[:max_w]):
+            attr = self._radar_cell_attr(char, fg_idx, bg_idx)
+            safe_addstr(win, y, x_base + i, char, attr)
+
+    def _draw_radar_ascii_line(
         self,
         win,
         y: int,
@@ -227,54 +342,93 @@ class App:
     ) -> None:
         max_w = max(0, cols - 1 - x_off)
         line = (line or "")[:max_w]
-        kind_line = (kind_line or "")[:max_w]
-        if len(kind_line) < len(line):
-            kind_line += " " * (len(line) - len(kind_line))
+        kind_line = (kind_line or "").ljust(len(line))[:max_w]
         if not line:
             return
         x = max(0, x_off)
-        run_attr = self._radar_char_attr(
-            line[0], ramp, kind_line[0] if kind_line else " "
-        )
-        run = [line[0]]
-        for i, ch in enumerate(line[1:], start=1):
-            a = self._radar_char_attr(
-                ch, ramp, kind_line[i] if i < len(kind_line) else " "
-            )
+        run_attr = self._radar_char_attr_ascii(line[0], ramp, kind_line[0])
+        run: List[str] = [line[0]]
+        for i, ch in enumerate(line[1:], 1):
+            a = self._radar_char_attr_ascii(ch, ramp, kind_line[i] if i < len(kind_line) else " ")
             if a == run_attr:
                 run.append(ch)
-                continue
-            safe_addstr(win, y, x, "".join(run), run_attr)
-            x += len(run)
-            run = [ch]
-            run_attr = a
+            else:
+                safe_addstr(win, y, x, "".join(run), run_attr)
+                x += len(run)
+                run = [ch]
+                run_attr = a
         safe_addstr(win, y, x, "".join(run), run_attr)
 
     def _draw_state_overlay_line(
         self, win, y: int, line: str, cols: int, x_off: int = 0
     ) -> None:
         line = (line or "")[: max(0, cols - 1 - x_off)]
-        if not line:
-            return
         for x, ch in enumerate(line):
             if ch != " ":
                 safe_addstr(
-                    win, y, x + max(0, x_off), ch, curses.color_pair(2) | curses.A_DIM
+                    win, y, x + max(0, x_off), ch,
+                    curses.color_pair(2) | curses.A_DIM
                 )
 
     def _draw_city_overlay_line(
         self, win, y: int, line: str, cols: int, x_off: int = 0
     ) -> None:
         line = (line or "")[: max(0, cols - 1 - x_off)]
-        if not line:
-            return
         for x, ch in enumerate(line):
             if ch != " ":
                 attr = {
-                    "O": curses.color_pair(1) | curses.A_BOLD,  # you are here
-                    "@": curses.color_pair(12) | curses.A_BOLD,  # city dot
-                }.get(ch, curses.color_pair(3) | curses.A_BOLD)  # city label
+                    "O": curses.color_pair(1) | curses.A_BOLD,
+                    "@": curses.color_pair(12) | curses.A_BOLD,
+                }.get(ch, curses.color_pair(3) | curses.A_BOLD)
                 safe_addstr(win, y, x + max(0, x_off), ch, attr)
+
+    # ------------------------------------------------------------------
+    # Radar legend
+    # ------------------------------------------------------------------
+
+    def draw_radar_legend(self, win, y: int, x: int, cols: int) -> None:
+        """Draw a one-line dBZ color legend."""
+        label = "dBZ:"
+        safe_addstr(win, y, x, label, curses.A_DIM)
+        cx = x + len(label) + 1
+        for i, (_, _, _, _, _, _, dbz, lbl) in enumerate(NWS_RADAR_PALETTE):
+            nws_idx = i + 1
+            if cx + 3 > cols - 1:
+                break
+            if self._radar_has_256color:
+                # Draw a solid block using fg=bg=same color
+                pair_num = radar_dual_pair(nws_idx, nws_idx)
+                if pair_num < 256:
+                    safe_addstr(win, y, cx, "▀", curses.color_pair(pair_num))
+                    cx += 1
+            else:
+                safe_addstr(win, y, cx, "█", curses.color_pair(
+                    {1: 8, 2: 8, 3: 8, 4: 9, 5: 9, 6: 9,
+                     7: 2, 8: 2, 9: 2, 10: 4, 11: 4, 12: 4,
+                     13: 5, 14: 5}.get(nws_idx, 8)
+                ))
+                cx += 1
+            if cx + len(lbl) + 1 < cols - 1:
+                safe_addstr(win, y, cx, lbl, curses.A_DIM)
+                cx += len(lbl) + 1
+
+    # ------------------------------------------------------------------
+    # Radar timestamp
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _ts_ms_to_utc_str(ts_ms: int) -> str:
+        if not ts_ms:
+            return "—"
+        try:
+            ts_dt = dt.datetime.fromtimestamp(ts_ms / 1000, tz=dt.timezone.utc)
+            return ts_dt.strftime("%H:%Mz")
+        except Exception:
+            return "—"
+
+    # ------------------------------------------------------------------
+    # Mouse handling
+    # ------------------------------------------------------------------
 
     def _handle_mouse(self, mx: int, my: int, bstate: int) -> None:
         click_mask = (
@@ -286,27 +440,27 @@ class App:
         )
         if click_mask and not (bstate & click_mask):
             return
-        if self.view != "current" or not self.show_radar_map:
+        if self.view not in ("current", "radar") or not self.show_radar_map:
             return
         if self._radar_map_cols <= 0 or self._radar_map_rows <= 0:
             return
-
         rx = int(mx) - self._radar_map_x
         ry = int(my) - self._radar_map_y
         if rx < 0 or ry < 0 or rx >= self._radar_map_cols or ry >= self._radar_map_rows:
             return
-
         hit = self._radar_city_hitmap.get((rx, ry))
         if not hit:
             return
-
         code, lat, lon = hit
         if abs(self.lat - lat) < 1e-4 and abs(self.lon - lon) < 1e-4:
             self._flash(f"Already at {code}.", 1.2)
             return
-
         self._apply_location(code, lat, lon)
         self._flash(f"Location set: {code}", 1.8)
+
+    # ------------------------------------------------------------------
+    # Input prompt
+    # ------------------------------------------------------------------
 
     def _prompt_line(self, prompt: str, max_len: int = 96) -> Optional[str]:
         rows, cols = self.stdscr.getmaxyx()
@@ -334,18 +488,18 @@ class App:
             self.stdscr.timeout(500)
             self.stdscr.nodelay(False)
 
+    # ------------------------------------------------------------------
+    # Location actions
+    # ------------------------------------------------------------------
+
     def _search_location(self) -> bool:
         q = self._prompt_line("Location (city/state or ZIP): ")
-        if q is None:
+        if q is None or not q.strip():
             self._flash("Location search canceled.", 1.4)
-            return True
-        q = q.strip()
-        if not q:
-            self._flash("No location entered.", 1.4)
             return True
         try:
             self._show_loading("Searching location...")
-            g = self.client.geocode_us(q)
+            g = self.client.geocode_us(q.strip())
             if not g:
                 self._flash(f"No match found for '{q}'.", 2.5)
                 return True
@@ -356,22 +510,64 @@ class App:
             self._flash(f"Location search failed: {e}", 3.5)
         return True
 
+    def _apply_location(self, name: str, lat: float, lon: float) -> None:
+        self.location_name = name
+        self.lat = float(lat)
+        self.lon = float(lon)
+        self.points_data = None
+        self.forecast_url = None
+        self.hourly_url = None
+        self.stations_url = None
+        self.station_id = None
+        self.radar_station = None
+        self.state_code = None
+        self.client.cache.clear()
+        self._reset_radar_state()
+        self._in_refresh = True
+        self._show_loading(f"Switching location to {name}...")
+        self._load_points()
+        self.refresh_all(force=True, allow_offline=True)
+        self._save_cfg()
+
+    def _reset_radar_state(self) -> None:
+        self._radar_frames = []
+        self._radar_frame_idx = 0
+        self._radar_anim_playing = False
+        self._radar_cells = []
+        self._radar_ascii = []
+        self._radar_kind = []
+        self._radar_ts_ms = 0
+        self._radar_ts_utc = ""
+        self._radar_state_overlay = []
+        self._radar_city_overlay = []
+        self._radar_city_hitmap = {}
+        self._radar_err = None
+        self._radar_last = 0.0
+        self._radar_src_cols = 0
+        self._radar_src_rows = 0
+        self._radar_map_x = 0
+        self._radar_map_y = 0
+        self._radar_map_cols = 0
+        self._radar_map_rows = 0
+
+    # ------------------------------------------------------------------
+    # Config / state persistence
+    # ------------------------------------------------------------------
+
     def _save_cfg(self) -> None:
-        self.cfg.update(
-            {
-                "location_name": self.location_name,
-                "lat": self.lat,
-                "lon": self.lon,
-                "units": self.units,
-                "use_24h": self.use_24h,
-                "auto_refresh_seconds": self.auto_refresh_seconds,
-                "http_timeout": self.timeout,
-                "show_graph_panel_on_current": self.show_graph_panel_on_current,
-                "hourly_hours": self.hourly_hours,
-                "show_radar_map": self.show_radar_map,
-                "favorites": self.favorites,
-            }
-        )
+        self.cfg.update({
+            "location_name": self.location_name,
+            "lat": self.lat,
+            "lon": self.lon,
+            "units": self.units,
+            "use_24h": self.use_24h,
+            "auto_refresh_seconds": self.auto_refresh_seconds,
+            "http_timeout": self.timeout,
+            "show_graph_panel_on_current": self.show_graph_panel_on_current,
+            "hourly_hours": self.hourly_hours,
+            "show_radar_map": self.show_radar_map,
+            "favorites": self.favorites,
+        })
         save_json(CONFIG_PATH, self.cfg)
 
     def _load_points(self) -> None:
@@ -392,8 +588,6 @@ class App:
         if not self.state_code:
             m = re.search(r",\s*([A-Za-z]{2})(?:\b|$)", self.location_name or "")
             self.state_code = m.group(1).upper() if m else None
-        self.sunrise = props.get("astronomicalData", {}).get("sunrise")
-        self.sunset = props.get("astronomicalData", {}).get("sunset")
 
     def _pick_station(self) -> None:
         if not self.stations_url:
@@ -401,14 +595,22 @@ class App:
         stations = self.client.stations(self.stations_url)
         feats = stations.get("features", []) or []
         if feats:
-            station_id = ((feats[0] or {}).get("properties", {}) or {}).get(
-                "stationIdentifier"
-            )
-            if isinstance(station_id, str) and station_id:
-                self.station_id = station_id
+            sid = ((feats[0] or {}).get("properties", {}) or {}).get("stationIdentifier")
+            if isinstance(sid, str) and sid:
+                self.station_id = sid
 
     def _save_state(self) -> None:
-        state = {
+        def fix_dt(obj: Any) -> Any:
+            if isinstance(obj, dict):
+                return {
+                    k: v.isoformat() if isinstance(v, dt.datetime) else fix_dt(v)
+                    for k, v in obj.items()
+                }
+            if isinstance(obj, list):
+                return [fix_dt(i) for i in obj]
+            return obj
+
+        state = fix_dt({
             "saved_at": dt.datetime.now().astimezone().isoformat(),
             "location_name": self.location_name,
             "lat": self.lat,
@@ -421,21 +623,8 @@ class App:
             "alerts": [a.__dict__ for a in self.alerts],
             "radar_station": self.radar_station,
             "state_code": self.state_code,
-        }
-
-        def fix_dt(obj):
-            if isinstance(obj, dict):
-                for k, v in list(obj.items()):
-                    if isinstance(v, dt.datetime):
-                        obj[k] = v.isoformat()
-                    elif isinstance(v, dict):
-                        fix_dt(v)
-                    elif isinstance(v, list):
-                        for it in v:
-                            fix_dt(it) if isinstance(it, dict) else None
-            return obj
-
-        save_json(STATE_PATH, fix_dt(state))
+        })
+        save_json(STATE_PATH, state)
 
     def _serialize_current(self) -> Optional[Dict[str, Any]]:
         if not self.current:
@@ -449,27 +638,22 @@ class App:
         st = load_json(STATE_PATH)
         if not st:
             return False
-
         self.location_name = str(st.get("location_name") or self.location_name)
         try:
             self.lat = float(st.get("lat", self.lat))
             self.lon = float(st.get("lon", self.lon))
-        except Exception:
+        except (TypeError, ValueError):
             pass
         self.units = str(st.get("units") or self.units)
         self.use_24h = bool(st.get("use_24h", self.use_24h))
-        self.radar_station = st.get("radar_station", "").strip() or None
+        self.radar_station = st.get("radar_station", "") or None
         sc = st.get("state_code")
         if isinstance(sc, str) and re.fullmatch(r"[A-Za-z]{2}", sc.strip()):
             self.state_code = sc.strip().upper()
 
         c = st.get("current")
         if isinstance(c, dict):
-            ts = (
-                parse_iso(c.get("timestamp"))
-                if isinstance(c.get("timestamp"), str)
-                else None
-            )
+            ts = parse_iso(c.get("timestamp")) if isinstance(c.get("timestamp"), str) else None
             try:
                 self.current = CurrentConditions(
                     station=str(c.get("station") or "—"),
@@ -488,104 +672,36 @@ class App:
                 self.current = None
 
         for key, cls, fields in [
-            (
-                "forecast_periods",
-                ForecastPeriod,
-                [
-                    "name",
-                    "start",
-                    "end",
-                    "is_daytime",
-                    "temperature",
-                    "temperature_unit",
-                    "wind_speed",
-                    "wind_dir",
-                    "short_forecast",
-                    "detailed_forecast",
-                    "icon_key",
-                ],
-            ),
-            (
-                "hourly_periods",
-                HourlyPeriod,
-                [
-                    "start",
-                    "temperature",
-                    "temperature_unit",
-                    "wind_speed",
-                    "wind_speed_num",
-                    "wind_dir",
-                    "short_forecast",
-                    "icon_key",
-                    "pop",
-                ],
-            ),
-            (
-                "alerts",
-                AlertItem,
-                [
-                    "event",
-                    "severity",
-                    "urgency",
-                    "certainty",
-                    "headline",
-                    "sent",
-                    "effective",
-                    "expires",
-                    "description",
-                    "instruction",
-                ],
-            ),
+            ("forecast_periods", ForecastPeriod, [
+                "name", "start", "end", "is_daytime", "temperature",
+                "temperature_unit", "wind_speed", "wind_dir",
+                "short_forecast", "detailed_forecast", "icon_key",
+            ]),
+            ("hourly_periods", HourlyPeriod, [
+                "start", "temperature", "temperature_unit", "wind_speed",
+                "wind_speed_num", "wind_dir", "short_forecast", "icon_key", "pop",
+            ]),
+            ("alerts", AlertItem, [
+                "event", "severity", "urgency", "certainty", "headline",
+                "sent", "effective", "expires", "description", "instruction",
+            ]),
         ]:
             items = st.get(key, [])
-            setattr(
-                self,
-                key,
-                [
-                    cls(**{f: _parse_field(p.get(f), f) for f in fields})
-                    for p in items
-                    if isinstance(p, dict)
-                ],
-            )
-
+            setattr(self, key, [
+                cls(**{f: _parse_field(p.get(f), f) for f in fields})
+                for p in items if isinstance(p, dict)
+            ])
         return True
 
-    def _apply_location(self, name: str, lat: float, lon: float) -> None:
-        self.location_name = name
-        self.lat = float(lat)
-        self.lon = float(lon)
-        self.points_data = None
-        self.forecast_url = None
-        self.hourly_url = None
-        self.stations_url = None
-        self.station_id = None
-        self.radar_station = None
-        self.state_code = None
-        self.client.cache.clear()
-        self._radar_ascii = []
-        self._radar_kind = []
-        self._radar_state_overlay = []
-        self._radar_city_overlay = []
-        self._radar_city_hitmap = {}
-        self._radar_err = None
-        self._radar_last = 0.0
-        self._radar_src_cols = 0
-        self._radar_src_rows = 0
-        self._radar_map_x = 0
-        self._radar_map_y = 0
-        self._radar_map_cols = 0
-        self._radar_map_rows = 0
-        self._show_loading(f"Switching location to {name}...")
-        self._load_points()
-        self.refresh_all(force=True, allow_offline=True)
-        self._save_cfg()
+    # ------------------------------------------------------------------
+    # Favorites
+    # ------------------------------------------------------------------
 
     def _toggle_favorite(self) -> bool:
         eps = 1e-4
         idx = next(
             (
-                i
-                for i, f in enumerate(self.favorites)
+                i for i, f in enumerate(self.favorites)
                 if abs(float(f.get("lat", 0)) - self.lat) < eps
                 and abs(float(f.get("lon", 0)) - self.lon) < eps
             ),
@@ -613,15 +729,18 @@ class App:
             self._apply_location(
                 str(f.get("name") or "Favorite"), float(f["lat"]), float(f["lon"])
             )
-        except Exception:
+        except (KeyError, TypeError, ValueError):
             self._flash("Favorite is invalid (missing lat/lon).", 2.0)
         return True
+
+    # ------------------------------------------------------------------
+    # Data refresh
+    # ------------------------------------------------------------------
 
     def refresh_all(self, force: bool = False, allow_offline: bool = False) -> None:
         now = time.time()
         if not force and now < self.next_refresh:
             return
-
         self._in_refresh = True
         try:
             self.offline_mode = False
@@ -640,13 +759,11 @@ class App:
                 self.current = extract_current(
                     self.client.latest_observation(self.station_id)
                 )
-
             if self.forecast_url:
                 self._show_loading("Fetching forecast periods...")
                 self.forecast_periods = extract_forecast(
                     self.client.forecast(self.forecast_url, self.units)
                 )
-
             if self.hourly_url:
                 self._show_loading("Fetching hourly forecast...")
                 hf = extract_hourly(
@@ -661,7 +778,7 @@ class App:
 
             self.last_refresh = now
             self.next_refresh = now + self.auto_refresh_seconds
-            self._show_loading("Saving latest snapshot...")
+            self._show_loading("Saving snapshot...")
             self._save_state()
             self._flash("Updated.", 1.1)
 
@@ -676,30 +793,25 @@ class App:
         finally:
             self._in_refresh = False
 
+    # ------------------------------------------------------------------
+    # Radar refresh
+    # ------------------------------------------------------------------
+
     def _maybe_refresh_radar(self, target_cols: int, target_rows: int) -> None:
         if not self.show_radar_map:
             return
         ttl = int(self.cfg.get("cache_ttls", {}).get("radar", 300))
         if (
             (time.time() - self._radar_last) < ttl
-            and self._radar_ascii
+            and (self._radar_cells or self._radar_ascii)
             and self._radar_src_cols == target_cols
             and self._radar_src_rows == target_rows
         ):
             return
 
-        if not self.radar_station:
-            self._radar_ascii = ["(no radarStation from NWS points)"]
-            self._radar_kind = []
-            self._radar_state_overlay = []
-            self._radar_city_hitmap = {}
-            self._radar_err = "no radarStation"
-            self._radar_last = time.time()
-            return
-
         try:
-            from PIL import Image
-        except Exception:
+            from PIL import Image as _PIL_Image  # noqa: F401
+        except ImportError:
             self._radar_ascii = ["(install pillow to render radar map)"]
             self._radar_kind = []
             self._radar_state_overlay = []
@@ -713,6 +825,8 @@ class App:
         show_state_lines = bool(radar_cfg.get("show_state_lines", True))
         show_city_labels = bool(radar_cfg.get("show_city_labels", True))
         max_city_labels = int(radar_cfg.get("max_city_labels", 20))
+        n_frames = int(radar_cfg.get("animation_frames", 4))
+        step_min = int(radar_cfg.get("animation_step_min", 5))
 
         bbox = self.client.state_bbox(self.state_code) if self.state_code else None
         bbox = (
@@ -729,17 +843,49 @@ class App:
         self._radar_bbox = bbox
         self._radar_src_cols = target_cols
         self._radar_src_rows = target_rows
+
         try:
-            png = self.client.radar_wms_png(self.radar_station, bbox, req_w, req_h)
-            if png is None:
-                raise RuntimeError("radar returned no data")
-            self._save_radar_png(png)
-            self._radar_ascii, self._radar_kind = png_to_ascii(
-                png, target_cols, target_rows, ramp
+            # Fetch animation frames
+            raw_frames = self.client.radar_frames_png(
+                self.radar_station or "",
+                bbox,
+                req_w,
+                req_h,
+                n_frames=n_frames,
+                step_minutes=step_min,
             )
+            if not raw_frames:
+                raise RuntimeError("radar returned no frames")
+
+            # Convert each raw PNG to a RadarFrame
+            new_frames: List[RadarFrame] = []
+            for png, ts_ms in raw_frames:
+                self._save_radar_png(png)
+                if self._radar_has_256color:
+                    cells = png_to_halfblock_radar(png, target_cols, target_rows)
+                    ascii_lines, kind_lines = [], []
+                else:
+                    cells = []
+                    ascii_lines, kind_lines = png_to_ascii(
+                        png, target_cols, target_rows, ramp
+                    )
+                new_frames.append(RadarFrame(
+                    cells=cells,
+                    ascii_lines=ascii_lines,
+                    kind_lines=kind_lines,
+                    timestamp_ms=ts_ms,
+                ))
+            self._radar_frames = new_frames
+            # If animation is off, show the latest frame
+            if not self._radar_anim_playing:
+                self._radar_frame_idx = len(new_frames) - 1
+            self._set_current_radar_frame()
+
+            # Overlays (shared across all frames since same bbox)
             self._radar_state_overlay = []
             self._radar_city_overlay = []
             self._radar_city_hitmap = {}
+
             if show_state_lines:
                 try:
                     feats = self.client.state_lines_features(bbox, self.state_code)
@@ -750,34 +896,49 @@ class App:
                         ol, out_bbox = self.client.state_lines_png(bbox, req_w, req_h)
                         if ol:
                             self._radar_state_overlay = png_to_line_overlay(
-                                ol,
-                                target_cols,
-                                target_rows,
-                                mark="|",
-                                src_bbox=out_bbox,
-                                dst_bbox=bbox,
+                                ol, target_cols, target_rows,
+                                mark="|", src_bbox=out_bbox, dst_bbox=bbox,
                             )
                 except Exception as oe:
                     dbg(f"RADAR state-lines overlay failed: {oe}")
+
             if show_city_labels:
                 self._radar_city_overlay, self._radar_city_hitmap = (
                     city_overlay_and_hits_for_bbox(
-                        target_cols,
-                        target_rows,
-                        bbox,
+                        target_cols, target_rows, bbox,
                         max_labels=max_city_labels,
                         here=(self.lat, self.lon),
                     )
                 )
             self._radar_err = None
+
         except Exception as e:
+            self._radar_cells = []
             self._radar_ascii = []
             self._radar_kind = []
             self._radar_state_overlay = []
             self._radar_city_overlay = []
             self._radar_city_hitmap = {}
             self._radar_err = str(e)
+            dbg(f"RADAR refresh failed: {e}")
+
         self._radar_last = time.time()
+
+    def _set_current_radar_frame(self) -> None:
+        """Copy data from the current animation frame index to display state."""
+        if not self._radar_frames:
+            return
+        idx = clamp(self._radar_frame_idx, 0, len(self._radar_frames) - 1)
+        f = self._radar_frames[idx]
+        self._radar_cells = f.cells
+        self._radar_ascii = f.ascii_lines
+        self._radar_kind = f.kind_lines
+        self._radar_ts_ms = f.timestamp_ms
+        self._radar_ts_utc = self._ts_ms_to_utc_str(f.timestamp_ms)
+
+    # ------------------------------------------------------------------
+    # Main loop
+    # ------------------------------------------------------------------
 
     def run(self) -> None:
         self.stdscr.nodelay(False)
@@ -791,14 +952,31 @@ class App:
     def _tick(self) -> None:
         if not self.paused:
             self.refresh_all(force=False, allow_offline=True)
+
+        # Advance radar animation
+        if self._radar_anim_playing and len(self._radar_frames) > 1:
+            now = time.time()
+            if now - self._radar_anim_last >= self._radar_anim_interval:
+                self._radar_frame_idx = (
+                    (self._radar_frame_idx + 1) % len(self._radar_frames)
+                )
+                self._set_current_radar_frame()
+                self._radar_anim_last = now
+
         now = time.time()
         wait_ms = 500
         if self.next_refresh and not self.paused:
             wait_ms = min(wait_ms, max(50, int((self.next_refresh - now) * 1000)))
         if self.status_msg and now < self.status_until:
             wait_ms = min(wait_ms, max(50, int((self.status_until - now) * 1000)))
+        if self._radar_anim_playing and self._radar_frames:
+            wait_ms = min(wait_ms, int(self._radar_anim_interval * 1000))
         self.stdscr.timeout(clamp(wait_ms, 50, 1000))
         self._draw()
+
+    # ------------------------------------------------------------------
+    # Key handling
+    # ------------------------------------------------------------------
 
     def _handle_key(self, ch: int) -> bool:
         key_handlers = {
@@ -810,29 +988,32 @@ class App:
             ord("f"): lambda: self._set_view("forecast"),
             ord("h"): lambda: self._set_view("hourly"),
             ord("a"): lambda: self._set_view("alerts"),
-            ord("l"): lambda: self._search_location(),
-            ord("r"): lambda: self._refresh(),
-            ord("u"): lambda: self._toggle_units(),
-            ord("t"): lambda: self._toggle_time_format(),
-            ord("p"): lambda: self._toggle_pause(),
-            ord("g"): lambda: self._toggle_graphs(),
-            ord("w"): lambda: self._toggle_radar(),
-            ord("o"): lambda: self._open_radar(),
+            ord("w"): lambda: self._toggle_radar_view(),
+            ord("l"): self._search_location,
+            ord("r"): self._do_refresh,
+            ord("u"): self._toggle_units,
+            ord("t"): self._toggle_time_format,
+            ord("p"): self._toggle_pause,
+            ord("g"): self._toggle_graphs,
+            ord("A"): self._toggle_radar_anim,
+            ord("o"): self._open_radar_browser,
             ord("["): lambda: self._cycle_favorite(-1),
             ord("]"): lambda: self._cycle_favorite(1),
             ord("n"): lambda: self._cycle_favorite(1),
             ord("b"): lambda: self._cycle_favorite(-1),
-            ord("F"): lambda: self._toggle_favorite(),
+            ord("F"): self._toggle_favorite,
         }
-
         handler = key_handlers.get(ch)
         if handler:
-            return handler()
-
+            return handler()  # type: ignore[return-value]
         if ch in (curses.KEY_DOWN, ord("j")):
             self._scroll(1)
         elif ch in (curses.KEY_UP, ord("k")):
             self._scroll(-1)
+        elif ch in (curses.KEY_LEFT, ord("<")):
+            self._step_radar_frame(-1)
+        elif ch in (curses.KEY_RIGHT, ord(">")):
+            self._step_radar_frame(1)
         return True
 
     def _set_view(self, view: str) -> bool:
@@ -847,7 +1028,7 @@ class App:
             pass
         return True
 
-    def _refresh(self) -> bool:
+    def _do_refresh(self) -> bool:
         self._show_loading("Refreshing now...")
         self.refresh_all(force=True, allow_offline=True)
         self._radar_last = 0.0
@@ -882,34 +1063,62 @@ class App:
         self._save_cfg()
         return True
 
-    def _toggle_radar(self) -> bool:
-        self.show_radar_map = not self.show_radar_map
-        if self.show_radar_map:
-            self._radar_last = 0.0
-        self._flash("Radar map ON" if self.show_radar_map else "Radar map OFF", 1.2)
-        self._save_cfg()
+    def _toggle_radar_view(self) -> bool:
+        """Toggle between the radar view and the current conditions view."""
+        if self.view == "radar":
+            self.view = "current"
+        else:
+            self.view = "radar"
+            # Ensure radar is enabled
+            self.show_radar_map = True
+            self._save_cfg()
         return True
 
-    def _open_radar(self) -> bool:
-        url = "https://mrms.nssl.noaa.gov/qvs/product_viewer/"
-        subprocess.Popen(
-            ["xdg-open", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-        self._flash(f"Opened {url}", 5.0)
+    def _toggle_radar_anim(self) -> bool:
+        if len(self._radar_frames) < 2:
+            self._flash("Animation requires ≥2 frames. Try refreshing (r).", 2.5)
+            return True
+        self._radar_anim_playing = not self._radar_anim_playing
+        if self._radar_anim_playing:
+            self._radar_anim_last = time.time()
+            self._flash(
+                f"Animation ON  ({len(self._radar_frames)} frames)", 1.5
+            )
+        else:
+            self._flash("Animation OFF", 1.2)
         return True
 
-    def _scroll(self, direction: int) -> bool:
-        scroll_handlers = {
-            "forecast": lambda: setattr(self, "fc_scroll", self.fc_scroll + direction),
-            "alerts": lambda: setattr(
-                self, "alert_scroll", self.alert_scroll + direction
-            ),
-            "hourly": lambda: setattr(self, "hr_scroll", self.hr_scroll + direction),
-        }
-        handler = scroll_handlers.get(self.view)
-        if handler:
-            handler()
+    def _step_radar_frame(self, direction: int) -> bool:
+        if not self._radar_frames:
+            return True
+        n = len(self._radar_frames)
+        self._radar_frame_idx = (self._radar_frame_idx + direction) % n
+        self._set_current_radar_frame()
+        self._radar_anim_playing = False
         return True
+
+    def _open_radar_browser(self) -> bool:
+        url = "https://radar.weather.gov/"
+        try:
+            subprocess.Popen(
+                ["xdg-open", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+        except Exception:
+            pass
+        self._flash(f"Opened {url}", 3.0)
+        return True
+
+    def _scroll(self, direction: int) -> None:
+        if self.view == "forecast":
+            self.fc_scroll += direction
+        elif self.view == "alerts":
+            self.alert_scroll += direction
+        elif self.view == "hourly":
+            self.hr_scroll += direction
+
+    # ------------------------------------------------------------------
+    # Drawing
+    # ------------------------------------------------------------------
 
     def _draw(self) -> None:
         self.stdscr.erase()
@@ -921,13 +1130,11 @@ class App:
 
         if rows < MIN_ROWS or cols < MIN_COLS:
             safe_addstr(
-                self.stdscr,
-                0,
-                0,
-                f"Terminal too small ({cols}x{rows}). Need at least {MIN_COLS}x{MIN_ROWS}.",
+                self.stdscr, 0, 0,
+                f"Terminal too small ({cols}×{rows}). Need ≥{MIN_COLS}×{MIN_ROWS}.",
                 curses.color_pair(4) | curses.A_BOLD,
             )
-            safe_addstr(self.stdscr, 2, 0, "Resize and try again. Press q to quit.")
+            safe_addstr(self.stdscr, 2, 0, "Resize and try again.  Press q to quit.")
             self.stdscr.refresh()
             return
 
@@ -938,14 +1145,15 @@ class App:
         body_w = cols - 2
         win = self.stdscr.derwin(body_h, body_w, body_top, 1)
 
-        view_drawers = {
+        drawers = {
             "current": draw_current,
             "forecast": draw_forecast,
             "hourly": draw_hourly,
             "alerts": draw_alerts,
             "help": draw_help,
+            "radar": draw_radar_view,
         }
-        drawer = view_drawers.get(self.view)
+        drawer = drawers.get(self.view)
         if drawer:
             drawer(self, win)
 
@@ -953,28 +1161,28 @@ class App:
         self.stdscr.refresh()
 
 
-def _parse_field(value, field_name: str):
-    """Parse field based on field name for state loading."""
+# ---------------------------------------------------------------------------
+# State loading helpers
+# ---------------------------------------------------------------------------
+
+def _parse_field(value: Any, field_name: str) -> Any:
     if value is None:
         return None
     if field_name in ("start", "end", "sent", "effective", "expires", "timestamp"):
         return parse_iso(value) if isinstance(value, str) else None
     if field_name in (
-        "temperature",
-        "wind_speed_num",
-        "pop",
-        "humidity_pct",
-        "pressure_pa",
-        "visibility_m",
-        "wind_mps",
-        "wind_dir_deg",
-        "gust_mps",
+        "temperature", "wind_speed_num", "pop", "humidity_pct",
+        "pressure_pa", "visibility_m", "wind_mps", "wind_dir_deg", "gust_mps",
     ):
         return value if isinstance(value, (int, float)) else None
     if field_name == "is_daytime":
         return value if isinstance(value, bool) else None
     return value
 
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
 
 def main(stdscr) -> None:
     cfg = load_config()
