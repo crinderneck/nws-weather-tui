@@ -1,0 +1,318 @@
+#!/usr/bin/env python3
+"""
+NWS Weather TUI — Radar data fetching (MRMS, IEM NEXRAD, station WMS).
+"""
+
+from __future__ import annotations
+
+import re
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
+from cache import TTLCache
+from helpers import dbg
+
+MRMS_BASE = (
+    "https://mapservices.weather.noaa.gov/eventdriven/rest/services/"
+    "radar/radar_base_reflectivity_time/ImageServer"
+)
+
+
+class RadarFetcher:
+    def __init__(self, session, timeout: int, cache: TTLCache, ttls: Dict[str, int]) -> None:
+        self.s = session
+        self.timeout = timeout
+        self.cache = cache
+        self.ttls = ttls
+
+    # ------------------------------------------------------------------
+    # MRMS helpers
+    # ------------------------------------------------------------------
+
+    def _mrms_latest_time(self) -> Optional[int]:
+        """Fetch the latest available timestamp (ms) from MRMS ImageServer."""
+        ck = MRMS_BASE + ":latest_time"
+        cached = self.cache.get(ck)
+        if isinstance(cached, int):
+            return cached
+        try:
+            meta = self.s.get(MRMS_BASE, params={"f": "pjson"}, timeout=self.timeout)
+            meta.raise_for_status()
+            mj = meta.json()
+            te = ((mj or {}).get("timeInfo") or {}).get("timeExtent") or []
+            if isinstance(te, list) and len(te) >= 2 and isinstance(te[1], (int, float)):
+                ts = int(te[1])
+                self.cache.set(ck, ts, 180)
+                return ts
+        except Exception as e:
+            dbg(f"RADAR MRMS latest-time lookup failed: {e}")
+        return None
+
+    def _mrms_time_extent(self) -> Tuple[Optional[int], Optional[int]]:
+        """Return (start_ms, end_ms) of available MRMS time series."""
+        ck = MRMS_BASE + ":time_extent"
+        cached = self.cache.get(ck)
+        if isinstance(cached, tuple):
+            return cached  # type: ignore[return-value]
+        try:
+            meta = self.s.get(MRMS_BASE, params={"f": "pjson"}, timeout=self.timeout)
+            meta.raise_for_status()
+            mj = meta.json()
+            te = ((mj or {}).get("timeInfo") or {}).get("timeExtent") or []
+            if isinstance(te, list) and len(te) >= 2:
+                t0, t1 = int(te[0]), int(te[1])
+                out = (t0, t1)
+                self.cache.set(ck, out, 180)
+                return out
+        except Exception as e:
+            dbg(f"RADAR MRMS time-extent lookup failed: {e}")
+        return None, None
+
+    def _fetch_mrms_png(
+        self,
+        bbox4326: Tuple[float, float, float, float],
+        width: int,
+        height: int,
+        timestamp_ms: Optional[int] = None,
+    ) -> Optional[bytes]:
+        """Fetch one MRMS base-reflectivity PNG for the given bbox/time."""
+        minlon, minlat, maxlon, maxlat = bbox4326
+        params: Dict[str, str] = {
+            "bbox": f"{minlon:.6f},{minlat:.6f},{maxlon:.6f},{maxlat:.6f}",
+            "bboxSR": "4326",
+            "imageSR": "4326",
+            "size": f"{width},{height}",
+            "format": "png32",
+            "transparent": "true",
+            "adjustAspectRatio": "false",
+            "f": "image",
+        }
+        if timestamp_ms is not None:
+            params["time"] = str(timestamp_ms)
+
+        for ep in (MRMS_BASE + "/exportImage", MRMS_BASE + "/export"):
+            try:
+                r = self.s.get(ep, params=params, timeout=self.timeout * 2)
+                r.raise_for_status()
+                if isinstance(r.content, (bytes, bytearray)) and r.content.startswith(
+                    b"\x89PNG\r\n\x1a\n"
+                ):
+                    return bytes(r.content)
+                dbg(
+                    f"RADAR MRMS non-PNG ep={ep} "
+                    f"ct={(r.headers.get('Content-Type') or '').lower()} "
+                    f"bytes={len(r.content)}"
+                )
+            except Exception as e:
+                dbg(f"RADAR MRMS fetch failed ep={ep} err={e}")
+        return None
+
+    # ------------------------------------------------------------------
+    # IEM NEXRAD composite (secondary source)
+    # ------------------------------------------------------------------
+
+    def _fetch_iem_png(
+        self,
+        bbox4326: Tuple[float, float, float, float],
+        width: int,
+        height: int,
+    ) -> Optional[bytes]:
+        """Fetch NEXRAD composite reflectivity from Iowa State IEM WMS."""
+        minlon, minlat, maxlon, maxlat = bbox4326
+        try:
+            r = self.s.get(
+                "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi",
+                params={
+                    "service": "WMS",
+                    "version": "1.1.1",
+                    "request": "GetMap",
+                    "layers": "nexrad-n0r",
+                    "styles": "",
+                    "srs": "EPSG:4326",
+                    "bbox": f"{minlon},{minlat},{maxlon},{maxlat}",
+                    "width": str(width),
+                    "height": str(height),
+                    "format": "image/png",
+                    "transparent": "true",
+                },
+                timeout=self.timeout * 2,
+            )
+            r.raise_for_status()
+            if r.content.startswith(b"\x89PNG\r\n\x1a\n"):
+                return bytes(r.content)
+        except Exception as e:
+            dbg(f"RADAR IEM fetch failed: {e}")
+        return None
+
+    # ------------------------------------------------------------------
+    # Station WMS fallback (tertiary source)
+    # ------------------------------------------------------------------
+
+    def _fetch_station_wms_png(
+        self,
+        radar_id: str,
+        bbox4326: Tuple[float, float, float, float],
+        width: int,
+        height: int,
+    ) -> Optional[bytes]:
+        """Fetch base reflectivity from NWS station OpenGeoServer WMS."""
+        minlon, minlat, maxlon, maxlat = bbox4326
+        rid = (radar_id or "").strip()
+        if not rid:
+            return None
+        rid_l = rid.lower()
+        rid_u = rid.upper()
+        bases = [
+            f"https://opengeo.ncep.noaa.gov/geoserver/{rid_l}/ows",
+            f"https://opengeo.ncep.noaa.gov/geoserver/{rid_u}/ows",
+        ]
+
+        discovered_layers: List[str] = []
+        for base in bases:
+            cap_url = base + "?service=WMS&version=1.1.1&request=GetCapabilities"
+            try:
+                r = self.s.get(cap_url, timeout=self.timeout)
+                r.raise_for_status()
+                names = re.findall(r"<Name>([^<]+)</Name>", r.text or "")
+                if not names:
+                    continue
+
+                def _rank(name: str) -> int:
+                    n = name.lower()
+                    score = 0
+                    if "bref" in n:
+                        score += 40
+                    if "reflect" in n or "_ref" in n:
+                        score += 25
+                    if "n0q" in n:
+                        score += 20
+                    if rid_l in n:
+                        score += 12
+                    if "qcd" in n:
+                        score += 5
+                    if "raw" in n:
+                        score += 3
+                    return score
+
+                ranked = sorted(names, key=_rank, reverse=True)
+                discovered_layers.extend(n for n in ranked if _rank(n) > 0)
+            except Exception as e:
+                dbg(f"RADAR capabilities failed base={base}: {e}")
+
+        layers_try = discovered_layers + [
+            f"{rid_l}:{rid_l}_bref_raw",
+            f"{rid_l}:{rid_l}_bref_qcd",
+            f"{rid_l}:{rid_l}_bref",
+            f"{rid_u}:{rid_u}_bref_raw",
+            f"{rid_u}:{rid_u}_bref_qcd",
+            f"{rid_u}:{rid_u}_bref",
+        ]
+        seen: set = set()
+        unique_layers = [l for l in layers_try if l and l not in seen and not seen.add(l)]
+
+        for base in bases:
+            for layer in unique_layers:
+                params = (
+                    f"service=WMS&version=1.1.1&request=GetMap"
+                    f"&layers={layer}&styles=&format=image/png&transparent=true"
+                    f"&srs=EPSG:4326"
+                    f"&bbox={minlon:.6f},{minlat:.6f},{maxlon:.6f},{maxlat:.6f}"
+                    f"&width={width}&height={height}"
+                )
+                url = base + "?" + params
+                try:
+                    from cache import TTLCache as _  # noqa: F401
+                    ck = url
+                    cached = self.cache.get(ck)
+                    if isinstance(cached, (bytes, bytearray)) and cached.startswith(
+                        b"\x89PNG\r\n\x1a\n"
+                    ):
+                        return bytes(cached)
+                    r = self.s.get(url, timeout=self.timeout, allow_redirects=True)
+                    ct = (r.headers.get("Content-Type") or "").lower()
+                    if "vnd.ogc.se_xml" in ct or ("xml" in ct and "image" not in ct):
+                        dbg(f"RADAR BAD CT={ct} url={url} status={r.status_code}")
+                        continue
+                    r.raise_for_status()
+                    data = r.content
+                    if isinstance(data, (bytes, bytearray)) and data.startswith(
+                        b"\x89PNG\r\n\x1a\n"
+                    ):
+                        self.cache.set(ck, data, self.ttls.get("radar", 300))
+                        return bytes(data)
+                except Exception as e:
+                    dbg(f"RADAR station WMS failed base={base} layer={layer}: {e}")
+        return None
+
+    # ------------------------------------------------------------------
+    # Public: single-frame
+    # ------------------------------------------------------------------
+
+    def radar_wms_png(
+        self,
+        radar_id: str,
+        bbox4326: Tuple[float, float, float, float],
+        width: int,
+        height: int,
+    ) -> Optional[bytes]:
+        """Fetch the latest radar PNG. MRMS -> IEM -> station WMS."""
+        latest_ms = self._mrms_latest_time()
+        png = self._fetch_mrms_png(bbox4326, width, height, latest_ms)
+        if png:
+            return png
+        dbg("RADAR MRMS failed, trying IEM")
+
+        png = self._fetch_iem_png(bbox4326, width, height)
+        if png:
+            return png
+        dbg("RADAR IEM failed, trying station WMS")
+
+        png = self._fetch_station_wms_png(radar_id, bbox4326, width, height)
+        if png:
+            return png
+
+        raise RuntimeError("all radar sources failed (MRMS, IEM, station WMS)")
+
+    # ------------------------------------------------------------------
+    # Public: animation frames
+    # ------------------------------------------------------------------
+
+    def radar_frames_png(
+        self,
+        radar_id: str,
+        bbox4326: Tuple[float, float, float, float],
+        width: int,
+        height: int,
+        n_frames: int = 4,
+        step_minutes: int = 5,
+    ) -> List[Tuple[bytes, int]]:
+        """Fetch multiple MRMS radar frames for animation."""
+        t_start, t_end = self._mrms_time_extent()
+
+        if t_end is None:
+            t_end = int(time.time() * 1000)
+        if t_start is None:
+            t_start = t_end - n_frames * step_minutes * 60 * 1000
+
+        step_ms = step_minutes * 60 * 1000
+        timestamps = [t_end - (n_frames - 1 - i) * step_ms for i in range(n_frames)]
+        timestamps = [max(t_start, min(t_end, t)) for t in timestamps]
+        timestamps = sorted(set(timestamps))
+
+        frames: List[Tuple[bytes, int]] = []
+        for ts_ms in timestamps:
+            png = self._fetch_mrms_png(bbox4326, width, height, ts_ms)
+            if png:
+                frames.append((png, ts_ms))
+            else:
+                dbg(f"RADAR animation frame missing ts={ts_ms}")
+
+        if not frames:
+            try:
+                png = self.radar_wms_png(radar_id, bbox4326, width, height)
+                if png:
+                    frames.append((png, t_end))
+            except Exception as e:
+                dbg(f"RADAR fallback single frame failed: {e}")
+
+        return frames

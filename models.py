@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional
 
 from icons import pick_icon
 from formatting import parse_iso, parse_first_number
+from radar_decode import RadarCell
 
 
 @dataclass
@@ -68,6 +69,16 @@ class AlertItem:
     expires: Optional[dt.datetime]
     description: str
     instruction: str
+
+
+@dataclass
+class RadarFrame:
+    """One radar animation frame."""
+    cells: List[List[RadarCell]]   # halfblock cells (empty if 256-color unavailable)
+    ascii_lines: List[str]          # ASCII fallback lines
+    kind_lines: List[str]           # ASCII kind classification lines
+    timestamp_ms: int               # MRMS epoch ms (UTC)
+    source: str = "mrms"            # "mrms" | "iem" | "wms"
 
 
 def extract_current(obs_json: Dict[str, Any]) -> CurrentConditions:

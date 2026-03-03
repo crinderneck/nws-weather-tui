@@ -11,7 +11,6 @@ import re
 import signal
 import subprocess
 import time
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 import curses
@@ -21,31 +20,28 @@ from constants import (
     DEFAULT_CONFIG,
     MIN_COLS,
     MIN_ROWS,
-    N_RADAR_COLORS,
-    NWS_RADAR_PALETTE,
     RADAR_LAST_PNG_PATH,
     ensure_dir,
     load_config,
-    radar_curses_color,
-    radar_dual_pair,
-    radar_single_pair,
 )
+from curses_init import init_curses, init_radar_colors
 from formatting import fmt_time, parse_iso
 from geo import bbox_around, clamp, expand_bbox_km
 from helpers import dbg, safe_addstr
-from overlays import city_overlay_and_hits_for_bbox, png_to_line_overlay, vector_lines_overlay
-from persistence import load_app_state, save_app_config, save_app_state
-from radar_decode import RadarCell, png_to_ascii, png_to_halfblock_radar
 from models import (
     AlertItem,
     CurrentConditions,
     ForecastPeriod,
     HourlyPeriod,
+    RadarFrame,
     extract_alerts,
     extract_current,
     extract_forecast,
     extract_hourly,
 )
+from overlays import city_overlay_and_hits_for_bbox, png_to_line_overlay, vector_lines_overlay
+from persistence import load_app_state, save_app_config, save_app_state
+from radar_decode import RadarCell, png_to_ascii, png_to_halfblock_radar
 from views import (
     draw_header,
     draw_footer,
@@ -54,18 +50,10 @@ from views import (
     draw_hourly,
     draw_alerts,
     draw_help,
+    draw_moon,
     draw_radar_view,
+    draw_favorites,
 )
-
-
-@dataclass
-class RadarFrame:
-    """One radar animation frame."""
-    cells: List[List[RadarCell]]   # halfblock cells (empty if 256-color unavailable)
-    ascii_lines: List[str]          # ASCII fallback lines
-    kind_lines: List[str]           # ASCII kind classification lines
-    timestamp_ms: int               # MRMS epoch ms (UTC)
-    source: str = "mrms"            # "mrms" | "iem" | "wms"
 
 
 class App:
@@ -88,6 +76,7 @@ class App:
         self.show_radar_map: bool = bool(cfg.get("show_radar_map", True))
         self.favorites: List[Dict[str, Any]] = list(cfg.get("favorites", []) or [])
         self.fav_idx: int = 0
+        self.fav_edit_idx: int = 0
 
         # --- API client ---
         self.client = NWSClient(
@@ -163,79 +152,11 @@ class App:
         self._radar_has_256color: bool = False
 
         # --- Init curses ---
-        self._init_curses()
-        self._radar_has_256color = self._init_radar_colors()
+        init_curses(self.stdscr)
+        self._radar_has_256color = init_radar_colors()
 
         self._load_points()
         self.refresh_all(force=True, allow_offline=True)
-
-    # ------------------------------------------------------------------
-    # Curses initialisation
-    # ------------------------------------------------------------------
-
-    def _init_curses(self) -> None:
-        curses.curs_set(0)
-        curses.start_color()
-        curses.use_default_colors()
-        # UI color pairs 1-19
-        curses.init_pair(1,  curses.COLOR_CYAN,    -1)  # header, info
-        curses.init_pair(2,  curses.COLOR_YELLOW,  -1)  # highlights, forecast header
-        curses.init_pair(3,  curses.COLOR_GREEN,   -1)  # OK, temperature
-        curses.init_pair(4,  curses.COLOR_RED,     -1)  # errors, alerts
-        curses.init_pair(5,  curses.COLOR_MAGENTA, -1)  # header right, PoP bar
-        curses.init_pair(6,  curses.COLOR_BLUE,    -1)  # wind sparkline
-        curses.init_pair(7,  curses.COLOR_RED,     -1)  # temp sparkline
-        curses.init_pair(8,  curses.COLOR_CYAN,    -1)  # radar default (ASCII)
-        curses.init_pair(9,  curses.COLOR_GREEN,   -1)  # radar rain (ASCII)
-        curses.init_pair(10, curses.COLOR_BLUE,    -1)  # radar snow (ASCII)
-        curses.init_pair(11, curses.COLOR_MAGENTA, -1)  # radar sleet (ASCII)
-        curses.init_pair(12, curses.COLOR_WHITE,   -1)  # city dot @
-        curses.init_pair(13, curses.COLOR_YELLOW,  curses.COLOR_BLACK)  # radar anim indicator
-        curses.init_pair(14, curses.COLOR_WHITE,   -1)  # general bold
-        curses.init_pair(15, curses.COLOR_CYAN,    -1)  # radar view title
-        try:
-            mask = curses.ALL_MOUSE_EVENTS | getattr(curses, "REPORT_MOUSE_POSITION", 0)
-            curses.mousemask(mask)
-            curses.mouseinterval(0)
-        except curses.error:
-            pass
-
-    def _init_radar_colors(self) -> bool:
-        """Initialise NWS radar colors and all needed pairs for 256-color mode.
-
-        Color IDs 16-29 are assigned to the 14 NWS radar palette entries.
-        Pair  20-33: single-color radar cells (fg=NWS color, bg=default)
-        Pair  34-229: dual-color radar halfblock cells (fg × bg, 14×14)
-
-        Returns True if 256-color mode was successfully initialised.
-        """
-        try:
-            if curses.COLORS < 256 or not curses.can_change_color():
-                return False
-            # Init custom colors
-            for i, (_, _, _, r1k, g1k, b1k, *_rest) in enumerate(NWS_RADAR_PALETTE):
-                curses.init_color(radar_curses_color(i + 1), r1k, g1k, b1k)
-            # Single-color pairs (fg=nws, bg=transparent)
-            for nws_idx in range(1, N_RADAR_COLORS + 1):
-                curses.init_pair(
-                    radar_single_pair(nws_idx),
-                    radar_curses_color(nws_idx),
-                    -1,
-                )
-            # Dual-color pairs (fg=nws_fg, bg=nws_bg) for ▀ halfblocks
-            for fg in range(1, N_RADAR_COLORS + 1):
-                for bg in range(1, N_RADAR_COLORS + 1):
-                    pair_num = radar_dual_pair(fg, bg)
-                    if pair_num < 256:
-                        curses.init_pair(
-                            pair_num,
-                            radar_curses_color(fg),
-                            radar_curses_color(bg),
-                        )
-            return True
-        except curses.error as e:
-            dbg(f"256-color radar init failed: {e}")
-            return False
 
     # ------------------------------------------------------------------
     # Status / loading messages
@@ -267,10 +188,6 @@ class App:
             os.replace(tmp, RADAR_LAST_PNG_PATH)
         except Exception as e:
             dbg(f"RADAR save failed: {e}")
-
-    # ------------------------------------------------------------------
-    # Radar timestamp
-    # ------------------------------------------------------------------
 
     @staticmethod
     def _ts_ms_to_utc_str(ts_ms: int) -> str:
@@ -407,7 +324,7 @@ class App:
         self._radar_map_rows = 0
 
     # ------------------------------------------------------------------
-    # Config / state persistence (delegated to persistence module)
+    # Config / state persistence
     # ------------------------------------------------------------------
 
     def _save_cfg(self) -> None:
@@ -600,7 +517,6 @@ class App:
         self._radar_src_rows = target_rows
 
         try:
-            # Fetch animation frames
             raw_frames = self.client.radar_frames_png(
                 self.radar_station or "",
                 bbox,
@@ -612,7 +528,6 @@ class App:
             if not raw_frames:
                 raise RuntimeError("radar returned no frames")
 
-            # Convert each raw PNG to a RadarFrame
             new_frames: List[RadarFrame] = []
             for png, ts_ms in raw_frames:
                 self._save_radar_png(png)
@@ -631,7 +546,6 @@ class App:
                     timestamp_ms=ts_ms,
                 ))
             self._radar_frames = new_frames
-            # If animation is off, show the latest frame
             if not self._radar_anim_playing:
                 self._radar_frame_idx = len(new_frames) - 1
             self._set_current_radar_frame()
@@ -734,6 +648,9 @@ class App:
     # ------------------------------------------------------------------
 
     def _handle_key(self, ch: int) -> bool:
+        # Favorites editor intercepts keys first
+        if self.view == "favorites":
+            return self._handle_favorites_key(ch)
         key_handlers = {
             ord("q"): lambda: False,
             ord("Q"): lambda: False,
@@ -743,6 +660,7 @@ class App:
             ord("f"): lambda: self._set_view("forecast"),
             ord("h"): lambda: self._set_view("hourly"),
             ord("a"): lambda: self._set_view("alerts"),
+            ord("m"): lambda: self._set_view("moon"),
             ord("w"): lambda: self._toggle_radar_view(),
             ord("l"): self._search_location,
             ord("r"): self._do_refresh,
@@ -752,8 +670,7 @@ class App:
             ord("g"): self._toggle_graphs,
             ord("A"): self._toggle_radar_anim,
             ord("o"): self._open_radar_browser,
-            ord("["): lambda: self._cycle_favorite(-1),
-            ord("]"): lambda: self._cycle_favorite(1),
+            ord("e"): lambda: self._set_view("favorites"),
             ord("n"): lambda: self._cycle_favorite(1),
             ord("b"): lambda: self._cycle_favorite(-1),
             ord("F"): self._toggle_favorite,
@@ -819,12 +736,10 @@ class App:
         return True
 
     def _toggle_radar_view(self) -> bool:
-        """Toggle between the radar view and the current conditions view."""
         if self.view == "radar":
             self.view = "current"
         else:
             self.view = "radar"
-            # Ensure radar is enabled
             self.show_radar_map = True
             self._save_cfg()
         return True
@@ -862,6 +777,104 @@ class App:
             pass
         self._flash(f"Opened {url}", 3.0)
         return True
+
+    # ------------------------------------------------------------------
+    # Favorites editor
+    # ------------------------------------------------------------------
+
+    def _handle_favorites_key(self, ch: int) -> bool:
+        if ch in (ord("e"), 27):  # e or Escape -> exit editor
+            self.view = "current"
+            return True
+        if ch in (ord("q"), ord("Q")):
+            return False
+        if ch in (curses.KEY_DOWN, ord("j")):
+            self._fav_edit_move_cursor(1)
+        elif ch in (curses.KEY_UP, ord("k")):
+            self._fav_edit_move_cursor(-1)
+        elif ch == ord("d"):
+            self._fav_edit_delete()
+        elif ch == ord("r"):
+            self._fav_edit_rename()
+        elif ch == ord("a"):
+            self._fav_edit_add()
+        elif ch == ord("J"):
+            self._fav_edit_reorder(1)
+        elif ch == ord("K"):
+            self._fav_edit_reorder(-1)
+        elif ch in (curses.KEY_ENTER, 10, 13):
+            self._fav_edit_select()
+        return True
+
+    def _fav_edit_move_cursor(self, direction: int) -> None:
+        if not self.favorites:
+            return
+        self.fav_edit_idx = clamp(
+            self.fav_edit_idx + direction, 0, len(self.favorites) - 1
+        )
+
+    def _fav_edit_delete(self) -> None:
+        if not self.favorites:
+            return
+        removed = self.favorites.pop(self.fav_edit_idx)
+        self._flash(f"Deleted: {removed.get('name', '—')}", 1.5)
+        self.fav_edit_idx = clamp(self.fav_edit_idx, 0, max(0, len(self.favorites) - 1))
+        self._save_cfg()
+
+    def _fav_edit_rename(self) -> None:
+        if not self.favorites:
+            return
+        old = str(self.favorites[self.fav_edit_idx].get("name", ""))
+        new_name = self._prompt_line(f"Rename '{old}' to: ")
+        if new_name:
+            self.favorites[self.fav_edit_idx]["name"] = new_name
+            self._flash(f"Renamed to: {new_name}", 1.5)
+            self._save_cfg()
+        else:
+            self._flash("Rename canceled.", 1.2)
+
+    def _fav_edit_add(self) -> None:
+        q = self._prompt_line("Add favorite (city/state or ZIP): ")
+        if q is None or not q.strip():
+            self._flash("Add canceled.", 1.2)
+            return
+        try:
+            self._show_loading("Searching location...")
+            g = self.client.geocode_us(q.strip())
+            if not g:
+                self._flash(f"No match found for '{q}'.", 2.5)
+                return
+            name, lat, lon = g
+            self.favorites.append({"name": name, "lat": lat, "lon": lon})
+            self.fav_edit_idx = len(self.favorites) - 1
+            self._flash(f"Added: {name}", 1.5)
+            self._save_cfg()
+        except Exception as e:
+            self._flash(f"Add failed: {e}", 3.5)
+
+    def _fav_edit_reorder(self, direction: int) -> None:
+        if not self.favorites:
+            return
+        new_idx = self.fav_edit_idx + direction
+        if new_idx < 0 or new_idx >= len(self.favorites):
+            return
+        fav = self.favorites
+        fav[self.fav_edit_idx], fav[new_idx] = fav[new_idx], fav[self.fav_edit_idx]
+        self.fav_edit_idx = new_idx
+        self._save_cfg()
+
+    def _fav_edit_select(self) -> None:
+        if not self.favorites:
+            return
+        f = self.favorites[self.fav_edit_idx]
+        try:
+            self.view = "current"
+            self._apply_location(
+                str(f.get("name") or "Favorite"), float(f["lat"]), float(f["lon"])
+            )
+            self._flash(f"Jumped to: {f.get('name', '—')}", 1.8)
+        except (KeyError, TypeError, ValueError):
+            self._flash("Favorite is invalid (missing lat/lon).", 2.0)
 
     def _scroll(self, direction: int) -> None:
         if self.view == "forecast":
@@ -906,7 +919,9 @@ class App:
             "hourly": draw_hourly,
             "alerts": draw_alerts,
             "help": draw_help,
+            "moon": draw_moon,
             "radar": draw_radar_view,
+            "favorites": draw_favorites,
         }
         drawer = drawers.get(self.view)
         if drawer:

@@ -30,6 +30,8 @@ def draw_header(app: "App", rows: int, cols: int) -> None:
         "alerts": "ALERTS",
         "help": "HELP",
         "radar": "RADAR",
+        "moon": "MOON",
+        "favorites": "FAVORITES",
     }.get(app.view, app.view.upper())
 
     fav_tag = f" Fav:{len(app.favorites)}"
@@ -73,8 +75,8 @@ def draw_header(app: "App", rows: int, cols: int) -> None:
 def draw_footer(app: "App", rows: int, cols: int) -> None:
     safe_addstr(app.stdscr, rows - 2, 0, "\u2500" * (cols - 1), curses.A_DIM)
     helptext = (
-        "c Current|f Forecast|h Hourly|a Alerts|w Radar|"
+        "c Current|f Forecast|h Hourly|a Alerts|w Radar|m Moon|"
         "l Locate|r Refresh|u Units|t 12/24h|p Pause|g Graph|"
-        "A Anim|</> Frame|[/] Favs|? Help|q Quit"
+        "A Anim|</> Frame|e Favs|n/b Cycle|? Help|q Quit"
     )
     safe_addstr(app.stdscr, rows - 1, 1, helptext[: cols - 2], curses.A_DIM)

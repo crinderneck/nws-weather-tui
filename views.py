@@ -13,3 +13,5 @@ from views_hourly import draw_hourly                       # noqa: F401
 from views_alerts import draw_alerts                       # noqa: F401
 from views_help import draw_help                           # noqa: F401
 from views_radar import draw_radar_panel, draw_radar_view  # noqa: F401
+from views_moon import draw_moon                           # noqa: F401
+from views_favorites import draw_favorites                 # noqa: F401
