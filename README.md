@@ -57,7 +57,7 @@ A terminal-based weather application for the US, powered by the [National Weathe
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/nws-weather-tui.git
+git clone https://github.com/crinderneck/nws-weather-tui.git
 cd nws-weather-tui
 
 # Install dependencies

@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nws-weather-tui"
+version = "0.1.0"
+description = "A terminal-based weather application for the US, powered by the National Weather Service API"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [
+    { name = "crinderneck" },
+]
+keywords = ["weather", "tui", "curses", "nws", "terminal"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console :: Curses",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "pillow",
+    "requests",
+]
+
+[project.optional-dependencies]
+astral = ["astral"]
+
+[project.urls]
+Homepage = "https://github.com/crinderneck/nws-weather-tui"
+Repository = "https://github.com/crinderneck/nws-weather-tui"
+Issues = "https://github.com/crinderneck/nws-weather-tui/issues"
+
+[project.scripts]
+nws-weather-tui = "nws_weather_tui:main"
+
+[tool.setuptools]
+packages = ["nws_weather_tui"]
+py-modules = []
+
+[tool.setuptools.package-dir]
+nws_weather_tui = "."
