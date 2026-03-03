@@ -6,6 +6,7 @@ NWS Weather TUI — Main application.
 from __future__ import annotations
 
 import datetime as dt
+import math
 import os
 import re
 import signal
@@ -508,7 +509,8 @@ class App:
         )
 
         minlon, minlat, maxlon, maxlat = bbox
-        geo_aspect = (maxlon - minlon) / max(1e-9, maxlat - minlat)
+        cos_lat = abs(math.cos(math.radians((minlat + maxlat) / 2)))
+        geo_aspect = ((maxlon - minlon) * cos_lat) / max(1e-9, maxlat - minlat)
         req_h = max(64, target_rows * 12)
         req_w = max(64, int(req_h * geo_aspect))
 

@@ -5,6 +5,7 @@ NWS Weather TUI — Radar panel and full-screen radar view.
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, List
 
 import curses
@@ -62,8 +63,22 @@ def draw_radar_panel(
 
     # --- radar map ---
     map_rows = rows - y - 1
-    map_cols = max(20, cols - 1) if full_screen else max(20, min(cols - 1, int((cols - 1) * 0.96)))
-    map_x = (cols - 1 - map_cols) // 2 if not full_screen else 0
+    max_cols = max(20, cols - 1) if full_screen else max(20, min(cols - 1, int((cols - 1) * 0.96)))
+
+    # Constrain width to geographic aspect ratio so tall states aren't stretched
+    map_cols = max_cols
+    if app._radar_bbox:
+        minlon, minlat, maxlon, maxlat = app._radar_bbox
+        lat_span = maxlat - minlat
+        lon_span = maxlon - minlon
+        if lat_span > 1e-6 and lon_span > 1e-6:
+            cos_lat = abs(math.cos(math.radians((minlat + maxlat) / 2)))
+            geo_aspect = (lon_span * cos_lat) / lat_span
+            # Terminal chars are ~2x tall as wide; half-block = 2 vpx per row
+            ideal_cols = int(geo_aspect * map_rows * 2)
+            map_cols = max(20, min(max_cols, ideal_cols))
+
+    map_x = (cols - 1 - map_cols) // 2
 
     win_y0, win_x0 = win.getbegyx()
     app._radar_map_x = win_x0 + map_x
