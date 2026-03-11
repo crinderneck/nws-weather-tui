@@ -61,7 +61,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "show_city_labels": True,
         "max_city_labels": 20,
         "ascii_ramp": " .:-=+*#%@",
-        "animation_frames": 4,
+        "animation_frames": 8,
         "animation_interval_s": 0.5,
         "animation_step_min": 5,
     },

@@ -79,11 +79,23 @@ def safe_addstr(win, y: int, x: int, s: str, attr: int = 0) -> None:
 
 @lru_cache(maxsize=2048)
 def _wrap_lines_cached(text: str, width: int) -> Tuple[str, ...]:
-    return tuple(
-        textwrap.wrap(
-            text, width=width, replace_whitespace=False, drop_whitespace=False
-        )
-    )
+    """Wrap text respecting embedded newlines.
+
+    Single newlines reflow within a paragraph; double newlines (blank
+    lines) are preserved as paragraph breaks.
+    """
+    lines: list[str] = []
+    for paragraph in text.split("\n\n"):
+        if lines:
+            lines.append("")  # blank line between paragraphs
+        # Collapse single newlines within the paragraph into spaces
+        flat = " ".join(paragraph.split("\n"))
+        flat = flat.strip()
+        if not flat:
+            continue
+        wrapped = textwrap.wrap(flat, width=width)
+        lines.extend(wrapped if wrapped else [""])
+    return tuple(lines)
 
 
 def wrap_lines(text: str, width: int) -> Tuple[str, ...]:

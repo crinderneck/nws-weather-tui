@@ -56,36 +56,47 @@ def draw_hourly(app: "App", win) -> None:
         curses.A_DIM,
     )
 
+    # Column x-positions (fixed, spreadsheet-style)
+    x_time = 0
+    x_icon = 8
+    x_temp = 12
+    x_wind = 21
+    x_pop = 40
+    x_fc = 46
+
     header_y = 5
-    safe_addstr(
-        win, header_y, 0,
-        "Time  Ic  Temp     Wind               PoP  Forecast"[: cols - 1],
-        curses.A_DIM,
-    )
+    safe_addstr(win, header_y, x_time, "Time", curses.A_DIM)
+    safe_addstr(win, header_y, x_icon, "Ic", curses.A_DIM)
+    safe_addstr(win, header_y, x_temp, "Temp", curses.A_DIM)
+    safe_addstr(win, header_y, x_wind, "Wind", curses.A_DIM)
+    safe_addstr(win, header_y, x_pop, "PoP", curses.A_DIM)
+    safe_addstr(win, header_y, x_fc, "Forecast", curses.A_DIM)
     safe_addstr(win, header_y + 1, 0, "\u2500" * (cols - 1), curses.A_DIM)
 
     start_row = header_y + 2
     view_rows = rows - start_row - 1
     app.hr_scroll = clamp(app.hr_scroll, 0, max(0, len(hrs) - max(1, view_rows)))
-
-    w_time, w_ic, w_temp, w_wind, w_pop = 5, 2, 8, 18, 4
-    fixed = w_time + 2 + w_ic + 2 + w_temp + 1 + w_wind + 2 + w_pop + 2
-    w_fc = max(10, cols - fixed - 1)
+    w_fc = max(10, cols - x_fc - 1)
 
     y = start_row
     for i in range(app.hr_scroll, min(len(hrs), app.hr_scroll + max(1, view_rows))):
         h = hrs[i]
-        tstr = fmt_time(h.start, app.use_24h, with_date=False)[:w_time]
-        icon = (ICON_TINY.get(h.icon_key, "?") or "?")[:w_ic]
+        tstr = fmt_time(h.start, app.use_24h, with_date=False)
+        icon = ICON_TINY.get(h.icon_key, "?") or "?"
         temp = (
             "\u2014" if h.temperature is None
             else f"{h.temperature:.0f}\u00b0{h.temperature_unit}"
-        )[:w_temp]
-        wind = (f"{h.wind_dir} {h.wind_speed}".strip())[:w_wind]
-        pop = ("\u2014" if h.pop is None else f"{h.pop:.0f}%")[:w_pop]
+        )
+        wind = f"{h.wind_dir} {h.wind_speed}".strip()
+        pop = "\u2014" if h.pop is None else f"{h.pop:.0f}%"
         fc = (h.short_forecast or "\u2014")[:w_fc]
-        row = f"{tstr:>{w_time}}  {icon:^{w_ic}}  {temp:<{w_temp}} {wind:<{w_wind}}  {pop:>{w_pop}}  {fc}"
-        safe_addstr(win, y, 0, row[: cols - 1])
+
+        safe_addstr(win, y, x_time, tstr[:7].rjust(7))
+        safe_addstr(win, y, x_icon, icon[:2])
+        safe_addstr(win, y, x_temp, temp[:8])
+        safe_addstr(win, y, x_wind, wind[:18])
+        safe_addstr(win, y, x_pop, pop[:5].rjust(4))
+        safe_addstr(win, y, x_fc, fc)
         y += 1
         if y >= rows - 1:
             break

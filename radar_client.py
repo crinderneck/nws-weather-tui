@@ -257,6 +257,8 @@ class RadarFetcher:
     ) -> Optional[bytes]:
         """Fetch the latest radar PNG. MRMS -> IEM -> station WMS."""
         latest_ms = self._mrms_latest_time()
+        if latest_ms is not None:
+            latest_ms -= 3 * 60 * 1000  # avoid bleeding-edge unprocessed data
         png = self._fetch_mrms_png(bbox4326, width, height, latest_ms)
         if png:
             return png
@@ -283,7 +285,7 @@ class RadarFetcher:
         bbox4326: Tuple[float, float, float, float],
         width: int,
         height: int,
-        n_frames: int = 4,
+        n_frames: int = 8,
         step_minutes: int = 5,
     ) -> List[Tuple[bytes, int]]:
         """Fetch multiple MRMS radar frames for animation."""
@@ -292,9 +294,19 @@ class RadarFetcher:
         if t_end is None:
             t_end = int(time.time() * 1000)
         if t_start is None:
-            t_start = t_end - n_frames * step_minutes * 60 * 1000
+            t_start = t_end - 120 * 60 * 1000  # assume 2 hours available
 
+        # Back off from the bleeding edge — MRMS data needs a few minutes
+        # to process, so the very latest timestamp often returns empty.
+        t_end -= 3 * 60 * 1000  # 3 minute buffer
+
+        # Shrink step if the available time window can't fit all frames
+        span_ms = max(1, t_end - t_start)
         step_ms = step_minutes * 60 * 1000
+        needed_ms = (n_frames - 1) * step_ms
+        if needed_ms > span_ms:
+            step_ms = max(60_000, span_ms // (n_frames - 1))  # min 1-min steps
+
         timestamps = [t_end - (n_frames - 1 - i) * step_ms for i in range(n_frames)]
         timestamps = [max(t_start, min(t_end, t)) for t in timestamps]
         timestamps = sorted(set(timestamps))

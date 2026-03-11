@@ -89,12 +89,21 @@ def draw_radar_panel(
     if map_rows < 3:
         return
 
-    if not app._in_refresh:
-        app._maybe_refresh_radar(map_cols, map_rows)
+    from radar_state import maybe_refresh_radar
+    maybe_refresh_radar(app, map_cols, map_rows)
+
+    # Don't draw stale data from a different size — show loading stub
+    stale = (app._radar_src_cols != map_cols or app._radar_src_rows != map_rows)
 
     city_lines: List[str] = app._radar_city_overlay if show_city_labels else []
 
-    if app._radar_has_256color and app._radar_cells:
+    if stale:
+        safe_addstr(
+            win, y, map_x,
+            "(loading radar\u2026)"[:map_cols],
+            curses.A_DIM,
+        )
+    elif app._radar_has_256color and app._radar_cells:
         for i, row_cells in enumerate(app._radar_cells[:map_rows]):
             ry = y + i
             if ry >= rows:

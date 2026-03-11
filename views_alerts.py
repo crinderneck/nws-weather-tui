@@ -54,8 +54,11 @@ def draw_alerts(app: "App", win) -> None:
         safe_addstr(win, y, 0, meta[: cols - 1], curses.A_DIM)
         y += 1
 
-        safe_addstr(win, y, 0, (a.headline or "\u2014")[: cols - 1], curses.color_pair(2))
-        y += 1
+        for wline in wrap_lines(a.headline or "\u2014", cols - 1):
+            if y >= rows:
+                break
+            safe_addstr(win, y, 0, wline[: cols - 1], curses.color_pair(2))
+            y += 1
 
         desc = (a.description or "").strip()
         if desc:
@@ -67,6 +70,7 @@ def draw_alerts(app: "App", win) -> None:
 
         instr = (a.instruction or "").strip()
         if instr and y < rows:
+            y += 1  # single blank line before instruction
             safe_addstr(win, y, 0, "Instruction:", curses.A_BOLD)
             y += 1
             for wline in wrap_lines(instr, cols - 2):

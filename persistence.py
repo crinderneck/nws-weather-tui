@@ -42,18 +42,20 @@ def _serialize_current(app: "App") -> Optional[Dict[str, Any]]:
     return d
 
 
-def save_app_state(app: "App") -> None:
-    def fix_dt(obj: Any) -> Any:
-        if isinstance(obj, dict):
-            return {
-                k: v.isoformat() if isinstance(v, dt.datetime) else fix_dt(v)
-                for k, v in obj.items()
-            }
-        if isinstance(obj, list):
-            return [fix_dt(i) for i in obj]
-        return obj
+def _fix_dt(obj: Any) -> Any:
+    if isinstance(obj, dict):
+        return {
+            k: v.isoformat() if isinstance(v, dt.datetime) else _fix_dt(v)
+            for k, v in obj.items()
+        }
+    if isinstance(obj, list):
+        return [_fix_dt(i) for i in obj]
+    return obj
 
-    state = fix_dt({
+
+def _build_state_dict(app: "App") -> Dict[str, Any]:
+    """Snapshot app state into a plain dict (safe to call on the main thread)."""
+    return _fix_dt({
         "saved_at": dt.datetime.now().astimezone().isoformat(),
         "location_name": app.location_name,
         "lat": app.lat,
@@ -67,7 +69,10 @@ def save_app_state(app: "App") -> None:
         "radar_station": app.radar_station,
         "state_code": app.state_code,
     })
-    save_json(STATE_PATH, state)
+
+
+def save_app_state(app: "App") -> None:
+    save_json(STATE_PATH, _build_state_dict(app))
 
 
 def _parse_field(value: Any, field_name: str) -> Any:
