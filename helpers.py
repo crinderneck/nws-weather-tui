@@ -77,7 +77,7 @@ def safe_addstr(win, y: int, x: int, s: str, attr: int = 0) -> None:
         pass
 
 
-@lru_cache(maxsize=2048)
+@lru_cache(maxsize=256)
 def _wrap_lines_cached(text: str, width: int) -> Tuple[str, ...]:
     """Wrap text respecting embedded newlines.
 

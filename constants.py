@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
 from typing import Any, Dict, Optional
 
 ZIP_RE = re.compile(r"^\d{5}(?:-\d{4})?$")
@@ -95,12 +96,16 @@ def load_json(path: str) -> Optional[Dict[str, Any]]:
         return None
 
 
+_save_json_lock = threading.Lock()
+
+
 def save_json(path: str, obj: Dict[str, Any]) -> None:
     ensure_dir(os.path.dirname(path))
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(obj, f, indent=2, sort_keys=True)
-    os.replace(tmp, path)
+    tmp = f"{path}.{os.getpid()}.tmp"
+    with _save_json_lock:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(obj, f, indent=2, sort_keys=True)
+        os.replace(tmp, path)
 
 
 def deep_merge(defaults: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:

@@ -128,7 +128,7 @@ def draw_moon(app: "App", win) -> None:
     title = "Moon Phase"
     if y < rows:
         safe_addstr(win, y, 0, title, curses.A_BOLD)
-        y += 2
+        y += 1
 
     # Render the moon
     moon_lines = _render_moon(age)

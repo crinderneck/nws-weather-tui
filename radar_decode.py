@@ -49,6 +49,27 @@ def _pixel_to_nws_idx(r: int, g: int, b: int, a: int) -> int:
     return best_idx
 
 
+def _density_char(nws_idx: int) -> str:
+    """Pick halfblock char with density hint for accessibility.
+
+    60+ dBZ (idx >= 12) → █, 50+ dBZ (idx >= 10) → ▓, else → ▀
+    """
+    if nws_idx >= 12:
+        return "\u2588"  # █
+    if nws_idx >= 10:
+        return "\u2593"  # ▓
+    return "\u2580"  # ▀
+
+
+def _density_char_lower(nws_idx: int) -> str:
+    """Lower halfblock variant with density hint."""
+    if nws_idx >= 12:
+        return "\u2588"  # █
+    if nws_idx >= 10:
+        return "\u2593"  # ▓
+    return "\u2584"  # ▄
+
+
 def png_to_halfblock_radar(
     png_bytes: bytes, cols: int, rows: int
 ) -> List[List[RadarCell]]:
@@ -82,11 +103,11 @@ def png_to_halfblock_radar(
             if top == 0 and bot == 0:
                 row.append((" ", 0, 0))
             elif top != 0 and bot == 0:
-                row.append(("\u2580", top, 0))
+                row.append((_density_char(top), top, 0))
             elif top == 0 and bot != 0:
-                row.append(("\u2584", bot, 0))
+                row.append((_density_char_lower(bot), bot, 0))
             else:
-                row.append(("\u2580", top, bot))
+                row.append((_density_char(max(top, bot)), top, bot))
         result.append(row)
     return result
 

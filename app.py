@@ -82,6 +82,7 @@ class App:
 
         # --- UI state ---
         self.view: str = "current"
+        self._prev_view: str = "current"
         self.paused: bool = False
         self.status_msg: str = ""
         self.status_until: float = 0.0
@@ -95,6 +96,7 @@ class App:
         self._bg_weather_running: bool = False
         self._bg_radar_pending: Optional[Dict[str, Any]] = None
         self._bg_radar_running: bool = False
+        self._state_thread: Optional[threading.Thread] = None
 
         # --- NWS data ---
         self.points_data: Optional[Dict[str, Any]] = None
@@ -119,6 +121,8 @@ class App:
         self.fc_scroll: int = 0
         self.hr_scroll: int = 0
         self.alert_scroll: int = 0
+        self.alert_line_scroll: int = 0
+        self.help_scroll: int = 0
 
         # --- Radar state ---
         self._radar_frames: List[RadarFrame] = []
@@ -234,9 +238,11 @@ class App:
     def _save_state(self) -> None:
         from persistence import _build_state_dict
         snapshot = _build_state_dict(self)
-        threading.Thread(
-            target=self._write_state_bg, args=(snapshot,), daemon=True
-        ).start()
+        t = threading.Thread(
+            target=self._write_state_bg, args=(snapshot,), daemon=False
+        )
+        t.start()
+        self._state_thread = t
 
     @staticmethod
     def _write_state_bg(snapshot: dict) -> None:
@@ -260,6 +266,11 @@ class App:
             ch = self.stdscr.getch()
             if ch != -1 and not handle_key(self, ch):
                 break
+        self._cleanup()
+
+    def _cleanup(self) -> None:
+        if self._state_thread is not None:
+            self._state_thread.join(timeout=2.0)
 
     def _tick(self) -> None:
         from radar_state import apply_bg_radar, maybe_refresh_radar, set_current_radar_frame
@@ -335,7 +346,11 @@ class App:
         body_top = 3
         body_h = rows - body_top - 2
         body_w = cols - 2
-        win = self.stdscr.derwin(body_h, body_w, body_top, 1)
+        try:
+            win = self.stdscr.derwin(body_h, body_w, body_top, 1)
+        except curses.error:
+            self.stdscr.refresh()
+            return
 
         drawers = {
             "current": draw_current,

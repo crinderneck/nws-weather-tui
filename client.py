@@ -5,6 +5,7 @@ NWS Weather TUI — NWS API client (weather endpoints + delegation to sub-client
 
 from __future__ import annotations
 
+import threading
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -17,15 +18,32 @@ from geo_boundaries import BoundaryClient
 from radar_client import RadarFetcher
 
 
+class _LockedSession:
+    """Thread-safe wrapper around requests.Session."""
+
+    def __init__(self, session: requests.Session) -> None:
+        self._s = session
+        self._lock = threading.Lock()
+
+    def get(self, *args, **kwargs):
+        with self._lock:
+            return self._s.get(*args, **kwargs)
+
+    @property
+    def headers(self):
+        return self._s.headers
+
+
 class NWSClient:
     def __init__(self, user_agent: str, timeout: int, ttls: Dict[str, int]) -> None:
-        self.s = requests.Session()
-        self.s.headers.update(
+        raw = requests.Session()
+        raw.headers.update(
             {
                 "User-Agent": user_agent,
                 "Accept": "application/geo+json, application/json",
             }
         )
+        self.s = _LockedSession(raw)
         self.timeout = timeout
         self.ttls = ttls
         self.cache = TTLCache()

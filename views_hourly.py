@@ -27,7 +27,7 @@ def draw_hourly(app: "App", win) -> None:
         safe_addstr(
             win, 0, 0,
             "No hourly forecast available. Press r to refresh.",
-            curses.color_pair(4),
+            curses.A_DIM,
         )
         win.noutrefresh()
         return
@@ -48,7 +48,7 @@ def draw_hourly(app: "App", win) -> None:
 
     clean = [p for p in pops if isinstance(p, (int, float))]
     peak = float(max(clean)) if clean else None
-    safe_addstr(win, 3, 0, "PoP :", curses.A_BOLD)
+    safe_addstr(win, 3, 0, "PoP: ", curses.A_BOLD)
     safe_addstr(win, 3, 6, bar_pct(peak, graph_w)[:graph_w], curses.color_pair(5))
     safe_addstr(
         win, 3, 6 + graph_w + 1,
@@ -56,21 +56,21 @@ def draw_hourly(app: "App", win) -> None:
         curses.A_DIM,
     )
 
-    # Column x-positions (fixed, spreadsheet-style)
+    # Column x-positions (proportional, with minimums)
     x_time = 0
     x_icon = 8
     x_temp = 12
     x_wind = 21
-    x_pop = 40
-    x_fc = 46
+    x_pop = min(40, max(30, cols - 40))
+    x_fc = min(46, x_pop + 6)
 
     header_y = 5
-    safe_addstr(win, header_y, x_time, "Time", curses.A_DIM)
-    safe_addstr(win, header_y, x_icon, "Ic", curses.A_DIM)
-    safe_addstr(win, header_y, x_temp, "Temp", curses.A_DIM)
-    safe_addstr(win, header_y, x_wind, "Wind", curses.A_DIM)
-    safe_addstr(win, header_y, x_pop, "PoP", curses.A_DIM)
-    safe_addstr(win, header_y, x_fc, "Forecast", curses.A_DIM)
+    safe_addstr(win, header_y, x_time, "Time", curses.A_BOLD)
+    safe_addstr(win, header_y, x_icon, "Ic", curses.A_BOLD)
+    safe_addstr(win, header_y, x_temp, "Temp", curses.A_BOLD)
+    safe_addstr(win, header_y, x_wind, "Wind", curses.A_BOLD)
+    safe_addstr(win, header_y, x_pop, "PoP", curses.A_BOLD)
+    safe_addstr(win, header_y, x_fc, "Forecast", curses.A_BOLD)
     safe_addstr(win, header_y + 1, 0, "\u2500" * (cols - 1), curses.A_DIM)
 
     start_row = header_y + 2
@@ -94,7 +94,7 @@ def draw_hourly(app: "App", win) -> None:
         safe_addstr(win, y, x_time, tstr[:7].rjust(7))
         safe_addstr(win, y, x_icon, icon[:2])
         safe_addstr(win, y, x_temp, temp[:8])
-        safe_addstr(win, y, x_wind, wind[:18])
+        safe_addstr(win, y, x_wind, wind[:19])
         safe_addstr(win, y, x_pop, pop[:5].rjust(4))
         safe_addstr(win, y, x_fc, fc)
         y += 1

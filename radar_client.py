@@ -208,7 +208,11 @@ class RadarFetcher:
             f"{rid_u}:{rid_u}_bref",
         ]
         seen: set = set()
-        unique_layers = [l for l in layers_try if l and l not in seen and not seen.add(l)]
+        unique_layers: list = []
+        for layer in layers_try:
+            if layer and layer not in seen:
+                seen.add(layer)
+                unique_layers.append(layer)
 
         for base in bases:
             for layer in unique_layers:
@@ -303,9 +307,12 @@ class RadarFetcher:
         # Shrink step if the available time window can't fit all frames
         span_ms = max(1, t_end - t_start)
         step_ms = step_minutes * 60 * 1000
-        needed_ms = (n_frames - 1) * step_ms
-        if needed_ms > span_ms:
-            step_ms = max(60_000, span_ms // (n_frames - 1))  # min 1-min steps
+        if n_frames <= 1:
+            step_ms = span_ms
+        else:
+            needed_ms = (n_frames - 1) * step_ms
+            if needed_ms > span_ms:
+                step_ms = max(60_000, span_ms // max(1, n_frames - 1))
 
         timestamps = [t_end - (n_frames - 1 - i) * step_ms for i in range(n_frames)]
         timestamps = [max(t_start, min(t_end, t)) for t in timestamps]

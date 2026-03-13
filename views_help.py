@@ -31,6 +31,12 @@ def draw_help(app: "App", win) -> None:
         "  w  Full-screen radar map \u2014 press w again to return",
         "  m  Moon phase \u2014 current phase, illumination, upcoming dates",
         "",
+        "Navigation:",
+        "  j / k        Scroll down / up",
+        "  PgDn / PgUp  Scroll by 10 lines",
+        "  G            Jump to bottom",
+        "  Esc          Return to current conditions",
+        "",
         "Favourites editor (press e):",
         "  j / k    Move cursor up / down",
         "  d        Delete selected favourite",
@@ -38,9 +44,9 @@ def draw_help(app: "App", win) -> None:
         "  a        Add new favourite (search by city/ZIP)",
         "  J / K    Reorder selected favourite up / down",
         "  Enter    Jump to selected favourite",
-        "  e / Esc  Exit editor",
+        "  e / Esc  Exit editor (q also exits editor)",
         "",
-        "Radar keys:",
+        "Radar keys (active in current + radar views):",
         "  A        Toggle animation (cycles through last N MRMS frames)",
         "  < / >    Step backward / forward one animation frame",
         "  o        Open weather.gov radar in browser",
@@ -78,14 +84,24 @@ def draw_help(app: "App", win) -> None:
         "Optional: pip install astral  (for sunrise/sunset times)",
     ]
 
-    y = 0
+    # Expand wrapped lines
+    all_lines: list[tuple[str, int]] = []  # (text, original_line_idx)
     for i, line in enumerate(lines):
         for wline in wrap_lines(line, cols - 1):
-            if y >= rows:
-                break
-            safe_addstr(win, y, 0, wline[: cols - 1], curses.A_BOLD if i == 0 else 0)
-            y += 1
-        if y >= rows:
+            all_lines.append((wline, i))
+
+    total = len(all_lines)
+    app.help_scroll = max(0, min(app.help_scroll, max(0, total - rows)))
+
+    y = 0
+    for wline, orig_idx in all_lines[app.help_scroll:]:
+        if y >= rows - 1:
             break
+        safe_addstr(win, y, 0, wline[: cols - 1], curses.A_BOLD if orig_idx == 0 else 0)
+        y += 1
+
+    if total > rows - 1:
+        hint = f"Scroll: {app.help_scroll + 1}/{max(1, total - rows + 1)} (j/k \u2191\u2193)"
+        safe_addstr(win, rows - 1, 0, hint[: cols - 1], curses.A_DIM)
 
     win.noutrefresh()

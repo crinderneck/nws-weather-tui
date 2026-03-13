@@ -6,6 +6,7 @@ NWS Weather TUI — Key dispatch, mouse handling, input prompts.
 from __future__ import annotations
 
 import subprocess
+import sys
 from typing import Optional, TYPE_CHECKING
 
 import curses
@@ -58,11 +59,21 @@ def handle_key(app: "App", ch: int) -> bool:
     elif ch in (curses.KEY_UP, ord("k")):
         scroll(app, -1)
     elif ch in (curses.KEY_LEFT, ord("<")):
-        from radar_state import step_radar_frame
-        step_radar_frame(app, -1)
+        if app.view in ("current", "radar"):
+            from radar_state import step_radar_frame
+            step_radar_frame(app, -1)
     elif ch in (curses.KEY_RIGHT, ord(">")):
-        from radar_state import step_radar_frame
-        step_radar_frame(app, 1)
+        if app.view in ("current", "radar"):
+            from radar_state import step_radar_frame
+            step_radar_frame(app, 1)
+    elif ch == 27:  # Escape
+        app.view = "current"
+    elif ch == ord("G"):
+        _jump_scroll(app, "bottom")
+    elif ch == curses.KEY_NPAGE:
+        scroll(app, 10)
+    elif ch == curses.KEY_PPAGE:
+        scroll(app, -10)
     return True
 
 
@@ -134,8 +145,13 @@ def search_location(app: "App") -> bool:
             app._flash(f"No match found for '{q}'.", 2.5)
             return True
         name, lat, lon = g
-        app._apply_location(name, lat, lon)
-        app._flash(f"Location set: {name}", 1.8)
+        # Confirm step
+        confirm = prompt_line(app, f"Apply '{name}'? (y/n): ", max_len=3)
+        if confirm and confirm.lower().startswith("y"):
+            app._apply_location(name, lat, lon)
+            app._flash(f"Location set: {name}", 1.8)
+        else:
+            app._flash("Location search canceled.", 1.4)
     except Exception as e:
         app._flash(f"Location search failed: {e}", 3.5)
     return True
@@ -196,8 +212,9 @@ def _toggle_graphs(app: "App") -> bool:
 
 def _toggle_radar_view(app: "App") -> bool:
     if app.view == "radar":
-        app.view = "current"
+        app.view = app._prev_view if app._prev_view != "radar" else "current"
     else:
+        app._prev_view = app.view
         app.view = "radar"
         app.show_radar_map = True
         app._save_cfg()
@@ -212,19 +229,46 @@ def _toggle_radar_anim(app: "App") -> bool:
 def _open_radar_browser(app: "App") -> bool:
     url = "https://radar.weather.gov/"
     try:
-        subprocess.Popen(
-            ["xdg-open", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
+        if sys.platform == "darwin":
+            cmd = ["open", url]
+        elif sys.platform == "win32":
+            cmd = ["start", url]
+        else:
+            cmd = ["xdg-open", url]
+        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception:
         pass
     app._flash(f"Opened {url}", 3.0)
     return True
 
 
+def _jump_scroll(app: "App", position: str) -> None:
+    if position == "top":
+        if app.view == "forecast":
+            app.fc_scroll = 0
+        elif app.view == "alerts":
+            app.alert_line_scroll = 0
+        elif app.view == "hourly":
+            app.hr_scroll = 0
+        elif app.view == "help":
+            app.help_scroll = 0
+    elif position == "bottom":
+        if app.view == "forecast":
+            app.fc_scroll = max(0, len(app.forecast_periods) - 1)
+        elif app.view == "alerts":
+            app.alert_line_scroll = 9999
+        elif app.view == "hourly":
+            app.hr_scroll = max(0, len(app.hourly_periods) - 1)
+        elif app.view == "help":
+            app.help_scroll = 9999
+
+
 def scroll(app: "App", direction: int) -> None:
     if app.view == "forecast":
         app.fc_scroll += direction
     elif app.view == "alerts":
-        app.alert_scroll += direction
+        app.alert_line_scroll = max(0, app.alert_line_scroll + direction)
     elif app.view == "hourly":
         app.hr_scroll += direction
+    elif app.view == "help":
+        app.help_scroll = max(0, app.help_scroll + direction)

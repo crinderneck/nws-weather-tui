@@ -23,7 +23,7 @@ def init_curses(stdscr) -> None:
     curses.init_pair(4,  curses.COLOR_RED,     -1)  # errors, alerts
     curses.init_pair(5,  curses.COLOR_MAGENTA, -1)  # header right, PoP bar
     curses.init_pair(6,  curses.COLOR_BLUE,    -1)  # wind sparkline
-    curses.init_pair(7,  curses.COLOR_RED,     -1)  # temp sparkline
+    curses.init_pair(7,  curses.COLOR_YELLOW,  -1)  # temp sparkline
     curses.init_pair(8,  curses.COLOR_CYAN,    -1)  # radar default (ASCII)
     curses.init_pair(9,  curses.COLOR_GREEN,   -1)  # radar rain (ASCII)
     curses.init_pair(10, curses.COLOR_BLUE,    -1)  # radar snow (ASCII)
@@ -35,7 +35,7 @@ def init_curses(stdscr) -> None:
     try:
         mask = curses.ALL_MOUSE_EVENTS | getattr(curses, "REPORT_MOUSE_POSITION", 0)
         curses.mousemask(mask)
-        curses.mouseinterval(0)
+        curses.mouseinterval(200)
     except curses.error:
         pass
 

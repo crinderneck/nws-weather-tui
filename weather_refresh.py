@@ -100,7 +100,7 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
         result["ok"] = True
 
     except Exception as e:
-        result["error"] = str(e)
+        result["error"] = f"{type(e).__name__}: {e}"
         result["allow_offline"] = ctx["allow_offline"]
 
     result["_gen"] = gen

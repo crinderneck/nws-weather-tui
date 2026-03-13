@@ -22,9 +22,17 @@ def sparkline(values: List[Optional[float]], width: int) -> str:
         if len(values) == 1:
             out = [values[0]] * width
         else:
+            n = len(values)
             for i in range(width):
-                idx = int(i * (len(values) - 1) / max(1, width - 1))
-                out.append(values[idx])
+                t = i * (n - 1) / max(1, width - 1)
+                lo_idx = int(t)
+                hi_idx = min(lo_idx + 1, n - 1)
+                frac = t - lo_idx
+                v_lo, v_hi = values[lo_idx], values[hi_idx]
+                if v_lo is None or v_hi is None:
+                    out.append(v_lo if v_lo is not None else v_hi)
+                else:
+                    out.append(v_lo + (v_hi - v_lo) * frac)
         values = out
 
     clean = [v for v in values if v is not None]

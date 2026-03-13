@@ -52,6 +52,8 @@ class Geocoder:
                 if places:
                     p0 = places[0] or {}
                     lat_s, lon_s = p0.get("latitude"), p0.get("longitude")
+                    if lat_s is None or lon_s is None:
+                        return None
                     lat_f, lon_f = float(lat_s), float(lon_s)
                     place = str(p0.get("place name") or "").strip()
                     state = str(
@@ -74,7 +76,7 @@ class Geocoder:
                     "limit": "1",
                     "addressdetails": "1",
                 },
-                headers={"User-Agent": "nws-weather-tui/1.0"},
+                headers={"User-Agent": self.s.headers.get("User-Agent", "nws-weather-tui/1.0")},
                 timeout=self.timeout,
             )
             r.raise_for_status()

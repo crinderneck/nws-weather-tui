@@ -79,9 +79,11 @@ def next_moon_phases(date: dt.date) -> List[Tuple[str, dt.date]]:
     for target_age, name in targets:
         days_until = (target_age - age) % SYNODIC_MONTH
         if days_until < 0.5:
-            days_until += SYNODIC_MONTH
-        phase_dt = base + dt.timedelta(days=days_until)
-        results.append((name, phase_dt.date()))
+            # Show today's phase rather than skipping to next cycle
+            results.append((name, date))
+        else:
+            phase_dt = base + dt.timedelta(days=days_until)
+            results.append((name, phase_dt.date()))
 
     results.sort(key=lambda x: x[1])
     return results

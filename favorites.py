@@ -57,7 +57,8 @@ def handle_favorites_key(app: "App", ch: int) -> bool:
         app.view = "current"
         return True
     if ch in (ord("q"), ord("Q")):
-        return False
+        app.view = "current"
+        return True
     if ch in (curses.KEY_DOWN, ord("j")):
         _fav_edit_move_cursor(app, 1)
     elif ch in (curses.KEY_UP, ord("k")):

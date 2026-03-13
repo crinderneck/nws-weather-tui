@@ -20,13 +20,18 @@ from app import main
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 if __name__ == "__main__":
-    ensure_dir(os.path.dirname(DEBUG_LOG_PATH))
-    _log = open(DEBUG_LOG_PATH, "a", encoding="utf-8", buffering=1)
-    sys.stderr = _log
+    try:
+        ensure_dir(os.path.dirname(DEBUG_LOG_PATH))
+        _log = open(DEBUG_LOG_PATH, "a", encoding="utf-8", buffering=1)
+    except Exception:
+        _log = None
+    if _log is not None:
+        sys.stderr = _log
     try:
         curses.wrapper(main)
     except KeyboardInterrupt:
         pass
     finally:
         sys.stderr = sys.__stderr__
-        _log.close()
+        if _log is not None:
+            _log.close()

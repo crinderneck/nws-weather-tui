@@ -192,8 +192,9 @@ def _bg_radar_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
             raise RuntimeError("radar returned no frames")
 
         new_frames: List[RadarFrame] = []
-        for png, ts_ms in raw_frames:
-            save_radar_png(png)
+        for fi, (png, ts_ms) in enumerate(raw_frames):
+            if fi == len(raw_frames) - 1:
+                save_radar_png(png)
             if ctx["has_256color"]:
                 cells = png_to_halfblock_radar(png, ctx["target_cols"], ctx["target_rows"])
                 if not any(fg or bg for row in cells for _, fg, bg in row):

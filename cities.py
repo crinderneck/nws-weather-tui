@@ -11,6 +11,7 @@ from typing import List, Tuple
 MAJOR_CITIES: List[Tuple[str, float, float]] = [
     ("SEA", 47.6062, -122.3321),
     ("SPK", 47.6588, -117.4260),
+    ("MOL", 47.1301, -119.2780),
     ("TAC", 47.2529, -122.4443),
     ("YKM", 46.6021, -120.5059),
     ("BLI", 48.7519, -122.4787),
