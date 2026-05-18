@@ -133,19 +133,41 @@ def prompt_line(app: "App", prompt: str, max_len: int = 96) -> Optional[str]:
         app.stdscr.nodelay(False)
 
 
+def _parse_lat_lon(text: str) -> Optional[tuple[float, float]]:
+    """Try to parse 'lat,lon' or 'lat lon' from text. Returns (lat, lon) or None."""
+    import re
+    m = re.match(r"^\s*([+-]?\d+\.?\d*)\s*[,\s]\s*([+-]?\d+\.?\d*)\s*$", text)
+    if not m:
+        return None
+    lat, lon = float(m.group(1)), float(m.group(2))
+    if -90 <= lat <= 90 and -180 <= lon <= 180:
+        return (lat, lon)
+    return None
+
+
 def search_location(app: "App") -> bool:
-    q = prompt_line(app, "Location (city/state or ZIP): ")
+    q = prompt_line(app, "Location (city/state, ZIP, or lat,lon): ")
     if q is None or not q.strip():
         app._flash("Location search canceled.", 1.4)
         return True
     try:
+        coords = _parse_lat_lon(q.strip())
+        if coords:
+            lat, lon = coords
+            name = f"{lat:.4f}, {lon:.4f}"
+            confirm = prompt_line(app, f"Apply '{name}'? (y/n): ", max_len=3)
+            if confirm and confirm.lower().startswith("y"):
+                app._apply_location(name, lat, lon)
+                app._flash(f"Location set: {name}", 1.8)
+            else:
+                app._flash("Location search canceled.", 1.4)
+            return True
         app._show_loading("Searching location...")
         g = app.client.geocode_us(q.strip())
         if not g:
             app._flash(f"No match found for '{q}'.", 2.5)
             return True
         name, lat, lon = g
-        # Confirm step
         confirm = prompt_line(app, f"Apply '{name}'? (y/n): ", max_len=3)
         if confirm and confirm.lower().startswith("y"):
             app._apply_location(name, lat, lon)

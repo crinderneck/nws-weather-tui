@@ -63,7 +63,7 @@ def draw_help(app: "App", win) -> None:
         "  3. NWS station OpenGeoServer WMS  (per-station, lower resolution)",
         "",
         "Other actions:",
-        "  l  Search location (city, state or ZIP)",
+        "  l  Search location (city/state, ZIP, or lat,lon)",
         "  r  Force refresh",
         "  u  Toggle US / SI units",
         "  t  Toggle 12h/24h clock",
