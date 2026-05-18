@@ -59,7 +59,6 @@ def _render_moon(age: float) -> list[str]:
     Uses block chars to show the illuminated vs shadow side.
     Waxing: right side lit first.  Waning: left side lit first.
     """
-    illum = moon_illumination(age)
     # Phase angle determines terminator position
     # 0 = new, 0.5 = full
     phase_frac = age / 29.53058770576  # 0..1 through cycle
@@ -159,10 +158,11 @@ def draw_moon(app: "App", win) -> None:
     else:
         info_lines.append("Moonrise/Moonset: install 'astral' for times")
 
+    info_x = max((cols - max(len(s) for s in info_lines)) // 2, 0)
     for line in info_lines:
         if y >= rows:
             break
-        safe_addstr(win, y, 0, line[:cols - 1])
+        safe_addstr(win, y, info_x, line[:cols - 1])
         y += 1
 
     y += 1
