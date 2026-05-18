@@ -35,7 +35,7 @@ from models import (
 )
 from persistence import load_app_state, save_app_config
 from radar_decode import RadarCell
-from radar_state import reset_radar_state, set_current_radar_frame
+from radar_state import reset_radar_state
 from views import (
     draw_header,
     draw_footer,
@@ -45,7 +45,6 @@ from views import (
     draw_alerts,
     draw_help,
     draw_moon,
-    draw_radar_view,
     draw_favorites,
 )
 from weather_refresh import refresh_all
@@ -273,7 +272,7 @@ class App:
             self._state_thread.join(timeout=2.0)
 
     def _tick(self) -> None:
-        from radar_state import apply_bg_radar, maybe_refresh_radar, set_current_radar_frame
+        from radar_state import apply_bg_radar, set_current_radar_frame
         from weather_refresh import apply_bg_weather
 
         # Apply any completed background work
@@ -359,7 +358,6 @@ class App:
             "alerts": draw_alerts,
             "help": draw_help,
             "moon": draw_moon,
-            "radar": draw_radar_view,
             "favorites": draw_favorites,
         }
         drawer = drawers.get(self.view)

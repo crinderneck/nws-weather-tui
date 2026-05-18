@@ -92,6 +92,15 @@ def _refresh(self) -> None:
 - `client.py` - NWS API client
 - `models.py` - Data models and extraction functions
 - `views.py` - View/draw functions for each screen
+- `views_chrome.py` - Header and footer chrome
+- `views_radar.py` - Radar panel and full-screen radar view
+- `views_current.py` - Current conditions view
+- `views_forecast.py` - Multi-day forecast view
+- `views_hourly.py` - Hourly forecast view
+- `views_alerts.py` - Weather alerts view
+- `views_help.py` - Help screen
+- `views_moon.py` - Moon phase view
+- `views_favorites.py` - Favorites editor
 - `helpers.py` - Utility functions
 - `constants.py` - Constants and configuration
 - `cache.py` - Simple in-memory cache

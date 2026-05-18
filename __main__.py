@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-NWS Weather TUI — Entry point (can run as: python __main__.py or python -m nws_weather)
+NWS Weather TUI — Entry point (can run as: python __main__.py or python -m nws_weather_tui)
 """
 
 from __future__ import annotations

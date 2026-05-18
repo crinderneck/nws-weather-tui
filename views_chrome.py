@@ -28,7 +28,6 @@ def draw_header(app: "App", rows: int, cols: int) -> None:
         "hourly": "HOURLY",
         "alerts": "ALERTS",
         "help": "HELP",
-        "radar": "RADAR",
         "moon": "MOON",
         "favorites": "FAVORITES",
     }.get(app.view, app.view.upper())
@@ -84,7 +83,7 @@ def draw_footer(app: "App", rows: int, cols: int) -> None:
     safe_addstr(app.stdscr, rows - 2, 0, "\u2500" * (cols - 1), curses.A_DIM)
     if cols >= 100:
         helptext = (
-            "c Current \u00b7 f Forecast \u00b7 h Hourly \u00b7 a Alerts \u00b7 w Radar \u00b7 m Moon"
+            "c Current \u00b7 f Forecast \u00b7 h Hourly \u00b7 a Alerts \u00b7 m Moon"
             "  \u2502  "
             "l Locate \u00b7 r Refresh \u00b7 u Units \u00b7 t 12/24h \u00b7 p Pause \u00b7 g Graph"
             "  \u2502  "
@@ -95,4 +94,5 @@ def draw_footer(app: "App", rows: int, cols: int) -> None:
             "c/f/h/a/w/m Views \u00b7 l Locate \u00b7 r Refresh \u00b7 u Units"
             " \u00b7 Esc Back \u00b7 ? Help \u00b7 q Quit"
         )
-    safe_addstr(app.stdscr, rows - 1, 1, helptext[: cols - 2], curses.A_DIM)
+    footer_x = (cols - len(helptext)) // 2
+    safe_addstr(app.stdscr, rows - 1, footer_x, helptext[: cols - 1], curses.A_DIM)

@@ -70,6 +70,8 @@ pip install astral
 ## Usage
 
 ```bash
+python -m nws_weather_tui
+# or (from repo root)
 python __main__.py
 ```
 

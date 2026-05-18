@@ -37,7 +37,6 @@ def handle_key(app: "App", ch: int) -> bool:
         ord("h"): lambda: _set_view(app, "hourly"),
         ord("a"): lambda: _set_view(app, "alerts"),
         ord("m"): lambda: _set_view(app, "moon"),
-        ord("w"): lambda: _toggle_radar_view(app),
         ord("l"): lambda: search_location(app),
         ord("r"): lambda: _do_refresh(app),
         ord("u"): lambda: _toggle_units(app),
@@ -59,11 +58,11 @@ def handle_key(app: "App", ch: int) -> bool:
     elif ch in (curses.KEY_UP, ord("k")):
         scroll(app, -1)
     elif ch in (curses.KEY_LEFT, ord("<")):
-        if app.view in ("current", "radar"):
+        if app.view == "current":
             from radar_state import step_radar_frame
             step_radar_frame(app, -1)
     elif ch in (curses.KEY_RIGHT, ord(">")):
-        if app.view in ("current", "radar"):
+        if app.view == "current":
             from radar_state import step_radar_frame
             step_radar_frame(app, 1)
     elif ch == 27:  # Escape
@@ -87,7 +86,7 @@ def handle_mouse(app: "App", mx: int, my: int, bstate: int) -> None:
     )
     if click_mask and not (bstate & click_mask):
         return
-    if app.view not in ("current", "radar") or not app.show_radar_map:
+    if app.view != "current" or not app.show_radar_map:
         return
     if app._radar_map_cols <= 0 or app._radar_map_rows <= 0:
         return
@@ -229,17 +228,6 @@ def _toggle_graphs(app: "App") -> bool:
         1.2,
     )
     app._save_cfg()
-    return True
-
-
-def _toggle_radar_view(app: "App") -> bool:
-    if app.view == "radar":
-        app.view = app._prev_view if app._prev_view != "radar" else "current"
-    else:
-        app._prev_view = app.view
-        app.view = "radar"
-        app.show_radar_map = True
-        app._save_cfg()
     return True
 
 
