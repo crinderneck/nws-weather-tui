@@ -145,7 +145,10 @@ def city_overlay_and_hits_for_bbox(
     max_labels: int = 20,
     here: Optional[Tuple[float, float]] = None,
 ) -> Tuple[List[str], Dict[Tuple[int, int], Tuple[str, float, float]]]:
-    """Place city labels on a character grid and return a click hit map."""
+    """Place city labels on a character grid and return a click hit map.
+
+    Optimized with set-based occupied cell tracking for O(1) lookups.
+    """
     cols = max(1, cols)
     rows = max(1, rows)
     minlon, minlat, maxlon, maxlat = bbox4326
@@ -154,19 +157,29 @@ def city_overlay_and_hits_for_bbox(
     grid = [[" "] * cols for _ in range(rows)]
     hit_map: Dict[Tuple[int, int], Tuple[str, float, float]] = {}
 
+    occupied: set = set()
+
     def project(lat: float, lon: float) -> Tuple[int, int]:
         x = int(round((lon - minlon) / lon_span * (cols - 1)))
         y = int(round((maxlat - lat) / lat_span * (rows - 1)))
         return clamp(x, 0, cols - 1), clamp(y, 0, rows - 1)
 
-    def can_place(x0: int, y0: int, text: str) -> bool:
-        if y0 < 0 or y0 >= rows or x0 < 0 or x0 + len(text) > cols:
-            return False
-        return all(grid[y0][xx] == " " for xx in range(x0, x0 + len(text)))
+    def mark_occupied(x0: int, y0: int, length: int) -> None:
+        for xx in range(x0, x0 + length):
+            occupied.add((xx, y0))
+
+    def is_occupied(x0: int, y0: int, length: int) -> bool:
+        if y0 < 0 or y0 >= rows or x0 < 0 or x0 + length > cols:
+            return True
+        for xx in range(x0, x0 + length):
+            if (xx, y0) in occupied:
+                return True
+        return False
 
     def place(x0: int, y0: int, text: str) -> None:
         for i, ch in enumerate(text):
             grid[y0][x0 + i] = ch
+        mark_occupied(x0, y0, len(text))
 
     if here is not None:
         hlat, hlon = here
@@ -174,32 +187,40 @@ def city_overlay_and_hits_for_bbox(
             hx, hy = project(hlat, hlon)
             if hy - 1 >= 0:
                 grid[hy - 1][hx] = "O"
+                occupied.add((hx, hy - 1))
             if hy >= 0:
                 grid[hy][hx] = "|"
+                occupied.add((hx, hy))
             if hy >= 0 and hx - 1 >= 0 and hx + 1 < cols:
                 grid[hy][hx - 1] = "/"
                 grid[hy][hx + 1] = "\\"
+                occupied.add((hx - 1, hy))
+                occupied.add((hx + 1, hy))
             if hy + 1 < rows and hx - 1 >= 0 and hx + 1 < cols:
                 grid[hy + 1][hx - 1] = "/"
                 grid[hy + 1][hx + 1] = "\\"
+                occupied.add((hx - 1, hy + 1))
+                occupied.add((hx + 1, hy + 1))
 
     placed = 0
     for code, lat, lon in MAJOR_CITIES:
+        if placed >= max_labels:
+            break
         if not (minlat <= lat <= maxlat and minlon <= lon <= maxlon):
             continue
         x, y = project(lat, lon)
-        if grid[y][x] != " ":
+        if (x, y) in occupied:
             continue
         grid[y][x] = "@"
         hit_map[(x, y)] = (code, float(lat), float(lon))
-        for lx in (x + 1, x - len(code)):
-            if can_place(lx, y, code):
+        occupied.add((x, y))
+        text_len = len(code)
+        for lx in (x + 1, x - text_len):
+            if not is_occupied(lx, y, text_len):
                 place(lx, y, code)
-                for xx in range(lx, lx + len(code)):
+                for xx in range(lx, lx + text_len):
                     hit_map[(xx, y)] = (code, float(lat), float(lon))
                 break
         placed += 1
-        if placed >= max_labels:
-            break
 
-    return (["".join(r).rstrip() for r in grid], hit_map)
+    return (["".join(r) for r in grid], hit_map)
