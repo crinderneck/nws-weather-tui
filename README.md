@@ -61,7 +61,7 @@ git clone https://github.com/crinderneck/nws-weather-tui.git
 cd nws-weather-tui
 
 # Install dependencies
-pip install pillow requests
+pip install pillow requests numpy
 
 # Optional: for sunrise/sunset and moonrise/moonset times
 pip install astral
