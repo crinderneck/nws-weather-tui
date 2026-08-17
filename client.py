@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import requests
 
@@ -18,32 +18,39 @@ from geo_boundaries import BoundaryClient
 from radar_client import RadarFetcher
 
 
-class _LockedSession:
-    """Thread-safe wrapper around requests.Session."""
+class _ThreadLocalSession:
+    """Gives each thread its own requests.Session so concurrent background
+    fetches (weather refresh, radar frames) can run in parallel instead of
+    serializing on a shared, lock-guarded session."""
 
-    def __init__(self, session: requests.Session) -> None:
-        self._s = session
-        self._lock = threading.Lock()
+    def __init__(self, headers: Dict[str, str]) -> None:
+        self._headers = headers
+        self._local = threading.local()
+
+    def _session(self) -> requests.Session:
+        s = getattr(self._local, "session", None)
+        if s is None:
+            s = requests.Session()
+            s.headers.update(self._headers)
+            self._local.session = s
+        return s
 
     def get(self, *args, **kwargs):
-        with self._lock:
-            return self._s.get(*args, **kwargs)
+        return self._session().get(*args, **kwargs)
 
     @property
     def headers(self):
-        return self._s.headers
+        return self._headers
 
 
 class NWSClient:
     def __init__(self, user_agent: str, timeout: int, ttls: Dict[str, int]) -> None:
-        raw = requests.Session()
-        raw.headers.update(
+        self.s = _ThreadLocalSession(
             {
                 "User-Agent": user_agent,
                 "Accept": "application/geo+json, application/json",
             }
         )
-        self.s = _LockedSession(raw)
         self.timeout = timeout
         self.ttls = ttls
         self.cache = TTLCache()
@@ -135,9 +142,10 @@ class NWSClient:
         height: int,
         n_frames: int = 4,
         step_minutes: int = 5,
+        progress_cb: Optional[Callable[[int, int], None]] = None,
     ) -> List[Tuple[bytes, int]]:
         return self._radar.radar_frames_png(
-            radar_id, bbox4326, width, height, n_frames, step_minutes
+            radar_id, bbox4326, width, height, n_frames, step_minutes, progress_cb
         )
 
     # ------------------------------------------------------------------

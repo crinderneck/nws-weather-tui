@@ -43,6 +43,7 @@ def reset_radar_state(app: "App") -> None:
     app._radar_map_y = 0
     app._radar_map_cols = 0
     app._radar_map_rows = 0
+    app._radar_progress = (0, 0)
 
 
 def set_current_radar_frame(app: "App") -> None:
@@ -182,11 +183,13 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
 def _bg_radar_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
     """Run in background thread — fetches radar frames + overlays."""
     result: Dict[str, Any] = {"ok": False}
+    app._radar_progress = (0, ctx["n_frames"])
     try:
         raw_frames = app.client.radar_frames_png(
             ctx["radar_station"], ctx["bbox"],
             ctx["req_w"], ctx["req_h"],
             n_frames=ctx["n_frames"], step_minutes=ctx["step_min"],
+            progress_cb=lambda done, total: setattr(app, "_radar_progress", (done, total)),
         )
         if not raw_frames:
             raise RuntimeError("radar returned no frames")

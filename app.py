@@ -150,6 +150,7 @@ class App:
         self._radar_map_y: int = 0
         self._radar_map_cols: int = 0
         self._radar_map_rows: int = 0
+        self._radar_progress: Tuple[int, int] = (0, 0)
 
         # 256-color radar mode
         self._radar_has_256color: bool = False
@@ -292,7 +293,9 @@ class App:
             if self._bg_weather_running:
                 self.status_msg = f"{frame} Loading weather data..."
             else:
-                self.status_msg = f"{frame} Loading radar..."
+                done, total = self._radar_progress
+                progress = f" ({done}/{total} frames)" if total > 1 else ""
+                self.status_msg = f"{frame} Loading radar...{progress}"
             self.status_until = time.time() + 3600
 
         # Advance radar animation

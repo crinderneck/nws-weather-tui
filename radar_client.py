@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import re
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from cache import TTLCache
 from helpers import dbg
@@ -291,8 +292,15 @@ class RadarFetcher:
         height: int,
         n_frames: int = 8,
         step_minutes: int = 5,
+        progress_cb: Optional[Callable[[int, int], None]] = None,
     ) -> List[Tuple[bytes, int]]:
-        """Fetch multiple MRMS radar frames for animation."""
+        """Fetch multiple MRMS radar frames for animation.
+
+        Frames are independent requests, so they're fetched concurrently
+        (bounded pool) rather than one at a time — this is the dominant
+        cost of a radar refresh. progress_cb(done, total), if given, is
+        called from worker threads as each frame completes.
+        """
         t_start, t_end = self._mrms_time_extent()
 
         if t_end is None:
@@ -318,13 +326,27 @@ class RadarFetcher:
         timestamps = [max(t_start, min(t_end, t)) for t in timestamps]
         timestamps = sorted(set(timestamps))
 
-        frames: List[Tuple[bytes, int]] = []
-        for ts_ms in timestamps:
-            png = self._fetch_mrms_png(bbox4326, width, height, ts_ms)
-            if png:
-                frames.append((png, ts_ms))
-            else:
-                dbg(f"RADAR animation frame missing ts={ts_ms}")
+        fetched: Dict[int, bytes] = {}
+        done = 0
+        with ThreadPoolExecutor(max_workers=min(6, len(timestamps))) as pool:
+            futures = {
+                pool.submit(self._fetch_mrms_png, bbox4326, width, height, ts_ms): ts_ms
+                for ts_ms in timestamps
+            }
+            for fut in as_completed(futures):
+                ts_ms = futures[fut]
+                png = fut.result()
+                if png:
+                    fetched[ts_ms] = png
+                else:
+                    dbg(f"RADAR animation frame missing ts={ts_ms}")
+                done += 1
+                if progress_cb is not None:
+                    progress_cb(done, len(timestamps))
+
+        frames: List[Tuple[bytes, int]] = [
+            (fetched[ts_ms], ts_ms) for ts_ms in timestamps if ts_ms in fetched
+        ]
 
         if not frames:
             try:
