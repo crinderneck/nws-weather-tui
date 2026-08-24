@@ -5,8 +5,7 @@ NWS Weather TUI — Key dispatch, mouse handling, input prompts.
 
 from __future__ import annotations
 
-import subprocess
-import sys
+import webbrowser
 from typing import Optional, TYPE_CHECKING
 
 import curses
@@ -42,7 +41,6 @@ def handle_key(app: "App", ch: int) -> bool:
         ord("u"): lambda: _toggle_units(app),
         ord("t"): lambda: _toggle_time_format(app),
         ord("p"): lambda: _toggle_pause(app),
-        ord("g"): lambda: _toggle_graphs(app),
         ord("A"): lambda: _toggle_radar_anim(app),
         ord("o"): lambda: _open_radar_browser(app),
         ord("e"): lambda: _set_view(app, "favorites"),
@@ -221,16 +219,6 @@ def _toggle_pause(app: "App") -> bool:
     return True
 
 
-def _toggle_graphs(app: "App") -> bool:
-    app.show_graph_panel_on_current = not app.show_graph_panel_on_current
-    app._flash(
-        "Graph panel ON" if app.show_graph_panel_on_current else "Graph panel OFF",
-        1.2,
-    )
-    app._save_cfg()
-    return True
-
-
 def _toggle_radar_anim(app: "App") -> bool:
     from radar_state import toggle_radar_anim
     return toggle_radar_anim(app)
@@ -239,13 +227,7 @@ def _toggle_radar_anim(app: "App") -> bool:
 def _open_radar_browser(app: "App") -> bool:
     url = "https://radar.weather.gov/"
     try:
-        if sys.platform == "darwin":
-            cmd = ["open", url]
-        elif sys.platform == "win32":
-            cmd = ["start", url]
-        else:
-            cmd = ["xdg-open", url]
-        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        webbrowser.open(url)
     except Exception:
         pass
     app._flash(f"Opened {url}", 3.0)

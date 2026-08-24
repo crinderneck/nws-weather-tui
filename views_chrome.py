@@ -85,7 +85,7 @@ def draw_footer(app: "App", rows: int, cols: int) -> None:
         helptext = (
             "c Current \u00b7 f Forecast \u00b7 h Hourly \u00b7 a Alerts \u00b7 m Moon"
             "  \u2502  "
-            "l Locate \u00b7 r Refresh \u00b7 u Units \u00b7 t 12/24h \u00b7 p Pause \u00b7 g Graph"
+            "l Locate \u00b7 r Refresh \u00b7 u Units \u00b7 t 12/24h \u00b7 p Pause"
             "  \u2502  "
             "A Anim \u00b7 </> Frame \u00b7 e Favs \u00b7 n/b Cycle \u00b7 Esc Back \u00b7 ? Help \u00b7 q Quit"
         )

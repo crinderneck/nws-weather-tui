@@ -11,6 +11,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import requests
 
+from air_quality import AirQualityClient
 from cache import TTLCache
 from constants import BASE
 from geocode import Geocoder
@@ -59,6 +60,7 @@ class NWSClient:
         self._radar = RadarFetcher(self.s, timeout, self.cache, ttls)
         self._geocoder = Geocoder(self.s, timeout, self.cache)
         self._boundaries = BoundaryClient(self.s, timeout, self.cache)
+        self._air_quality = AirQualityClient(self.s, timeout, self.cache)
 
     # ------------------------------------------------------------------
     # Core HTTP helpers
@@ -113,6 +115,13 @@ class NWSClient:
     def alerts(self, lat: float, lon: float) -> Dict[str, Any]:
         url = f"{BASE}/alerts/active?point={lat:.4f},{lon:.4f}"
         return self._get_json(url, ttl=self.ttls["alerts"])
+
+    # ------------------------------------------------------------------
+    # Delegated: air quality
+    # ------------------------------------------------------------------
+
+    def air_quality(self, lat: float, lon: float) -> Dict[str, Any]:
+        return self._air_quality.current(lat, lon, ttl=self.ttls["air_quality"])
 
     # ------------------------------------------------------------------
     # Delegated: geocoding

@@ -10,7 +10,13 @@ import threading
 import time
 from typing import Any, Dict, TYPE_CHECKING
 
-from models import extract_alerts, extract_current, extract_forecast, extract_hourly
+from models import (
+    extract_air_quality,
+    extract_alerts,
+    extract_current,
+    extract_forecast,
+    extract_hourly,
+)
 
 if TYPE_CHECKING:
     from app import App
@@ -97,6 +103,12 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
         result["alerts"] = extract_alerts(
             app.client.alerts(ctx["lat"], ctx["lon"])
         )
+        # Air quality is a supplementary, non-NWS source — failures there
+        # are swallowed inside AirQualityClient and must not take the whole
+        # refresh offline.
+        result["air_quality"] = extract_air_quality(
+            app.client.air_quality(ctx["lat"], ctx["lon"])
+        )
         result["ok"] = True
 
     except Exception as e:
@@ -148,6 +160,8 @@ def apply_bg_weather(app: "App") -> None:
             app.hourly_periods = result["hourly_periods"]
         if "alerts" in result:
             app.alerts = result["alerts"]
+        if "air_quality" in result:
+            app.air_quality = result["air_quality"]
 
         app.offline_mode = False
         app.offline_reason = ""

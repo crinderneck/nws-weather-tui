@@ -53,7 +53,6 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "user_agent": os.getenv(
         "WEATHER_APP_UA", "NWSWeatherTUI/1.0 (contact: cjrinderneck@proton.me)"
     ),
-    "show_graph_panel_on_current": True,
     "hourly_hours": 24,
     "show_radar_map": True,
     "favorites": [],
@@ -74,6 +73,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "forecast_hourly": 600,
         "alerts": 300,
         "radar": 300,
+        "air_quality": 900,
     },
 }
 

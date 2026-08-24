@@ -5,7 +5,6 @@ NWS Weather TUI — Main application.
 
 from __future__ import annotations
 
-import re
 import signal
 import threading
 import time
@@ -27,6 +26,7 @@ from geo import clamp
 from helpers import safe_addstr
 from input_handler import handle_key
 from models import (
+    AirQuality,
     AlertItem,
     CurrentConditions,
     ForecastPeriod,
@@ -63,9 +63,6 @@ class App:
         self.use_24h: bool = bool(cfg.get("use_24h", False))
         self.auto_refresh_seconds: int = int(cfg.get("auto_refresh_seconds", 300))
         self.timeout: int = int(cfg.get("http_timeout", 10))
-        self.show_graph_panel_on_current: bool = bool(
-            cfg.get("show_graph_panel_on_current", True)
-        )
         self.hourly_hours: int = int(cfg.get("hourly_hours", 24))
         self.show_radar_map: bool = bool(cfg.get("show_radar_map", True))
         self.favorites: List[Dict[str, Any]] = list(cfg.get("favorites", []) or [])
@@ -110,6 +107,7 @@ class App:
         self.forecast_periods: List[ForecastPeriod] = []
         self.hourly_periods: List[HourlyPeriod] = []
         self.alerts: List[AlertItem] = []
+        self.air_quality: Optional[AirQuality] = None
 
         self.last_refresh: float = 0.0
         self.next_refresh: float = 0.0
@@ -159,10 +157,6 @@ class App:
         init_curses(self.stdscr)
         self._radar_has_256color = init_radar_colors()
 
-        try:
-            self._load_points()
-        except Exception:
-            pass  # background refresh will retry
         refresh_all(self, force=True, allow_offline=True)
 
     # ------------------------------------------------------------------
@@ -202,10 +196,6 @@ class App:
         self._bg_generation += 1
         self._bg_weather_running = False
         self._bg_radar_running = False
-        try:
-            self._load_points()
-        except Exception:
-            pass
         refresh_all(self, force=True, allow_offline=True)
         self._save_cfg()
 
@@ -215,25 +205,6 @@ class App:
 
     def _save_cfg(self) -> None:
         save_app_config(self)
-
-    def _load_points(self) -> None:
-        self.points_data = self.client.points(self.lat, self.lon)
-        props = self.points_data.get("properties", {}) or {}
-        self.forecast_url = props.get("forecast")
-        self.hourly_url = props.get("forecastHourly")
-        self.stations_url = props.get("observationStations")
-        rs = props.get("radarStation")
-        self.radar_station = rs.strip() if isinstance(rs, str) and rs else None
-        rel = (props.get("relativeLocation") or {}).get("properties", {})
-        st = rel.get("state") if isinstance(rel, dict) else None
-        self.state_code = (
-            st.strip().upper()
-            if isinstance(st, str) and re.fullmatch(r"[A-Za-z]{2}", st.strip())
-            else None
-        )
-        if not self.state_code:
-            m = re.search(r",\s*([A-Za-z]{2})(?:\b|$)", self.location_name or "")
-            self.state_code = m.group(1).upper() if m else None
 
     def _save_state(self) -> None:
         from persistence import _build_state_dict

@@ -25,7 +25,6 @@ def save_app_config(app: "App") -> None:
         "use_24h": app.use_24h,
         "auto_refresh_seconds": app.auto_refresh_seconds,
         "http_timeout": app.timeout,
-        "show_graph_panel_on_current": app.show_graph_panel_on_current,
         "hourly_hours": app.hourly_hours,
         "show_radar_map": app.show_radar_map,
         "favorites": app.favorites,
@@ -37,6 +36,15 @@ def _serialize_current(app: "App") -> Optional[Dict[str, Any]]:
     if not app.current:
         return None
     d = app.current.__dict__.copy()
+    if isinstance(d.get("timestamp"), dt.datetime):
+        d["timestamp"] = d["timestamp"].isoformat()
+    return d
+
+
+def _serialize_air_quality(app: "App") -> Optional[Dict[str, Any]]:
+    if not app.air_quality:
+        return None
+    d = app.air_quality.__dict__.copy()
     if isinstance(d.get("timestamp"), dt.datetime):
         d["timestamp"] = d["timestamp"].isoformat()
     return d
@@ -63,6 +71,7 @@ def _build_state_dict(app: "App") -> Dict[str, Any]:
         "units": app.units,
         "use_24h": app.use_24h,
         "current": _serialize_current(app),
+        "air_quality": _serialize_air_quality(app),
         "forecast_periods": [p.__dict__ for p in app.forecast_periods],
         "hourly_periods": [h.__dict__ for h in app.hourly_periods],
         "alerts": [a.__dict__ for a in app.alerts],
@@ -92,6 +101,7 @@ def _parse_field(value: Any, field_name: str) -> Any:
 
 def load_app_state(app: "App") -> bool:
     from models import (
+        AirQuality,
         AlertItem,
         CurrentConditions,
         ForecastPeriod,
@@ -133,6 +143,21 @@ def load_app_state(app: "App") -> bool:
             )
         except Exception:
             app.current = None
+
+    aq = st.get("air_quality")
+    if isinstance(aq, dict):
+        ts = parse_iso(aq.get("timestamp")) if isinstance(aq.get("timestamp"), str) else None
+        try:
+            app.air_quality = AirQuality(
+                timestamp=ts,
+                aqi=aq.get("aqi") if isinstance(aq.get("aqi"), (int, float)) else None,
+                category=str(aq.get("category") or "—"),
+                primary_pollutant=aq.get("primary_pollutant"),
+                pm2_5=aq.get("pm2_5") if isinstance(aq.get("pm2_5"), (int, float)) else None,
+                pm10=aq.get("pm10") if isinstance(aq.get("pm10"), (int, float)) else None,
+            )
+        except Exception:
+            app.air_quality = None
 
     for key, cls, fields in [
         ("forecast_periods", ForecastPeriod, [

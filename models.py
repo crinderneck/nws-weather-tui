@@ -72,6 +72,16 @@ class AlertItem:
 
 
 @dataclass
+class AirQuality:
+    timestamp: Optional[dt.datetime]
+    aqi: Optional[int]
+    category: str
+    primary_pollutant: Optional[str]
+    pm2_5: Optional[float]
+    pm10: Optional[float]
+
+
+@dataclass
 class RadarFrame:
     """One radar animation frame."""
     cells: List[List[RadarCell]]   # halfblock cells (empty if 256-color unavailable)
@@ -121,6 +131,64 @@ def extract_current(obs_json: Dict[str, Any]) -> CurrentConditions:
         visibility_m=v("visibility"),
         text_description=str(desc),
         icon_key=icon_key,
+    )
+
+
+_AQI_POLLUTANT_LABELS = {
+    "us_aqi_pm2_5": "PM2.5",
+    "us_aqi_pm10": "PM10",
+    "us_aqi_ozone": "Ozone",
+    "us_aqi_no2": "NO2",
+    "us_aqi_so2": "SO2",
+    "us_aqi_co": "CO",
+}
+
+
+def aqi_category(aqi: Optional[float]) -> str:
+    if aqi is None:
+        return "—"
+    if aqi <= 50:
+        return "Good"
+    if aqi <= 100:
+        return "Moderate"
+    if aqi <= 150:
+        return "Unhealthy for Sensitive Groups"
+    if aqi <= 200:
+        return "Unhealthy"
+    if aqi <= 300:
+        return "Very Unhealthy"
+    return "Hazardous"
+
+
+def extract_air_quality(aq_json: Dict[str, Any]) -> Optional["AirQuality"]:
+    cur = (aq_json or {}).get("current")
+    if not isinstance(cur, dict):
+        return None
+
+    def num(key: str) -> Optional[float]:
+        v = cur.get(key)
+        return v if isinstance(v, (int, float)) else None
+
+    aqi_val = num("us_aqi")
+    if aqi_val is None:
+        return None
+
+    sub_scores = {k: num(k) for k in _AQI_POLLUTANT_LABELS}
+    sub_scores = {k: v for k, v in sub_scores.items() if v is not None}
+    primary = (
+        _AQI_POLLUTANT_LABELS[max(sub_scores, key=sub_scores.get)]
+        if sub_scores else None
+    )
+
+    ts = parse_iso(cur.get("time")) if isinstance(cur.get("time"), str) else None
+
+    return AirQuality(
+        timestamp=ts,
+        aqi=int(round(aqi_val)),
+        category=aqi_category(aqi_val),
+        primary_pollutant=primary,
+        pm2_5=num("pm2_5"),
+        pm10=num("pm10"),
     )
 
 
