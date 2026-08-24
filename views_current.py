@@ -6,11 +6,12 @@ NWS Weather TUI — Current conditions view.
 from __future__ import annotations
 
 import time
-from typing import List, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
 import curses
 
 from conversions import c_to_f, dewpoint_c, m_to_mi, mps_to_mph, pa_to_inhg
+from curses_init import WINDSOCK_ORANGE_PAIR
 from formatting import fmt_num, fmt_time
 from geo import clamp
 from helpers import safe_addstr
@@ -44,6 +45,47 @@ def _aqi_attr(aqi: int) -> int:
     if aqi <= 300:
         return curses.color_pair(5)                # Very Unhealthy — magenta
     return curses.color_pair(4) | curses.A_BOLD    # Hazardous
+
+
+def _draw_windsock(win, lines: List[str], x0: int, has_256color: bool) -> None:
+    """Draw windsock lines with a gray pole and orange/white sock stripes.
+
+    Stripe color alternates every 2 glyphs along the sock body, counted in
+    drawing order (so it stripes correctly whether the sock is drooping
+    near-vertical or extended near-horizontal), not by screen column.
+    """
+    gray_attr = curses.color_pair(14) | curses.A_DIM
+    white_attr = curses.color_pair(14)
+    orange_attr = (
+        curses.color_pair(WINDSOCK_ORANGE_PAIR) if has_256color else curses.color_pair(2)
+    )
+    stripe_w = 2
+
+    counter = 0
+    for row, line in enumerate(lines):
+        run_start: Optional[int] = None
+        run_attr = None
+
+        def flush(end_col: int) -> None:
+            nonlocal run_start, run_attr
+            if run_start is not None:
+                safe_addstr(win, row, x0 + run_start, line[run_start:end_col], run_attr)
+                run_start = None
+
+        for col, ch in enumerate(line):
+            if ch == " ":
+                flush(col)
+                continue
+            if col <= 1:
+                attr = gray_attr
+            else:
+                attr = white_attr if (counter // stripe_w) % 2 == 0 else orange_attr
+                counter += 1
+            if attr != run_attr:
+                flush(col)
+                run_start = col
+                run_attr = attr
+        flush(len(line))
 
 
 def draw_current(app: "App", win) -> None:
@@ -150,8 +192,7 @@ def draw_current(app: "App", win) -> None:
     sock_lines = windsock_lines(mps_to_mph(c.wind_mps), time.time())
     sock_w = max((len(l) for l in sock_lines), default=0)
     if sock_w and sock_x + sock_w < cols:
-        for i, line in enumerate(sock_lines[:rows]):
-            safe_addstr(win, i, sock_x, line, curses.color_pair(6))
+        _draw_windsock(win, sock_lines[:rows], sock_x, app._radar_has_256color)
 
     # --- Radar panel ---
     if app.show_radar_map and y + 4 < rows:

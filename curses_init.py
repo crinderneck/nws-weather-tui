@@ -10,6 +10,11 @@ import curses
 from constants import N_RADAR_COLORS, NWS_RADAR_PALETTE, radar_curses_color, radar_dual_pair, radar_single_pair
 from helpers import dbg
 
+# Custom color 30 / pair 16 are unused by the radar palette (which occupies
+# colors 16-29 and pairs 20-229) — reserved here for a true 256-color orange.
+WINDSOCK_ORANGE_COLOR = 30
+WINDSOCK_ORANGE_PAIR = 16
+
 
 def init_curses(stdscr) -> None:
     """Set up curses mode, UI color pairs 1-15, and mouse input."""
@@ -55,6 +60,8 @@ def init_radar_colors() -> bool:
         # Init custom colors
         for i, (_, _, _, r1k, g1k, b1k, *_rest) in enumerate(NWS_RADAR_PALETTE):
             curses.init_color(radar_curses_color(i + 1), r1k, g1k, b1k)
+        curses.init_color(WINDSOCK_ORANGE_COLOR, 1000, 549, 0)
+        curses.init_pair(WINDSOCK_ORANGE_PAIR, WINDSOCK_ORANGE_COLOR, -1)
         # Single-color pairs (fg=nws, bg=transparent)
         for nws_idx in range(1, N_RADAR_COLORS + 1):
             curses.init_pair(
