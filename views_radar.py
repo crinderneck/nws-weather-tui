@@ -15,7 +15,6 @@ from radar_renderer import (
     draw_city_overlay_line,
     draw_radar_ascii_line,
     draw_radar_halfblock_line,
-    draw_radar_legend,
     draw_state_overlay_line,
 )
 
@@ -48,18 +47,11 @@ def draw_radar_panel(
     ts_tag = f"  {app._radar_ts_utc}" if app._radar_ts_utc else ""
     mode_tag = " [256-color]" if app._radar_has_256color else " [ASCII]"
     state_tag = f" \u2014 {app.state_code}" if app.state_code else ""
-    header = (
-        f"Radar{state_tag}{ts_tag}{anim_tag}{mode_tag}"
-        f"  [w] full  [A] anim  [</> step]  [o] browser"
-        f"  (O=you @=city |=border  click to jump)"
-    )
-    safe_addstr(win, y, 0, header[: cols - 1], curses.color_pair(15) | curses.A_BOLD)
+    header = f"Radar{state_tag}{ts_tag}{anim_tag}{mode_tag}"
+    header = header[: cols - 1]
+    header_x = max(0, (cols - 1 - len(header)) // 2)
+    safe_addstr(win, y, header_x, header, curses.color_pair(15) | curses.A_BOLD)
     y += 1
-
-    # --- legend line ---
-    if y < rows:
-        draw_radar_legend(win, y, 0, cols, app._radar_has_256color)
-        y += 1
 
     # --- radar map ---
     map_rows = rows - y - 1

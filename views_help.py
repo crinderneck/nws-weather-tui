@@ -11,9 +11,12 @@ import curses
 
 from constants import CONFIG_PATH, STATE_PATH
 from helpers import safe_addstr, wrap_lines
+from radar_renderer import draw_radar_legend
 
 if TYPE_CHECKING:
     from app import App
+
+_DBZ_LEGEND_SENTINEL = "\x00dbz-legend\x00"
 
 
 def draw_help(app: "App", win) -> None:
@@ -57,6 +60,9 @@ def draw_help(app: "App", win) -> None:
         "             (requires terminal supporting 256 colours + curses.can_change_color)",
         '  ASCII:     fallback ramp " .:-=+*#%@" with R/S/I precipitation kind colouring',
         "",
+        "dBZ (reflectivity) legend:",
+        _DBZ_LEGEND_SENTINEL,
+        "",
         "Radar sources (tried in order):",
         "  1. NOAA MRMS ImageServer  (national composite, near real-time)",
         "  2. Iowa State IEM NEXRAD WMS  (CONUS composite, NWS colour table)",
@@ -83,9 +89,12 @@ def draw_help(app: "App", win) -> None:
         "Optional: pip install astral  (for sunrise/sunset times)",
     ]
 
-    # Expand wrapped lines
+    # Expand wrapped lines (the dBZ legend sentinel is drawn specially, not wrapped)
     all_lines: list[tuple[str, int]] = []  # (text, original_line_idx)
     for i, line in enumerate(lines):
+        if line == _DBZ_LEGEND_SENTINEL:
+            all_lines.append((line, i))
+            continue
         for wline in wrap_lines(line, cols - 1):
             all_lines.append((wline, i))
 
@@ -96,7 +105,10 @@ def draw_help(app: "App", win) -> None:
     for wline, orig_idx in all_lines[app.help_scroll:]:
         if y >= rows - 1:
             break
-        safe_addstr(win, y, 0, wline[: cols - 1], curses.A_BOLD if orig_idx == 0 else 0)
+        if wline == _DBZ_LEGEND_SENTINEL:
+            draw_radar_legend(win, y, 0, cols, app._radar_has_256color)
+        else:
+            safe_addstr(win, y, 0, wline[: cols - 1], curses.A_BOLD if orig_idx == 0 else 0)
         y += 1
 
     if total > rows - 1:

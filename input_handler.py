@@ -29,7 +29,7 @@ def handle_key(app: "App", ch: int) -> bool:
     key_handlers = {
         ord("q"): lambda: False,
         ord("Q"): lambda: False,
-        ord("?"): lambda: _set_view(app, "help"),
+        ord("?"): lambda: _toggle_help(app),
         curses.KEY_MOUSE: lambda: _handle_mouse_event(app),
         ord("c"): lambda: _set_view(app, "current"),
         ord("f"): lambda: _set_view(app, "forecast"),
@@ -178,6 +178,11 @@ def search_location(app: "App") -> bool:
 
 def _set_view(app: "App", view: str) -> bool:
     app.view = view
+    return True
+
+
+def _toggle_help(app: "App") -> bool:
+    app.view = "current" if app.view == "help" else "help"
     return True
 
 

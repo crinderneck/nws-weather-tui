@@ -5,13 +5,11 @@ NWS Weather TUI — Header and footer chrome.
 
 from __future__ import annotations
 
-import datetime as dt
 import time
 from typing import TYPE_CHECKING
 
 import curses
 
-from formatting import fmt_time
 from geo import clamp
 from helpers import safe_addstr
 
@@ -58,25 +56,6 @@ def draw_header(app: "App", rows: int, cols: int) -> None:
         if app._is_loading:
             attr |= curses.A_BOLD
         safe_addstr(app.stdscr, 2, 1, app.status_msg[: cols - 2], attr)
-    else:
-        lr = (
-            dt.datetime.fromtimestamp(app.last_refresh).astimezone()
-            if app.last_refresh else None
-        )
-        nxt = (
-            dt.datetime.fromtimestamp(app.next_refresh).astimezone()
-            if app.next_refresh else None
-        )
-        s = (
-            f"Last: {fmt_time(lr, app.use_24h, with_date=True)}"
-            f"   Next: {fmt_time(nxt, app.use_24h, with_date=True)}"
-        )
-        if app.offline_mode:
-            s += "   OFFLINE"
-        safe_addstr(
-            app.stdscr, 2, 1, s[: cols - 2],
-            curses.A_DIM if not app.offline_mode else curses.color_pair(4),
-        )
 
 
 def draw_footer(app: "App", rows: int, cols: int) -> None:
