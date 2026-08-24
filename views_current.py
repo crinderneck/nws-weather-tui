@@ -106,7 +106,6 @@ def draw_current(app: "App", win) -> None:
     icon_lines = ICON_BIG.get(c.icon_key, ICON_BIG["unknown"]).strip("\n").splitlines()
     icon_w = max((len(x) for x in icon_lines), default=0)
     left_w = clamp(icon_w + 2, 12, cols - 1)
-    x0 = left_w
 
     dp_val = dewpoint_c(c.temperature_c, c.humidity_pct)
     if app.units == "us":
@@ -173,12 +172,27 @@ def draw_current(app: "App", win) -> None:
     else:
         text_lines.append(("Active Alerts: 0", curses.A_DIM))
 
+    # --- Horizontally center the icon + text + windsock block as a whole ---
+    text_max_w = max((len(t) for t, _ in text_lines), default=0)
+    sock_lines = windsock_lines(mps_to_mph(c.wind_mps), time.time())
+    sock_w = max((len(l) for l in sock_lines), default=0)
+    gap = 3
+
+    block_w_with_sock = left_w + text_max_w + gap + sock_w
+    show_sock = sock_w > 0 and block_w_with_sock <= cols - 1
+    block_w = block_w_with_sock if show_sock else (left_w + text_max_w)
+    margin = max(0, (cols - block_w) // 2)
+
+    icon_x0 = margin
+    x0 = margin + left_w
+    sock_x = x0 + text_max_w + gap
+
     # --- Icon, vertically centered against the text block ---
     icon_h = min(len(icon_lines), rows)
     text_h = min(len(text_lines), rows)
     icon_y0 = max(0, (text_h - icon_h) // 2)
     for i, line in enumerate(icon_lines[: rows - icon_y0]):
-        safe_addstr(win, icon_y0 + i, 0, line[:left_w], curses.color_pair(2))
+        safe_addstr(win, icon_y0 + i, icon_x0, line[:left_w], curses.color_pair(2))
 
     # --- Text block ---
     y = 0
@@ -187,11 +201,7 @@ def draw_current(app: "App", win) -> None:
         y += 1
 
     # --- Windsock, top-aligned to the right of the text block ---
-    text_max_w = max((len(t) for t, _ in text_lines), default=0)
-    sock_x = x0 + text_max_w + 3
-    sock_lines = windsock_lines(mps_to_mph(c.wind_mps), time.time())
-    sock_w = max((len(l) for l in sock_lines), default=0)
-    if sock_w and sock_x + sock_w < cols:
+    if show_sock:
         _draw_windsock(win, sock_lines[:rows], sock_x, app._radar_has_256color)
 
     # --- Radar panel ---
