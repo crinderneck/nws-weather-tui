@@ -17,6 +17,7 @@ from constants import BASE
 from geocode import Geocoder
 from geo_boundaries import BoundaryClient
 from radar_client import RadarFetcher
+from uv_index import UVIndexClient
 
 
 class _ThreadLocalSession:
@@ -61,6 +62,7 @@ class NWSClient:
         self._geocoder = Geocoder(self.s, timeout, self.cache)
         self._boundaries = BoundaryClient(self.s, timeout, self.cache)
         self._air_quality = AirQualityClient(self.s, timeout, self.cache)
+        self._uv_index = UVIndexClient(self.s, timeout, self.cache)
 
     # ------------------------------------------------------------------
     # Core HTTP helpers
@@ -116,12 +118,65 @@ class NWSClient:
         url = f"{BASE}/alerts/active?point={lat:.4f},{lon:.4f}"
         return self._get_json(url, ttl=self.ttls["alerts"])
 
+    def forecast_discussion(self, office_id: str) -> Optional[Dict[str, Any]]:
+        """Fetch the latest Area Forecast Discussion (AFD) text product
+        issued by a WFO (e.g. "OTX")."""
+        return self._latest_text_product(office_id, "AFD", ttl_key="afd")
+
+    def hazardous_weather_outlook(self, office_id: str) -> Optional[Dict[str, Any]]:
+        """Fetch the latest Hazardous Weather Outlook (HWO) text product
+        issued by a WFO (e.g. "OTX") — a rolling 7-day heads-up on
+        potential severe/hazardous weather."""
+        return self._latest_text_product(office_id, "HWO", ttl_key="hwo")
+
+    def _latest_text_product(
+        self, office_id: str, product_type: str, ttl_key: str
+    ) -> Optional[Dict[str, Any]]:
+        office = (office_id or "").strip().upper()
+        if not office:
+            return None
+        try:
+            listing = self._get_json(
+                f"{BASE}/products/types/{product_type}/locations/{office}",
+                ttl=self.ttls.get(ttl_key, 3600),
+            )
+            graph = (listing or {}).get("@graph") or []
+            if not graph:
+                return None
+            prod_id = (graph[0] or {}).get("id")
+            if not isinstance(prod_id, str) or not prod_id:
+                return None
+            prod = self._get_json(
+                f"{BASE}/products/{prod_id}", ttl=self.ttls.get(ttl_key, 3600)
+            )
+            text = str((prod or {}).get("productText") or "").strip()
+            if not text:
+                return None
+            return {
+                "text": text,
+                "issuance_time": prod.get("issuanceTime"),
+                "office": office,
+            }
+        except Exception:
+            return None
+
+    def forecast_grid_data(self, grid_data_url: str) -> Dict[str, Any]:
+        """Fetch raw NWS gridpoint data (quantitative precip, snowfall, etc.)."""
+        return self._get_json(grid_data_url, ttl=self.ttls.get("gridpoints", 600))
+
     # ------------------------------------------------------------------
     # Delegated: air quality
     # ------------------------------------------------------------------
 
     def air_quality(self, lat: float, lon: float) -> Dict[str, Any]:
         return self._air_quality.current(lat, lon, ttl=self.ttls["air_quality"])
+
+    # ------------------------------------------------------------------
+    # Delegated: UV index
+    # ------------------------------------------------------------------
+
+    def uv_index(self, lat: float, lon: float) -> Dict[str, Any]:
+        return self._uv_index.current(lat, lon, ttl=self.ttls.get("uv_index", 900))
 
     # ------------------------------------------------------------------
     # Delegated: geocoding

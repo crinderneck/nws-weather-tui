@@ -28,6 +28,9 @@ def draw_header(app: "App", rows: int, cols: int) -> None:
         "help": "HELP",
         "moon": "MOON",
         "favorites": "FAVORITES",
+        "afd": "DISCUSSION",
+        "hwo": "OUTLOOK",
+        "dashboard": "DASHBOARD",
     }.get(app.view, app.view.upper())
 
     fav_tag = (
@@ -62,11 +65,11 @@ def draw_footer(app: "App", rows: int, cols: int) -> None:
     safe_addstr(app.stdscr, rows - 2, 0, "\u2500" * (cols - 1), curses.A_DIM)
     if cols >= 100:
         helptext = (
-            "c Current \u00b7 f Forecast \u00b7 h Hourly \u00b7 a Alerts \u00b7 m Moon"
+            "c Current \u00b7 f Forecast \u00b7 h Hourly \u00b7 a Alerts \u00b7 m Moon \u00b7 d Discussion \u00b7 H Outlook"
             "  \u2502  "
             "l Locate \u00b7 r Refresh \u00b7 u Units \u00b7 t 12/24h \u00b7 p Pause"
             "  \u2502  "
-            "A Anim \u00b7 </> Frame \u00b7 e Favs \u00b7 n/b Cycle \u00b7 Esc Back \u00b7 ? Help \u00b7 q Quit"
+            "A Anim \u00b7 </> Frame \u00b7 e Favs \u00b7 D Dashboard \u00b7 n/b Cycle \u00b7 Esc Back \u00b7 ? Help \u00b7 q Quit"
         )
     else:
         helptext = (

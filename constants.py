@@ -59,6 +59,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "radar": {
         "show_state_lines": True,
         "show_city_labels": True,
+        "show_alert_polygons": True,
         "max_city_labels": 20,
         "ascii_ramp": " .:-=+*#%@",
         "animation_frames": 8,
@@ -74,6 +75,10 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "alerts": 300,
         "radar": 300,
         "air_quality": 900,
+        "uv_index": 900,
+        "afd": 3600,
+        "hwo": 3600,
+        "gridpoints": 600,
     },
 }
 

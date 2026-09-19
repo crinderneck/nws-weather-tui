@@ -121,6 +121,18 @@ def vector_lines_overlay(
             seqs.extend(g["rings"])
         if isinstance(g.get("paths"), list):
             seqs.extend(g["paths"])
+        gtype = g.get("type")
+        coords = g.get("coordinates")
+        if gtype == "Polygon" and isinstance(coords, list):
+            seqs.extend(coords)
+        elif gtype == "MultiPolygon" and isinstance(coords, list):
+            for polygon in coords:
+                if isinstance(polygon, list):
+                    seqs.extend(polygon)
+        elif gtype in ("LineString",) and isinstance(coords, list):
+            seqs.append(coords)
+        elif gtype == "MultiLineString" and isinstance(coords, list):
+            seqs.extend(coords)
         for seq in seqs:
             if not isinstance(seq, list) or len(seq) < 2:
                 continue

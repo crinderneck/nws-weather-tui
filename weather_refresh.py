@@ -10,12 +10,16 @@ import threading
 import time
 from typing import Any, Dict, TYPE_CHECKING
 
+from helpers import dbg
 from models import (
     extract_air_quality,
     extract_alerts,
     extract_current,
     extract_forecast,
+    extract_grid_precip,
     extract_hourly,
+    extract_uv_index,
+    merge_grid_precip_into_hourly,
 )
 
 if TYPE_CHECKING:
@@ -38,6 +42,7 @@ def refresh_all(app: "App", force: bool = False, allow_offline: bool = False) ->
         "points_data": app.points_data, "forecast_url": app.forecast_url,
         "hourly_url": app.hourly_url, "stations_url": app.stations_url,
         "station_id": app.station_id, "hourly_hours": app.hourly_hours,
+        "office_id": app.office_id, "grid_data_url": app.grid_data_url,
         "allow_offline": allow_offline,
     }
     gen = app._bg_generation
@@ -55,6 +60,8 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
         forecast_url = ctx["forecast_url"]
         hourly_url = ctx["hourly_url"]
         stations_url = ctx["stations_url"]
+        office_id = ctx["office_id"]
+        grid_data_url = ctx["grid_data_url"]
 
         if not points_data:
             points_data = app.client.points(ctx["lat"], ctx["lon"])
@@ -64,6 +71,9 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
             stations_url = props.get("observationStations")
             rs = props.get("radarStation")
             result["radar_station"] = rs.strip() if isinstance(rs, str) and rs else None
+            gdu = props.get("forecastGridData")
+            grid_data_url = gdu if isinstance(gdu, str) and gdu else None
+            result["grid_data_url"] = grid_data_url
             rel = (props.get("relativeLocation") or {}).get("properties", {})
             st = rel.get("state") if isinstance(rel, dict) else None
             result["state_code"] = (
@@ -71,6 +81,9 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
                 if isinstance(st, str) and re.fullmatch(r"[A-Za-z]{2}", st.strip())
                 else None
             )
+            cwa = props.get("cwa")
+            office_id = cwa.strip().upper() if isinstance(cwa, str) and cwa else None
+            result["office_id"] = office_id
             result["points_data"] = points_data
             result["forecast_url"] = forecast_url
             result["hourly_url"] = hourly_url
@@ -98,16 +111,36 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
                 app.client.forecast_hourly(hourly_url, ctx["units"])
             )
             h = ctx["hourly_hours"]
-            result["hourly_periods"] = hf[:h] if h > 0 else hf
+            hourly_periods = hf[:h] if h > 0 else hf
+            # Gridpoint precip/snow amounts are supplementary — a failure
+            # here must not take the whole refresh offline, and simply
+            # leaves the hourly periods without accumulation figures.
+            if grid_data_url:
+                try:
+                    grid = extract_grid_precip(
+                        app.client.forecast_grid_data(grid_data_url)
+                    )
+                    merge_grid_precip_into_hourly(hourly_periods, grid)
+                except Exception as ge:
+                    dbg(f"Gridpoint precip/snow fetch failed: {ge}")
+            result["hourly_periods"] = hourly_periods
 
         result["alerts"] = extract_alerts(
             app.client.alerts(ctx["lat"], ctx["lon"])
         )
-        # Air quality is a supplementary, non-NWS source — failures there
-        # are swallowed inside AirQualityClient and must not take the whole
-        # refresh offline.
+        # AFD/HWO are supplementary forecaster narratives — failures here
+        # must not take the whole refresh offline.
+        if office_id:
+            result["afd"] = app.client.forecast_discussion(office_id)
+            result["hwo"] = app.client.hazardous_weather_outlook(office_id)
+        # Air quality and UV index are supplementary, non-NWS sources —
+        # failures there are swallowed internally and must not take the
+        # whole refresh offline.
         result["air_quality"] = extract_air_quality(
             app.client.air_quality(ctx["lat"], ctx["lon"])
+        )
+        result["uv_index"] = extract_uv_index(
+            app.client.uv_index(ctx["lat"], ctx["lon"])
         )
         result["ok"] = True
 
@@ -151,6 +184,14 @@ def apply_bg_weather(app: "App") -> None:
             if not app.state_code:
                 m = re.search(r",\s*([A-Za-z]{2})(?:\b|$)", app.location_name or "")
                 app.state_code = m.group(1).upper() if m else None
+        if "office_id" in result:
+            app.office_id = result["office_id"]
+        if "grid_data_url" in result:
+            app.grid_data_url = result["grid_data_url"]
+        if "afd" in result and result["afd"]:
+            app.afd = result["afd"]
+        if "hwo" in result and result["hwo"]:
+            app.hwo = result["hwo"]
 
         if "current" in result:
             app.current = result["current"]
@@ -162,6 +203,8 @@ def apply_bg_weather(app: "App") -> None:
             app.alerts = result["alerts"]
         if "air_quality" in result:
             app.air_quality = result["air_quality"]
+        if "uv_index" in result:
+            app.uv_index = result["uv_index"]
 
         app.offline_mode = False
         app.offline_reason = ""

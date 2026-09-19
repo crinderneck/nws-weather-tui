@@ -8,13 +8,15 @@ A terminal-based weather application for the US, powered by the [National Weathe
 
 ### Current Conditions
 - Live temperature, humidity, dew point, wind speed/direction, barometric pressure, and visibility from your nearest NWS station
+- Heat index / wind chill ("feels like" temperature) when it meaningfully differs from the actual temperature
+- UV Index (current + today's forecast max)
 - Large ASCII weather icons
-- Mini sparkline graphs for temperature, humidity, and wind trends
 - Embedded radar panel alongside current conditions
 
 ### Forecast & Hourly
 - Multi-day forecast with day/night periods from NWS (scrollable)
-- Hourly forecast with sparkline charts and a tabular breakdown for the next 24 hours (configurable)
+- Hourly forecast with a high-resolution Braille line graph of the temperature trend, a precipitation-chance bar, and a tabular breakdown for the next 24 hours (configurable)
+- Expected precipitation and snowfall accumulation (from NWS gridpoint data), shown as a period total
 
 ### Radar
 - **256-color half-block rendering** — high-resolution radar imagery using Unicode half-block characters (▀/▄) with the NWS standard dBZ color scale
@@ -22,6 +24,7 @@ A terminal-based weather application for the US, powered by the [National Weathe
 - **Animated radar** — press `A` to loop through recent MRMS frames; step through manually with `<` / `>`
 - **Full-screen radar view** — press `w` for a dedicated radar map
 - State boundary overlays and nearby city labels
+- Active severe weather alert polygons (tornado/severe thunderstorm warnings, etc.) drawn in bold red
 - Click city labels with the mouse to jump to that location
 - **Three radar sources** (automatic fallback):
   1. NOAA MRMS ImageServer (national composite, near real-time)
@@ -33,6 +36,16 @@ A terminal-based weather application for the US, powered by the [National Weathe
 ### Weather Alerts
 - Active NWS alerts for your location, scrollable with `j`/`k`
 
+### Area Forecast Discussion
+- Latest forecaster narrative (AFD) from your local NWS Weather Forecast Office, press `d` to view
+- Raw NWS product text is cleaned up for readability — boilerplate headers and `&&`/`$$` markers stripped, section titles bolded, prose reflowed into natural paragraphs, and tabular data (e.g. point temps/PoPs) kept intact instead of being run together
+- Scrollable with `j`/`k`
+
+### Hazardous Weather Outlook
+- Rolling 7-day heads-up on potential hazardous/severe weather from your local NWS Weather Forecast Office, press `H` to view
+- Same cleaned-up formatting as the discussion view
+- Scrollable with `j`/`k`
+
 ### Moon Phase
 - ASCII art moon rendering showing the current illumination
 - Phase name, moon age, lunation number
@@ -43,6 +56,7 @@ A terminal-based weather application for the US, powered by the [National Weathe
 - Save locations as favorites with `F`
 - Cycle between saved favorites with `n`/`b`
 - Full favorites editor (`e`) — add, delete, rename, reorder locations
+- Favorites dashboard (`D`) — at-a-glance temperature/condition/wind for every saved favorite, refreshed in the background
 - Search by city name or ZIP code
 
 ### Other
@@ -85,6 +99,9 @@ python __main__.py
 | `a` | Alerts view |
 | `w` | Full-screen radar |
 | `m` | Moon phase |
+| `d` | Area Forecast Discussion |
+| `H` | Hazardous Weather Outlook |
+| `D` | Favorites dashboard |
 | `l` | Search location |
 | `r` | Force refresh |
 | `u` | Toggle US / SI units |
@@ -97,7 +114,7 @@ python __main__.py
 | `A` | Toggle radar animation |
 | `<` / `>` | Step radar frames |
 | `o` | Open radar in browser |
-| `j` / `k` | Scroll (forecast, alerts) |
+| `j` / `k` | Scroll (forecast, alerts, discussion) |
 | `?` | Help |
 | `q` | Quit |
 
@@ -118,6 +135,7 @@ Settings are stored at `~/.config/nws-weather-tui/config.json` and are created w
 | `radar.animation_interval_s` | `0.5` | Seconds between animation frames |
 | `radar.show_state_lines` | `true` | State boundary overlays |
 | `radar.show_city_labels` | `true` | City name labels on radar |
+| `radar.show_alert_polygons` | `true` | Severe weather alert (warning/watch) polygon overlays on radar |
 
 ## Requirements
 
@@ -130,4 +148,4 @@ Settings are stored at `~/.config/nws-weather-tui/config.json` and are created w
 
 ## Data Source
 
-All weather data comes from the [National Weather Service API](https://api.weather.gov), which is free, requires no API key, and covers the United States.
+Weather data comes from the [National Weather Service API](https://api.weather.gov), which is free, requires no API key, and covers the United States. Air quality and UV Index are supplementary, non-NWS data from the free [Open-Meteo API](https://open-meteo.com/) (no key required) and never take the app offline if unavailable.

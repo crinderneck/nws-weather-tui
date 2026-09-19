@@ -12,6 +12,7 @@ import curses
 
 from helpers import safe_addstr
 from radar_renderer import (
+    draw_alert_overlay_line,
     draw_city_overlay_line,
     draw_radar_ascii_line,
     draw_radar_halfblock_line,
@@ -35,6 +36,7 @@ def draw_radar_panel(
     ramp = str(radar_cfg.get("ascii_ramp", " .:-=+*#%@"))
     show_state_lines = bool(radar_cfg.get("show_state_lines", True))
     show_city_labels = bool(radar_cfg.get("show_city_labels", True))
+    show_alert_polygons = bool(radar_cfg.get("show_alert_polygons", True))
 
     # --- header line ---
     n_frames = len(app._radar_frames)
@@ -45,9 +47,8 @@ def draw_radar_panel(
         else ""
     )
     ts_tag = f"  {app._radar_ts_utc}" if app._radar_ts_utc else ""
-    mode_tag = " [256-color]" if app._radar_has_256color else " [ASCII]"
     state_tag = f" \u2014 {app.state_code}" if app.state_code else ""
-    header = f"Radar{state_tag}{ts_tag}{anim_tag}{mode_tag}"
+    header = f"Radar{state_tag}{ts_tag}{anim_tag}"
     header = header[: cols - 1]
     header_x = max(0, (cols - 1 - len(header)) // 2)
     safe_addstr(win, y, header_x, header, curses.color_pair(15) | curses.A_BOLD)
@@ -88,6 +89,7 @@ def draw_radar_panel(
     stale = (app._radar_src_cols != map_cols or app._radar_src_rows != map_rows)
 
     city_lines: List[str] = app._radar_city_overlay if show_city_labels else []
+    alert_lines: List[str] = app._radar_alert_overlay if show_alert_polygons else []
 
     if stale:
         safe_addstr(
@@ -105,6 +107,8 @@ def draw_radar_panel(
                 draw_state_overlay_line(
                     win, ry, app._radar_state_overlay[i], cols, x_off=map_x
                 )
+            if i < len(alert_lines):
+                draw_alert_overlay_line(win, ry, alert_lines[i], cols, x_off=map_x)
             if i < len(city_lines):
                 draw_city_overlay_line(win, ry, city_lines[i], cols, x_off=map_x)
 
@@ -119,6 +123,8 @@ def draw_radar_panel(
                 draw_state_overlay_line(
                     win, ry, app._radar_state_overlay[i], cols, x_off=map_x
                 )
+            if i < len(alert_lines):
+                draw_alert_overlay_line(win, ry, alert_lines[i], cols, x_off=map_x)
             if i < len(city_lines):
                 draw_city_overlay_line(win, ry, city_lines[i], cols, x_off=map_x)
 

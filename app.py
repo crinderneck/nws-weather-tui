@@ -32,6 +32,7 @@ from models import (
     ForecastPeriod,
     HourlyPeriod,
     RadarFrame,
+    UVIndex,
 )
 from persistence import load_app_state, save_app_config
 from radar_decode import RadarCell
@@ -46,6 +47,9 @@ from views import (
     draw_help,
     draw_moon,
     draw_favorites,
+    draw_afd,
+    draw_hwo,
+    draw_dashboard,
 )
 from weather_refresh import refresh_all
 
@@ -92,6 +96,10 @@ class App:
         self._bg_weather_running: bool = False
         self._bg_radar_pending: Optional[Dict[str, Any]] = None
         self._bg_radar_running: bool = False
+        self._bg_dash_pending: Optional[Dict[str, Any]] = None
+        self._bg_dash_running: bool = False
+        self._dash_data: Dict[int, Dict[str, Any]] = {}
+        self._dash_last: float = 0.0
         self._state_thread: Optional[threading.Thread] = None
 
         # --- NWS data ---
@@ -102,12 +110,17 @@ class App:
         self.station_id: Optional[str] = None
         self.radar_station: Optional[str] = None
         self.state_code: Optional[str] = None
+        self.office_id: Optional[str] = None
 
         self.current: Optional[CurrentConditions] = None
         self.forecast_periods: List[ForecastPeriod] = []
         self.hourly_periods: List[HourlyPeriod] = []
         self.alerts: List[AlertItem] = []
         self.air_quality: Optional[AirQuality] = None
+        self.uv_index: Optional[UVIndex] = None
+        self.afd: Optional[Dict[str, Any]] = None
+        self.hwo: Optional[Dict[str, Any]] = None
+        self.grid_data_url: Optional[str] = None
 
         self.last_refresh: float = 0.0
         self.next_refresh: float = 0.0
@@ -120,6 +133,9 @@ class App:
         self.alert_scroll: int = 0
         self.alert_line_scroll: int = 0
         self.help_scroll: int = 0
+        self.afd_scroll: int = 0
+        self.hwo_scroll: int = 0
+        self.dash_idx: int = 0
 
         # --- Radar state ---
         self._radar_frames: List[RadarFrame] = []
@@ -138,6 +154,7 @@ class App:
 
         self._radar_state_overlay: List[str] = []
         self._radar_city_overlay: List[str] = []
+        self._radar_alert_overlay: List[str] = []
         self._radar_city_hitmap: Dict[Tuple[int, int], Tuple[str, float, float]] = {}
         self._radar_last: float = 0.0
         self._radar_err: Optional[str] = None
@@ -191,6 +208,12 @@ class App:
         self.station_id = None
         self.radar_station = None
         self.state_code = None
+        self.office_id = None
+        self.afd = None
+        self.afd_scroll = 0
+        self.hwo = None
+        self.hwo_scroll = 0
+        self.grid_data_url = None
         self.client.cache.clear()
         reset_radar_state(self)
         self._bg_generation += 1
@@ -252,6 +275,9 @@ class App:
             apply_bg_weather(self)
         if self._bg_radar_pending is not None:
             apply_bg_radar(self)
+        if self._bg_dash_pending is not None:
+            from dashboard import apply_bg_dashboard
+            apply_bg_dashboard(self)
 
         if not self.paused:
             refresh_all(self, force=False, allow_offline=True)
@@ -333,6 +359,9 @@ class App:
             "help": draw_help,
             "moon": draw_moon,
             "favorites": draw_favorites,
+            "afd": draw_afd,
+            "hwo": draw_hwo,
+            "dashboard": draw_dashboard,
         }
         drawer = drawers.get(self.view)
         if drawer:

@@ -33,6 +33,7 @@ def toggle_favorite(app: "App") -> bool:
         )
         app._flash("Added to favorites.", 1.2)
     app.fav_idx = clamp(app.fav_idx, 0, max(0, len(app.favorites) - 1))
+    app._dash_data = {}
     app._save_cfg()
     return True
 
@@ -92,6 +93,7 @@ def _fav_edit_delete(app: "App") -> None:
     removed = app.favorites.pop(app.fav_edit_idx)
     app._flash(f"Deleted: {removed.get('name', '—')}", 1.5)
     app.fav_edit_idx = clamp(app.fav_edit_idx, 0, max(0, len(app.favorites) - 1))
+    app._dash_data = {}
     app._save_cfg()
 
 
@@ -125,6 +127,7 @@ def _fav_edit_add(app: "App") -> None:
         app.favorites.append({"name": name, "lat": lat, "lon": lon})
         app.fav_edit_idx = len(app.favorites) - 1
         app._flash(f"Added: {name}", 1.5)
+        app._dash_data = {}
         app._save_cfg()
     except Exception as e:
         app._flash(f"Add failed: {e}", 3.5)
@@ -139,6 +142,7 @@ def _fav_edit_reorder(app: "App", direction: int) -> None:
     fav = app.favorites
     fav[app.fav_edit_idx], fav[new_idx] = fav[new_idx], fav[app.fav_edit_idx]
     app.fav_edit_idx = new_idx
+    app._dash_data = {}
     app._save_cfg()
 
 

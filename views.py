@@ -15,3 +15,6 @@ from views_help import draw_help                           # noqa: F401
 from views_radar import draw_radar_panel, draw_radar_view  # noqa: F401
 from views_moon import draw_moon                           # noqa: F401
 from views_favorites import draw_favorites                 # noqa: F401
+from views_afd import draw_afd                              # noqa: F401
+from views_hwo import draw_hwo                              # noqa: F401
+from views_dashboard import draw_dashboard                  # noqa: F401

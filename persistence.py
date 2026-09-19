@@ -50,6 +50,12 @@ def _serialize_air_quality(app: "App") -> Optional[Dict[str, Any]]:
     return d
 
 
+def _serialize_uv_index(app: "App") -> Optional[Dict[str, Any]]:
+    if not app.uv_index:
+        return None
+    return app.uv_index.__dict__.copy()
+
+
 def _fix_dt(obj: Any) -> Any:
     if isinstance(obj, dict):
         return {
@@ -72,11 +78,15 @@ def _build_state_dict(app: "App") -> Dict[str, Any]:
         "use_24h": app.use_24h,
         "current": _serialize_current(app),
         "air_quality": _serialize_air_quality(app),
+        "uv_index": _serialize_uv_index(app),
         "forecast_periods": [p.__dict__ for p in app.forecast_periods],
         "hourly_periods": [h.__dict__ for h in app.hourly_periods],
         "alerts": [a.__dict__ for a in app.alerts],
         "radar_station": app.radar_station,
         "state_code": app.state_code,
+        "office_id": app.office_id,
+        "afd": app.afd,
+        "hwo": app.hwo,
     })
 
 
@@ -92,6 +102,7 @@ def _parse_field(value: Any, field_name: str) -> Any:
     if field_name in (
         "temperature", "wind_speed_num", "pop", "humidity_pct",
         "pressure_pa", "visibility_m", "wind_mps", "wind_dir_deg", "gust_mps",
+        "heat_index_c", "wind_chill_c", "precip_mm", "snow_mm",
     ):
         return value if isinstance(value, (int, float)) else None
     if field_name == "is_daytime":
@@ -106,6 +117,7 @@ def load_app_state(app: "App") -> bool:
         CurrentConditions,
         ForecastPeriod,
         HourlyPeriod,
+        UVIndex,
     )
 
     st = load_json(STATE_PATH)
@@ -123,6 +135,13 @@ def load_app_state(app: "App") -> bool:
     sc = st.get("state_code")
     if isinstance(sc, str) and re.fullmatch(r"[A-Za-z]{2}", sc.strip()):
         app.state_code = sc.strip().upper()
+    app.office_id = st.get("office_id") or None
+    afd = st.get("afd")
+    if isinstance(afd, dict) and afd.get("text"):
+        app.afd = afd
+    hwo = st.get("hwo")
+    if isinstance(hwo, dict) and hwo.get("text"):
+        app.hwo = hwo
 
     c = st.get("current")
     if isinstance(c, dict):
@@ -140,6 +159,10 @@ def load_app_state(app: "App") -> bool:
                 visibility_m=c.get("visibility_m"),
                 text_description=str(c.get("text_description") or "\u2014"),
                 icon_key=str(c.get("icon_key") or "unknown"),
+                heat_index_c=c.get("heat_index_c")
+                if isinstance(c.get("heat_index_c"), (int, float)) else None,
+                wind_chill_c=c.get("wind_chill_c")
+                if isinstance(c.get("wind_chill_c"), (int, float)) else None,
             )
         except Exception:
             app.current = None
@@ -159,6 +182,16 @@ def load_app_state(app: "App") -> bool:
         except Exception:
             app.air_quality = None
 
+    uv = st.get("uv_index")
+    if isinstance(uv, dict):
+        try:
+            app.uv_index = UVIndex(
+                current=uv.get("current") if isinstance(uv.get("current"), (int, float)) else None,
+                daily_max=uv.get("daily_max") if isinstance(uv.get("daily_max"), (int, float)) else None,
+            )
+        except Exception:
+            app.uv_index = None
+
     for key, cls, fields in [
         ("forecast_periods", ForecastPeriod, [
             "name", "start", "end", "is_daytime", "temperature",
@@ -168,6 +201,7 @@ def load_app_state(app: "App") -> bool:
         ("hourly_periods", HourlyPeriod, [
             "start", "temperature", "temperature_unit", "wind_speed",
             "wind_speed_num", "wind_dir", "short_forecast", "icon_key", "pop",
+            "precip_mm", "snow_mm",
         ]),
         ("alerts", AlertItem, [
             "event", "severity", "urgency", "certainty", "headline",

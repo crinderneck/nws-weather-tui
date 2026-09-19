@@ -92,6 +92,19 @@ _FALL_CYCLE_S = 22.0   # average spacing between candidate fall windows
 _FALL_CHANCE = 0.35    # odds a given cycle actually contains a fall
 _FALL_STEP_S = 0.55    # time spent resting on each descending level
 
+# Widest line across every possible frame. Callers should lay out the sock's
+# column using this fixed width (not the current frame's actual width) so
+# that neighboring content doesn't shift as the sock droops/flutters.
+WINDSOCK_MAX_W = max(
+    (
+        len(line)
+        for _max_mph, _frames, _interval in _LEVELS
+        for _frame in _frames
+        for line in _frame.strip("\n").splitlines()
+    ),
+    default=0,
+)
+
 
 def _level_index(mph: float) -> int:
     for i, (max_mph, _frames, _interval) in enumerate(_LEVELS):

@@ -9,11 +9,12 @@ from typing import TYPE_CHECKING
 
 import curses
 
+from conversions import mm_to_in
 from formatting import fmt_num, fmt_time
 from geo import clamp
 from helpers import safe_addstr
 from icons import ICON_TINY
-from sparklines import bar_pct, sparkline
+from sparklines import bar_pct, braille_graph
 
 if TYPE_CHECKING:
     from app import App
@@ -36,25 +37,71 @@ def draw_hourly(app: "App", win) -> None:
         win, 0, 0, f"Hourly forecast (next {len(hrs)}h):"[: cols - 1], curses.A_BOLD
     )
 
-    graph_w = clamp(cols - 12, 10, cols - 10)
     temps = [h.temperature for h in hrs]
-    winds = [h.wind_speed_num for h in hrs]
     pops = [h.pop for h in hrs]
 
-    safe_addstr(win, 1, 0, "Temp:", curses.A_BOLD)
-    safe_addstr(win, 1, 6, sparkline(temps, graph_w)[:graph_w], curses.color_pair(7))
-    safe_addstr(win, 2, 0, "Wind:", curses.A_BOLD)
-    safe_addstr(win, 2, 6, sparkline(winds, graph_w)[:graph_w], curses.color_pair(6))
+    y = 1
+    clean_temps = [t for t in temps if isinstance(t, (int, float))]
+    if clean_temps:
+        unit = next((h.temperature_unit for h in hrs if h.temperature_unit), "")
+        lo_t, hi_t = min(clean_temps), max(clean_temps)
+        label = (
+            f"Temperature (°{unit})   {fmt_num(lo_t, 0)}° – {fmt_num(hi_t, 0)}°"
+        )
+    else:
+        label = "Temperature"
+    safe_addstr(win, y, 0, label[: cols - 1], curses.A_BOLD)
+    y += 1
+
+    # Prioritize height over width: a tall, narrower chart reads as an
+    # actual trend line, where a single-row-tall full-width one just looks
+    # like a flat squiggle. Reserve room for the fixed rows around it (title,
+    # label, PoP, QPF, spacer, table header/divider, footer) plus a minimum
+    # of table rows so the graph can't crowd the hourly table off-screen.
+    fixed_overhead = 8
+    min_table_rows = 5
+    graph_h = clamp(rows - fixed_overhead - min_table_rows, 4, 10)
+    graph_w = clamp(cols - 30, 30, 60)
+    graph_x = max(0, (cols - graph_w) // 2)
+    for i, line in enumerate(braille_graph(temps, graph_w, graph_h)):
+        safe_addstr(win, y + i, graph_x, line[:graph_w], curses.color_pair(7))
+    y += graph_h
 
     clean = [p for p in pops if isinstance(p, (int, float))]
     peak = float(max(clean)) if clean else None
-    safe_addstr(win, 3, 0, "PoP: ", curses.A_BOLD)
-    safe_addstr(win, 3, 6, bar_pct(peak, graph_w)[:graph_w], curses.color_pair(5))
+    pop_bar_w = clamp(cols - 6 - 11, 10, cols - 7)
+    safe_addstr(win, y, 0, "PoP: ", curses.A_BOLD)
+    safe_addstr(win, y, 6, bar_pct(peak, pop_bar_w)[:pop_bar_w], curses.color_pair(5))
     safe_addstr(
-        win, 3, 6 + graph_w + 1,
-        f"peak {fmt_num(peak, 0)}%"[: cols - (6 + graph_w + 2)],
+        win, y, 6 + pop_bar_w + 1,
+        f"peak {fmt_num(peak, 0)}%"[: cols - (6 + pop_bar_w + 2)],
         curses.A_DIM,
     )
+    y += 1
+
+    precip_mm = [h.precip_mm for h in hrs]
+    snow_mm = [h.snow_mm for h in hrs]
+    clean_precip = [p for p in precip_mm if isinstance(p, (int, float))]
+    clean_snow = [s for s in snow_mm if isinstance(s, (int, float))]
+    if clean_precip:
+        total_precip_mm = sum(clean_precip)
+        total_snow_mm = sum(clean_snow) if clean_snow else 0.0
+        if app.units == "us":
+            precip_str = f"QPF: total {fmt_num(mm_to_in(total_precip_mm), 2)} in expected"
+            snow_str = (
+                f"  ({fmt_num(mm_to_in(total_snow_mm), 1)} in snow)"
+                if total_snow_mm > 0 else ""
+            )
+        else:
+            precip_str = f"QPF: total {fmt_num(total_precip_mm, 1)} mm expected"
+            snow_str = (
+                f"  ({fmt_num(total_snow_mm, 1)} mm snow)"
+                if total_snow_mm > 0 else ""
+            )
+        safe_addstr(win, y, 0, f"{precip_str}{snow_str}"[: cols - 1], curses.A_DIM)
+        y += 1
+
+    y += 1  # spacer before the table
 
     # Column x-positions (proportional, with minimums)
     x_time = 0
@@ -64,7 +111,7 @@ def draw_hourly(app: "App", win) -> None:
     x_pop = min(40, max(30, cols - 40))
     x_fc = min(46, x_pop + 6)
 
-    header_y = 5
+    header_y = y
     safe_addstr(win, header_y, x_time, "Time", curses.A_BOLD)
     safe_addstr(win, header_y, x_icon, "Ic", curses.A_BOLD)
     safe_addstr(win, header_y, x_temp, "Temp", curses.A_BOLD)

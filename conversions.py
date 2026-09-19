@@ -25,6 +25,10 @@ def m_to_mi(m: Optional[float]) -> Optional[float]:
     return None if m is None else m / 1609.344
 
 
+def mm_to_in(mm: Optional[float]) -> Optional[float]:
+    return None if mm is None else mm / 25.4
+
+
 def dewpoint_c(temp_c: Optional[float], humidity_pct: Optional[float]) -> Optional[float]:
     """Calculate dew point temperature using the Magnus formula approximation."""
     if temp_c is None or humidity_pct is None:

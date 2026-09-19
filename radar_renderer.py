@@ -98,6 +98,17 @@ def draw_state_overlay_line(
             )
 
 
+def draw_alert_overlay_line(
+    win, y: int, line: str, cols: int, x_off: int = 0
+) -> None:
+    """Draw NWS alert (warning/watch) polygon outlines in bold red."""
+    line = (line or "")[: max(0, cols - 1 - x_off)]
+    attr = curses.color_pair(4) | curses.A_BOLD
+    for x, ch in enumerate(line):
+        if ch != " ":
+            safe_addstr(win, y, x + max(0, x_off), ch, attr)
+
+
 def draw_city_overlay_line(
     win, y: int, line: str, cols: int, x_off: int = 0
 ) -> None:

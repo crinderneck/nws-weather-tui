@@ -5,6 +5,7 @@ NWS Weather TUI — Key dispatch, mouse handling, input prompts.
 
 from __future__ import annotations
 
+import threading
 import webbrowser
 from typing import Optional, TYPE_CHECKING
 
@@ -21,6 +22,8 @@ if TYPE_CHECKING:
 def handle_key(app: "App", ch: int) -> bool:
     if app.view == "favorites":
         return handle_favorites_key(app, ch)
+    if app.view == "dashboard":
+        return handle_dashboard_key(app, ch)
     if ch == curses.KEY_RESIZE:
         rows, cols = app.stdscr.getmaxyx()
         app._flash(f"Resized to {cols}\u00d7{rows}", 1.5)
@@ -36,6 +39,9 @@ def handle_key(app: "App", ch: int) -> bool:
         ord("h"): lambda: _set_view(app, "hourly"),
         ord("a"): lambda: _set_view(app, "alerts"),
         ord("m"): lambda: _set_view(app, "moon"),
+        ord("d"): lambda: _set_view(app, "afd"),
+        ord("H"): lambda: _set_view(app, "hwo"),
+        ord("D"): lambda: _set_view(app, "dashboard"),
         ord("l"): lambda: search_location(app),
         ord("r"): lambda: _do_refresh(app),
         ord("u"): lambda: _toggle_units(app),
@@ -142,6 +148,35 @@ def _parse_lat_lon(text: str) -> Optional[tuple[float, float]]:
     return None
 
 
+def _geocode_with_spinner(app: "App", query: str) -> Optional[tuple]:
+    """Run geocode_us() on a background thread so the UI stays responsive
+    (spinner keeps animating, terminal stays repaintable) instead of
+    freezing on the main thread for the duration of the HTTP request."""
+    result: dict = {}
+    done = threading.Event()
+
+    def _worker() -> None:
+        try:
+            result["value"] = app.client.geocode_us(query)
+        except Exception as e:
+            result["error"] = str(e)
+        done.set()
+
+    threading.Thread(target=_worker, daemon=True).start()
+    app.stdscr.nodelay(True)
+    try:
+        while not done.is_set():
+            app._show_loading("Searching location...")
+            app.stdscr.getch()  # drain/discard so keys typed meanwhile don't queue up
+            done.wait(0.05)
+    finally:
+        app.stdscr.nodelay(False)
+        app.stdscr.timeout(500)
+    if "error" in result:
+        raise RuntimeError(result["error"])
+    return result.get("value")
+
+
 def search_location(app: "App") -> bool:
     q = prompt_line(app, "Location (city/state, ZIP, or lat,lon): ")
     if q is None or not q.strip():
@@ -159,8 +194,7 @@ def search_location(app: "App") -> bool:
             else:
                 app._flash("Location search canceled.", 1.4)
             return True
-        app._show_loading("Searching location...")
-        g = app.client.geocode_us(q.strip())
+        g = _geocode_with_spinner(app, q.strip())
         if not g:
             app._flash(f"No match found for '{q}'.", 2.5)
             return True
@@ -249,6 +283,10 @@ def _jump_scroll(app: "App", position: str) -> None:
             app.hr_scroll = 0
         elif app.view == "help":
             app.help_scroll = 0
+        elif app.view == "afd":
+            app.afd_scroll = 0
+        elif app.view == "hwo":
+            app.hwo_scroll = 0
     elif position == "bottom":
         if app.view == "forecast":
             app.fc_scroll = max(0, len(app.forecast_periods) - 1)
@@ -258,6 +296,39 @@ def _jump_scroll(app: "App", position: str) -> None:
             app.hr_scroll = max(0, len(app.hourly_periods) - 1)
         elif app.view == "help":
             app.help_scroll = 9999
+        elif app.view == "afd":
+            app.afd_scroll = 9999
+        elif app.view == "hwo":
+            app.hwo_scroll = 9999
+
+
+def handle_dashboard_key(app: "App", ch: int) -> bool:
+    if ch in (ord("D"), ord("e"), 27):  # D, e, or Escape -> back
+        app.view = "current"
+        return True
+    if ch in (ord("q"), ord("Q")):
+        return False
+    if not app.favorites:
+        return True
+    if ch in (curses.KEY_DOWN, ord("j")):
+        app.dash_idx = clamp(app.dash_idx + 1, 0, len(app.favorites) - 1)
+    elif ch in (curses.KEY_UP, ord("k")):
+        app.dash_idx = clamp(app.dash_idx - 1, 0, len(app.favorites) - 1)
+    elif ch == ord("r"):
+        from dashboard import refresh_dashboard
+        refresh_dashboard(app, force=True)
+        app._flash("Refreshing dashboard...", 1.2)
+    elif ch in (curses.KEY_ENTER, 10, 13):
+        f = app.favorites[app.dash_idx]
+        try:
+            app.view = "current"
+            app._apply_location(
+                str(f.get("name") or "Favorite"), float(f["lat"]), float(f["lon"])
+            )
+            app._flash(f"Jumped to: {f.get('name', '—')}", 1.8)
+        except (KeyError, TypeError, ValueError):
+            app._flash("Favorite is invalid (missing lat/lon).", 2.0)
+    return True
 
 
 def scroll(app: "App", direction: int) -> None:
@@ -269,3 +340,7 @@ def scroll(app: "App", direction: int) -> None:
         app.hr_scroll += direction
     elif app.view == "help":
         app.help_scroll = max(0, app.help_scroll + direction)
+    elif app.view == "afd":
+        app.afd_scroll = max(0, app.afd_scroll + direction)
+    elif app.view == "hwo":
+        app.hwo_scroll = max(0, app.hwo_scroll + direction)

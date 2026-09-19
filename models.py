@@ -6,8 +6,9 @@ NWS Weather TUI — Data models (dataclasses).
 from __future__ import annotations
 
 import datetime as dt
+import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from icons import pick_icon
 from formatting import parse_iso, parse_first_number
@@ -27,6 +28,8 @@ class CurrentConditions:
     visibility_m: Optional[float]
     text_description: str
     icon_key: str
+    heat_index_c: Optional[float] = None
+    wind_chill_c: Optional[float] = None
 
 
 @dataclass
@@ -55,6 +58,8 @@ class HourlyPeriod:
     short_forecast: str
     icon_key: str
     pop: Optional[float]
+    precip_mm: Optional[float] = None
+    snow_mm: Optional[float] = None
 
 
 @dataclass
@@ -69,6 +74,7 @@ class AlertItem:
     expires: Optional[dt.datetime]
     description: str
     instruction: str
+    geometry: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -79,6 +85,12 @@ class AirQuality:
     primary_pollutant: Optional[str]
     pm2_5: Optional[float]
     pm10: Optional[float]
+
+
+@dataclass
+class UVIndex:
+    current: Optional[float]
+    daily_max: Optional[float]
 
 
 @dataclass
@@ -131,6 +143,8 @@ def extract_current(obs_json: Dict[str, Any]) -> CurrentConditions:
         visibility_m=v("visibility"),
         text_description=str(desc),
         icon_key=icon_key,
+        heat_index_c=v("heatIndex"),
+        wind_chill_c=v("windChill"),
     )
 
 
@@ -190,6 +204,39 @@ def extract_air_quality(aq_json: Dict[str, Any]) -> Optional["AirQuality"]:
         pm2_5=num("pm2_5"),
         pm10=num("pm10"),
     )
+
+
+def uv_category(uv: Optional[float]) -> str:
+    if uv is None:
+        return "—"
+    if uv < 3:
+        return "Low"
+    if uv < 6:
+        return "Moderate"
+    if uv < 8:
+        return "High"
+    if uv < 11:
+        return "Very High"
+    return "Extreme"
+
+
+def extract_uv_index(uv_json: Dict[str, Any]) -> Optional["UVIndex"]:
+    cur = (uv_json or {}).get("current")
+    daily = (uv_json or {}).get("daily")
+    cur_val = None
+    if isinstance(cur, dict):
+        v = cur.get("uv_index")
+        cur_val = v if isinstance(v, (int, float)) else None
+
+    max_val = None
+    if isinstance(daily, dict):
+        vals = daily.get("uv_index_max")
+        if isinstance(vals, list) and vals and isinstance(vals[0], (int, float)):
+            max_val = vals[0]
+
+    if cur_val is None and max_val is None:
+        return None
+    return UVIndex(current=cur_val, daily_max=max_val)
 
 
 def extract_forecast(fc_json: Dict[str, Any]) -> List[ForecastPeriod]:
@@ -270,6 +317,71 @@ def extract_hourly(h_json: Dict[str, Any]) -> List[HourlyPeriod]:
     return out
 
 
+_DURATION_RE = re.compile(
+    r"^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$"
+)
+
+
+def _parse_duration(s: str) -> dt.timedelta:
+    m = _DURATION_RE.match(s or "")
+    if not m:
+        return dt.timedelta()
+    days, hours, minutes, seconds = (int(x) if x else 0 for x in m.groups())
+    return dt.timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
+
+
+def _parse_grid_values(
+    values: Optional[List[Dict[str, Any]]]
+) -> List[Tuple[dt.datetime, dt.datetime, float]]:
+    out: List[Tuple[dt.datetime, dt.datetime, float]] = []
+    for item in values or []:
+        if not isinstance(item, dict):
+            continue
+        vt = item.get("validTime")
+        val = item.get("value")
+        if not isinstance(vt, str) or "/" not in vt or not isinstance(val, (int, float)):
+            continue
+        start_s, dur_s = vt.split("/", 1)
+        start = parse_iso(start_s)
+        if start is None:
+            continue
+        out.append((start, start + _parse_duration(dur_s), float(val)))
+    return out
+
+
+def extract_grid_precip(
+    grid_json: Dict[str, Any]
+) -> Dict[str, List[Tuple[dt.datetime, dt.datetime, float]]]:
+    """Parse NWS gridpoint quantitative precipitation / snowfall time series."""
+    props = (grid_json or {}).get("properties", {}) or {}
+    out: Dict[str, List[Tuple[dt.datetime, dt.datetime, float]]] = {}
+    for key, field in [
+        ("precip_mm", "quantitativePrecipitation"),
+        ("snow_mm", "snowfallAmount"),
+    ]:
+        obj = props.get(field)
+        values = obj.get("values") if isinstance(obj, dict) else None
+        out[key] = _parse_grid_values(values)
+    return out
+
+
+def merge_grid_precip_into_hourly(
+    hourly: List["HourlyPeriod"],
+    grid: Dict[str, List[Tuple[dt.datetime, dt.datetime, float]]],
+) -> None:
+    """Attach per-hour precip/snow accumulation (mm) from gridpoint data."""
+    for key, series in grid.items():
+        if not series:
+            continue
+        for h in hourly:
+            if h.start is None:
+                continue
+            for start, end, val in series:
+                if start <= h.start < end:
+                    setattr(h, key, val)
+                    break
+
+
 def extract_alerts(alerts_json: Dict[str, Any]) -> List[AlertItem]:
     feats = alerts_json.get("features", []) or []
     out: List[AlertItem] = []
@@ -293,6 +405,8 @@ def extract_alerts(alerts_json: Dict[str, Any]) -> List[AlertItem]:
                 else None,
                 description=str(props.get("description") or ""),
                 instruction=str(props.get("instruction") or ""),
+                geometry=(f or {}).get("geometry")
+                if isinstance((f or {}).get("geometry"), dict) else None,
             )
         )
     sev_rank = {"Extreme": 0, "Severe": 1, "Moderate": 2, "Minor": 3, "Unknown": 4}

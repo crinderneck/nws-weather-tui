@@ -135,6 +135,14 @@ class BoundaryClient:
         state_code: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         minlon, minlat, maxlon, maxlat = bbox4326
+        ck = (
+            f"state_lines_features:{(state_code or '').upper()}:"
+            f"{minlon:.6f},{minlat:.6f},{maxlon:.6f},{maxlat:.6f}"
+        )
+        cached = self.cache.get(ck)
+        if cached is not None:
+            return cached  # type: ignore[return-value]
+
         layer_url = NWS_REF_MAP_BASE + "/3"
         params = {
             "where": "1=1",
@@ -153,6 +161,7 @@ class BoundaryClient:
             feats = (r.json() or {}).get("features") or []
             if not isinstance(feats, list):
                 return []
+            result = feats
             if state_code and re.fullmatch(r"[A-Za-z]{2}", state_code):
                 st = state_code.upper()
                 filtered = [
@@ -164,8 +173,12 @@ class BoundaryClient:
                     ]
                 ]
                 if filtered:
-                    return filtered
-            return feats
+                    result = filtered
+            # State boundary geometry is effectively static, so cache it
+            # long-term (like state_bbox) instead of re-fetching every
+            # radar refresh cycle.
+            self.cache.set(ck, result, 86400)
+            return result
         except Exception as e:
             dbg(f"state_lines_features failed: {e}")
             return []

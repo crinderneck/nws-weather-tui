@@ -34,6 +34,7 @@ def reset_radar_state(app: "App") -> None:
     app._radar_ts_utc = ""
     app._radar_state_overlay = []
     app._radar_city_overlay = []
+    app._radar_alert_overlay = []
     app._radar_city_hitmap = {}
     app._radar_err = None
     app._radar_last = 0.0
@@ -134,6 +135,7 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
     ramp = str(radar_cfg.get("ascii_ramp", " .:-=+*#%@"))
     show_state_lines = bool(radar_cfg.get("show_state_lines", True))
     show_city_labels = bool(radar_cfg.get("show_city_labels", True))
+    show_alert_polygons = bool(radar_cfg.get("show_alert_polygons", True))
     max_city_labels = int(radar_cfg.get("max_city_labels", 20))
     n_frames = int(radar_cfg.get("animation_frames", 8))
     step_min = int(radar_cfg.get("animation_step_min", 5))
@@ -169,7 +171,12 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
         "ramp": ramp,
         "show_state_lines": show_state_lines,
         "show_city_labels": show_city_labels,
+        "show_alert_polygons": show_alert_polygons,
         "max_city_labels": max_city_labels,
+        "alert_geometries": [
+            {"geometry": a.geometry, "severity": a.severity}
+            for a in app.alerts if a.geometry
+        ],
         "n_frames": n_frames, "step_min": step_min,
         "lat": app.lat, "lon": app.lon,
         "state_code": app.state_code,
@@ -262,8 +269,19 @@ def _bg_radar_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
                 here=(ctx["lat"], ctx["lon"]),
             )
 
+        alert_overlay: List[str] = []
+        if ctx["show_alert_polygons"] and ctx["alert_geometries"]:
+            try:
+                alert_overlay = vector_lines_overlay(
+                    ctx["alert_geometries"], ctx["bbox"],
+                    ctx["target_cols"], ctx["target_rows"], mark="!",
+                )
+            except Exception as ae:
+                dbg(f"RADAR alert-polygon overlay failed: {ae}")
+
         result["state_overlay"] = state_overlay
         result["city_overlay"] = city_overlay
+        result["alert_overlay"] = alert_overlay
         result["city_hitmap"] = city_hitmap
         result["anim_playing"] = ctx["anim_playing"]
         result["ok"] = True
@@ -299,6 +317,7 @@ def apply_bg_radar(app: "App") -> None:
         set_current_radar_frame(app)
         app._radar_state_overlay = result.get("state_overlay", [])
         app._radar_city_overlay = result.get("city_overlay", [])
+        app._radar_alert_overlay = result.get("alert_overlay", [])
         app._radar_city_hitmap = result.get("city_hitmap", {})
         app._radar_err = None
         if not app._bg_weather_running:
@@ -309,5 +328,6 @@ def apply_bg_radar(app: "App") -> None:
         app._radar_kind = []
         app._radar_state_overlay = []
         app._radar_city_overlay = []
+        app._radar_alert_overlay = []
         app._radar_city_hitmap = {}
         app._radar_err = result.get("error", "unknown")
