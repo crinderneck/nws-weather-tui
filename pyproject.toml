@@ -41,11 +41,7 @@ Repository = "https://github.com/crinderneck/nws-weather-tui"
 Issues = "https://github.com/crinderneck/nws-weather-tui/issues"
 
 [project.scripts]
-nws-weather-tui = "nws_weather_tui:main"
+nws-weather-tui = "nws_weather_tui.__main__:run"
 
-[tool.setuptools]
-packages = ["nws_weather_tui"]
-py-modules = []
-
-[tool.setuptools.package-dir]
-nws_weather_tui = "."
+[tool.setuptools.packages.find]
+where = ["src"]

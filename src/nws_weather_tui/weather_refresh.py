@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+"""
+NWS Weather TUI — Weather data fetching (background thread pipeline).
+"""
+
+from __future__ import annotations
+
+import re
+import threading
+import time
+from typing import Any, Dict, TYPE_CHECKING
+
+from nws_weather_tui.helpers import dbg
+from nws_weather_tui.models import (
+    extract_air_quality,
+    extract_alerts,
+    extract_current,
+    extract_forecast,
+    extract_grid_series,
+    extract_hourly,
+    extract_uv_index,
+    merge_grid_into_hourly,
+)
+
+if TYPE_CHECKING:
+    from nws_weather_tui.app import App
+
+
+def refresh_all(app: "App", force: bool = False, allow_offline: bool = False) -> None:
+    now = time.time()
+    if not force and now < app.next_refresh:
+        return
+    if app._bg_weather_running:
+        return
+    app.next_refresh = now + app.auto_refresh_seconds
+    app._bg_weather_running = True
+    app._is_loading = True
+    app.status_msg = "/ Loading weather data..."
+    app.status_until = time.time() + 3600
+    ctx = {
+        "lat": app.lat, "lon": app.lon, "units": app.units,
+        "points_data": app.points_data, "forecast_url": app.forecast_url,
+        "hourly_url": app.hourly_url, "stations_url": app.stations_url,
+        "station_id": app.station_id, "hourly_hours": app.hourly_hours,
+        "office_id": app.office_id, "grid_data_url": app.grid_data_url,
+        "state_code": app.state_code,
+        "allow_offline": allow_offline,
+    }
+    gen = app._bg_generation
+    threading.Thread(
+        target=_bg_weather_fetch, args=(app, ctx, gen), daemon=True
+    ).start()
+
+
+def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
+    """Run in background thread — fetches all weather data."""
+    result: Dict[str, Any] = {"ok": False}
+    try:
+        points_data = ctx["points_data"]
+        station_id = ctx["station_id"]
+        forecast_url = ctx["forecast_url"]
+        hourly_url = ctx["hourly_url"]
+        stations_url = ctx["stations_url"]
+        office_id = ctx["office_id"]
+        grid_data_url = ctx["grid_data_url"]
+
+        if not points_data:
+            points_data = app.client.points(ctx["lat"], ctx["lon"])
+            props = (points_data or {}).get("properties", {}) or {}
+            forecast_url = props.get("forecast")
+            hourly_url = props.get("forecastHourly")
+            stations_url = props.get("observationStations")
+            rs = props.get("radarStation")
+            result["radar_station"] = rs.strip() if isinstance(rs, str) and rs else None
+            gdu = props.get("forecastGridData")
+            grid_data_url = gdu if isinstance(gdu, str) and gdu else None
+            result["grid_data_url"] = grid_data_url
+            rel = (props.get("relativeLocation") or {}).get("properties", {})
+            st = rel.get("state") if isinstance(rel, dict) else None
+            result["state_code"] = (
+                st.strip().upper()
+                if isinstance(st, str) and re.fullmatch(r"[A-Za-z]{2}", st.strip())
+                else None
+            )
+            cwa = props.get("cwa")
+            office_id = cwa.strip().upper() if isinstance(cwa, str) and cwa else None
+            result["office_id"] = office_id
+            result["points_data"] = points_data
+            result["forecast_url"] = forecast_url
+            result["hourly_url"] = hourly_url
+            result["stations_url"] = stations_url
+
+        if not station_id and stations_url:
+            stations = app.client.stations(stations_url)
+            feats = (stations or {}).get("features", []) or []
+            if feats:
+                sid = ((feats[0] or {}).get("properties", {}) or {}).get("stationIdentifier")
+                if isinstance(sid, str) and sid:
+                    station_id = sid
+                    result["station_id"] = sid
+
+        if station_id:
+            result["current"] = extract_current(
+                app.client.latest_observation(station_id)
+            )
+        if forecast_url:
+            result["forecast_periods"] = extract_forecast(
+                app.client.forecast(forecast_url, ctx["units"])
+            )
+        if hourly_url:
+            hf = extract_hourly(
+                app.client.forecast_hourly(hourly_url, ctx["units"])
+            )
+            h = ctx["hourly_hours"]
+            hourly_periods = hf[:h] if h > 0 else hf
+            # Gridpoint series (precip, feels-like, gusts, sky, thunder) are
+            # supplementary — a failure here must not take the whole refresh
+            # offline, and simply leaves those hourly fields empty.
+            if grid_data_url:
+                try:
+                    grid = extract_grid_series(
+                        app.client.forecast_grid_data(grid_data_url)
+                    )
+                    merge_grid_into_hourly(hourly_periods, grid)
+                except Exception as ge:
+                    dbg(f"Gridpoint data fetch failed: {ge}")
+            result["hourly_periods"] = hourly_periods
+
+        result["alerts"] = extract_alerts(
+            app.client.alerts(ctx["lat"], ctx["lon"])
+        )
+        # Alerts elsewhere in the state give the Alerts view something to
+        # say when this point has none; supplementary, so failures are quiet.
+        state = result.get("state_code", ctx["state_code"])
+        if state and not result["alerts"]:
+            try:
+                result["area_alerts"] = extract_alerts(app.client.alerts_area(state))
+            except Exception as ae:
+                dbg(f"Area alerts fetch failed: {ae}")
+        # AFD/HWO are supplementary forecaster narratives — failures here
+        # must not take the whole refresh offline.
+        if office_id:
+            result["afd"] = app.client.forecast_discussion(office_id)
+            result["afd_earlier"] = app.client.earlier_forecast_discussions(office_id)
+            result["hwo"] = app.client.hazardous_weather_outlook(office_id)
+        # Air quality and UV index are supplementary, non-NWS sources —
+        # failures there are swallowed internally and must not take the
+        # whole refresh offline.
+        result["air_quality"] = extract_air_quality(
+            app.client.air_quality(ctx["lat"], ctx["lon"])
+        )
+        result["uv_index"] = extract_uv_index(
+            app.client.uv_index(ctx["lat"], ctx["lon"])
+        )
+        result["ok"] = True
+
+    except Exception as e:
+        result["error"] = f"{type(e).__name__}: {e}"
+        result["allow_offline"] = ctx["allow_offline"]
+
+    result["_gen"] = gen
+    with app._bg_lock:
+        app._bg_weather_pending = result
+
+
+def apply_bg_weather(app: "App") -> None:
+    """Main-thread: apply completed background weather results."""
+    with app._bg_lock:
+        result = app._bg_weather_pending
+        app._bg_weather_pending = None
+    if result is None:
+        return
+    if result.get("_gen") != app._bg_generation:
+        app._bg_weather_running = False
+        return
+    app._bg_weather_running = False
+    app._is_loading = app._bg_radar_running
+
+    if result.get("ok"):
+        if "points_data" in result:
+            app.points_data = result["points_data"]
+        if "forecast_url" in result:
+            app.forecast_url = result["forecast_url"]
+        if "hourly_url" in result:
+            app.hourly_url = result["hourly_url"]
+        if "stations_url" in result:
+            app.stations_url = result["stations_url"]
+        if "station_id" in result:
+            app.station_id = result["station_id"]
+        if "radar_station" in result:
+            app.radar_station = result["radar_station"]
+        if "state_code" in result:
+            app.state_code = result["state_code"]
+            if not app.state_code:
+                m = re.search(r",\s*([A-Za-z]{2})(?:\b|$)", app.location_name or "")
+                app.state_code = m.group(1).upper() if m else None
+        if "office_id" in result:
+            app.office_id = result["office_id"]
+        if "grid_data_url" in result:
+            app.grid_data_url = result["grid_data_url"]
+        if "afd" in result and result["afd"]:
+            app.afd = result["afd"]
+        if "afd_earlier" in result and result["afd_earlier"]:
+            app.afd_earlier = result["afd_earlier"]
+        if "hwo" in result and result["hwo"]:
+            app.hwo = result["hwo"]
+
+        if "current" in result:
+            app.current = result["current"]
+        if "forecast_periods" in result:
+            app.forecast_periods = result["forecast_periods"]
+        if "hourly_periods" in result:
+            app.hourly_periods = result["hourly_periods"]
+        if "alerts" in result:
+            app.alerts = result["alerts"]
+            app.area_alerts = result.get("area_alerts", [])
+        if "air_quality" in result:
+            app.air_quality = result["air_quality"]
+        if "uv_index" in result:
+            app.uv_index = result["uv_index"]
+
+        app.offline_mode = False
+        app.offline_reason = ""
+        app.last_refresh = time.time()
+        app.next_refresh = time.time() + app.auto_refresh_seconds
+        app._save_state()
+        app._flash("Updated.", 1.1)
+    else:
+        app.offline_mode = True
+        app.offline_reason = result.get("error", "unknown")
+        app.next_refresh = time.time() + 60
+        if result.get("allow_offline") and app._load_state():
+            app._flash(f"Offline: showing last saved data ({app.offline_reason})", 4.0)
+        else:
+            app._flash(f"Refresh failed: {app.offline_reason}", 6.0)
+
+    if app.startup_warning:
+        app._flash(app.startup_warning, 10.0)
+        app.startup_warning = None
