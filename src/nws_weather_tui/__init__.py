@@ -6,4 +6,4 @@ doesn't pull in curses and the whole app. The entry point is
 ``nws_weather_tui.__main__:run``.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"

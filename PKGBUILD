@@ -1,6 +1,6 @@
 # Maintainer: crinderneck <cjrinderneck@protonmail.com>
 pkgname=nws-weather-tui
-pkgver=0.2.0
+pkgver=0.2.1
 pkgrel=1
 pkgdesc="A terminal-based weather application for the US, powered by the National Weather Service API"
 arch=('any')
