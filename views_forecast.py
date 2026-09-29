@@ -112,6 +112,7 @@ CARD_MIN_W = 15   # narrowest card that still fits the big icon
 CARD_MAX_W = 60
 GAP = 1           # separator column between cards
 ICON_ROWS = 5
+TEXT_PAD = 3      # blank columns between the description text and the separators
 
 
 def _card_attr_temp(v: Optional[float], unit: str) -> int:
@@ -158,7 +159,7 @@ def _card_lines(card: DayCard, w: int, app: "App") -> List[Tuple[str, int, bool]
             continue
         out.append(("", 0, False))
         out.append((label, curses.color_pair(1) | curses.A_BOLD, False))
-        for wl in wrap_lines(period.detailed_forecast, w):
+        for wl in wrap_lines(period.detailed_forecast, max(1, w - 2 * TEXT_PAD)):
             out.append((wl, 0, False))
     return out
 
@@ -220,10 +221,12 @@ def draw_forecast(app: "App", win) -> None:
         for i, (text, attr, centered) in enumerate(lines):
             if y >= bottom:
                 break
+            # Description text sits TEXT_PAD columns in from both separators.
+            tx, tw = (x, card_w) if centered else (x + TEXT_PAD, max(1, card_w - 2 * TEXT_PAD))
             if y == bottom - 1 and i < len(lines) - 1:
-                text = (text[: card_w - 1] + "\u2026") if text else "\u2026"
-            safe_addstr(win, y, x + ((card_w - len(text)) // 2 if centered else 0),
-                        text[:card_w], attr)
+                text = (text[: tw - 1] + "\u2026") if text else "\u2026"
+            safe_addstr(win, y, tx + ((tw - len(text)) // 2 if centered else 0),
+                        text[:tw], attr)
             y += 1
 
     if len(cards) > visible:
