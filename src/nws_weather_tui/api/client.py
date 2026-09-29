@@ -119,13 +119,13 @@ class NWSClient:
         return self._get_json(url, ttl=self.ttls["alerts"])
 
     def alerts_area(self, state_code: str) -> Dict[str, Any]:
-        """Active alerts anywhere in a state (e.g. "WA")."""
+        """Active alerts anywhere in a state (e.g. "OH")."""
         url = f"{BASE}/alerts/active?area={state_code.strip().upper()}"
         return self._get_json(url, ttl=self.ttls["alerts"])
 
     def forecast_discussion(self, office_id: str) -> Optional[Dict[str, Any]]:
         """Fetch the latest Area Forecast Discussion (AFD) text product
-        issued by a WFO (e.g. "OTX")."""
+        issued by a WFO (e.g. "ILN")."""
         return self._latest_text_product(office_id, "AFD", ttl_key="afd")
 
     def earlier_forecast_discussions(
@@ -142,7 +142,7 @@ class NWSClient:
 
     def hazardous_weather_outlook(self, office_id: str) -> Optional[Dict[str, Any]]:
         """Fetch the latest Hazardous Weather Outlook (HWO) text product
-        issued by a WFO (e.g. "OTX") — a rolling 7-day heads-up on
+        issued by a WFO (e.g. "ILN") — a rolling 7-day heads-up on
         potential severe/hazardous weather."""
         return self._latest_text_product(office_id, "HWO", ttl_key="hwo")
 

@@ -43,9 +43,9 @@ DEBUG_LOG_PATH = os.path.join(CONFIG_DIR, "debug.log")
 # ---------------------------------------------------------------------------
 
 DEFAULT_CONFIG: Dict[str, Any] = {
-    "location_name": "Spokane, WA",
-    "lat": 47.6588,
-    "lon": -117.4260,
+    "location_name": "Columbus, OH",
+    "lat": 39.9612,
+    "lon": -82.9988,
     "units": "us",
     "use_24h": False,
     "auto_refresh_seconds": 300,
