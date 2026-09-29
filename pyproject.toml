@@ -1,13 +1,15 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+# 77+ is needed for the SPDX `license = "MIT"` string (PEP 639).
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "nws-weather-tui"
-version = "0.1.0"
+dynamic = ["version"]
 description = "A terminal-based weather application for the US, powered by the National Weather Service API"
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.8"
 authors = [
     { name = "crinderneck" },
@@ -33,7 +35,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-astral = ["astral"]
+astral = ["astral"]  # sunrise/sunset, moonrise/moonset
+numpy = ["numpy"]    # faster radar decoding
+all = ["astral", "numpy"]
 
 [project.urls]
 Homepage = "https://github.com/crinderneck/nws-weather-tui"
@@ -45,3 +49,7 @@ nws-weather-tui = "nws_weather_tui.__main__:run"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.dynamic]
+# Single source of truth for the version; the release workflow checks the tag matches it.
+version = { attr = "nws_weather_tui.__version__" }
