@@ -55,9 +55,13 @@ from weather_refresh import refresh_all
 
 
 class App:
-    def __init__(self, stdscr, cfg: Dict[str, Any]) -> None:
+    def __init__(
+        self, stdscr, cfg: Dict[str, Any], startup_warning: Optional[str] = None
+    ) -> None:
         self.stdscr = stdscr
         self.cfg = cfg
+        # Shown once the first refresh finishes, so the spinner doesn't hide it.
+        self.startup_warning: Optional[str] = startup_warning
 
         # --- Location & preferences ---
         self.location_name: str = str(cfg.get("location_name", "—"))
@@ -286,8 +290,9 @@ class App:
         if not self.paused:
             refresh_all(self, force=False, allow_offline=True)
 
-        # Update loading spinner
-        if self._bg_weather_running or self._bg_radar_running:
+        # Update loading spinner, but let an active _flash() message finish first
+        flash_active = not self._is_loading and time.time() < self.status_until
+        if (self._bg_weather_running or self._bg_radar_running) and not flash_active:
             frame = self._spinner_frames[self._spinner_idx % len(self._spinner_frames)]
             self._spinner_idx += 1
             self._is_loading = True
@@ -381,9 +386,9 @@ class App:
 # ---------------------------------------------------------------------------
 
 def main(stdscr) -> None:
-    cfg = load_config()
+    cfg, config_warning = load_config()
     signal.signal(signal.SIGINT, lambda *_: None)
-    app = App(stdscr, cfg)
+    app = App(stdscr, cfg, startup_warning=config_warning)
     app.run()
 
 

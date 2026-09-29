@@ -143,7 +143,7 @@ In the favorites editor: `j`/`k` move, `J`/`K` reorder, `Enter` jumps, `a` adds,
 
 ## Configuration
 
-Settings live in `~/.config/nws-weather-tui/config.json`, which is created with defaults on first run and updated as you change location, units or favorites. The last fetched data is kept in `state.json` alongside it for offline use.
+Settings live in `~/.config/nws-weather-tui/config.json`, which is created with defaults on first run and updated as you change location, units or favorites. The last fetched data is kept in `state.json` alongside it for offline use. If `config.json` can't be parsed (for example after a hand-edit typo), it's renamed to `config.json.broken-<timestamp>` and the app starts with defaults, so nothing is lost.
 
 | Setting | Default | Description |
 |---------|---------|-------------|

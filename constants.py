@@ -13,7 +13,8 @@ import json
 import os
 import re
 import threading
-from typing import Any, Dict, Optional
+import time
+from typing import Any, Dict, Optional, Tuple
 
 ZIP_RE = re.compile(r"^\d{5}(?:-\d{4})?$")
 
@@ -125,15 +126,42 @@ def deep_merge(defaults: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, 
     return out
 
 
-def load_config() -> Dict[str, Any]:
+def load_config() -> Tuple[Dict[str, Any], Optional[str]]:
+    """Load the config, merged over defaults.
+
+    Returns ``(cfg, warning)``. ``warning`` is set when the file existed but
+    couldn't be used; the file is moved aside rather than overwritten, so a
+    typo from hand-editing never silently loses favorites.
+    """
     ensure_dir(CONFIG_DIR)
-    on_disk = load_json(CONFIG_PATH)
-    if on_disk is None:
+    try:
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+            on_disk = json.load(f)
+    except FileNotFoundError:
         save_json(CONFIG_PATH, DEFAULT_CONFIG)
-        return dict(DEFAULT_CONFIG)
+        return dict(DEFAULT_CONFIG), None
+    except (OSError, ValueError) as e:
+        return _quarantine_config(f"could not be read ({e})")
+    if not isinstance(on_disk, dict):
+        return _quarantine_config("is not a JSON object")
     cfg = deep_merge(DEFAULT_CONFIG, on_disk)
     save_json(CONFIG_PATH, cfg)
-    return cfg
+    return cfg, None
+
+
+def _quarantine_config(reason: str) -> Tuple[Dict[str, Any], Optional[str]]:
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    backup = f"{CONFIG_PATH}.broken-{stamp}"
+    try:
+        os.replace(CONFIG_PATH, backup)
+    except OSError as e:
+        return dict(DEFAULT_CONFIG), (
+            f"Config {reason}; using defaults. Could not back it up: {e}"
+        )
+    save_json(CONFIG_PATH, DEFAULT_CONFIG)
+    return dict(DEFAULT_CONFIG), (
+        f"Config {reason}; using defaults. Old file kept as {os.path.basename(backup)}"
+    )
 
 
 BASE = "https://api.weather.gov"
