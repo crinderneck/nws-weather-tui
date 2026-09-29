@@ -233,3 +233,7 @@ def apply_bg_weather(app: "App") -> None:
             app._flash(f"Offline: showing last saved data ({app.offline_reason})", 4.0)
         else:
             app._flash(f"Refresh failed: {app.offline_reason}", 6.0)
+
+    if app.startup_warning:
+        app._flash(app.startup_warning, 10.0)
+        app.startup_warning = None
