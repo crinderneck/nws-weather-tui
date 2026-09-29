@@ -86,6 +86,7 @@ def _build_state_dict(app: "App") -> Dict[str, Any]:
         "state_code": app.state_code,
         "office_id": app.office_id,
         "afd": app.afd,
+        "afd_earlier": app.afd_earlier,
         "hwo": app.hwo,
     })
 
@@ -139,6 +140,9 @@ def load_app_state(app: "App") -> bool:
     afd = st.get("afd")
     if isinstance(afd, dict) and afd.get("text"):
         app.afd = afd
+    earlier = st.get("afd_earlier")
+    if isinstance(earlier, list):
+        app.afd_earlier = [p for p in earlier if isinstance(p, dict) and p.get("text")]
     hwo = st.get("hwo")
     if isinstance(hwo, dict) and hwo.get("text"):
         app.hwo = hwo
@@ -196,7 +200,7 @@ def load_app_state(app: "App") -> bool:
         ("forecast_periods", ForecastPeriod, [
             "name", "start", "end", "is_daytime", "temperature",
             "temperature_unit", "wind_speed", "wind_dir",
-            "short_forecast", "detailed_forecast", "icon_key",
+            "short_forecast", "detailed_forecast", "icon_key", "pop",
         ]),
         ("hourly_periods", HourlyPeriod, [
             "start", "temperature", "temperature_unit", "wind_speed",

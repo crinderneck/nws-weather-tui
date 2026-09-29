@@ -45,15 +45,10 @@ def fmt_time(t: Optional[object], use_24h: bool, with_date: bool = False) -> str
     tt = _to_local(t)
     if not tt:
         return "\u2014"
+    clock = tt.strftime("%H:%M") if use_24h else tt.strftime("%I:%M%p").lstrip("0").lower()
     if with_date:
-        return (
-            tt.strftime("%Y-%m-%d %H:%M")
-            if use_24h
-            else tt.strftime("%Y-%m-%d %I:%M %p").lstrip("0")
-        )
-    return (
-        tt.strftime("%H:%M") if use_24h else tt.strftime("%I:%M%p").lstrip("0").lower()
-    )
+        return f"{tt.strftime('%a %b')} {tt.day}, {clock}"
+    return clock
 
 
 def fmt_num(x: Optional[float], digits: int = 0) -> str:

@@ -53,7 +53,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "user_agent": os.getenv(
         "WEATHER_APP_UA", "NWSWeatherTUI/1.0 (contact: cjrinderneck@proton.me)"
     ),
-    "hourly_hours": 24,
+    "hourly_hours": 0,  # 0 = everything the API returns (~156h)
     "show_radar_map": True,
     "favorites": [],
     "radar": {

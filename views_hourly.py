@@ -7,8 +7,10 @@ the top of the page calls out what is actually *notable* in the coming
 hours: when precipitation starts and stops, thunder risk, gusts, feels-like
 divergence, swings that run against the diurnal cycle (fronts), humidity
 and cloud transitions. Below that a condition ribbon shows at a glance
-when the sky is clear, cloudy or wet, and the table breaks the hours up by
-day with sunrise/sunset markers and colour-coded values.
+when the sky is clear, cloudy or wet across the whole forecast. When the
+terminal is wide enough every day gets its own column with hours running
+down the rows; otherwise a scrolling table breaks the hours up by day with
+sunrise/sunset markers and colour-coded values.
 """
 
 from __future__ import annotations
@@ -28,6 +30,7 @@ if TYPE_CHECKING:
     from app import App
 
 KMH_PER_MPH = 1.609344
+MIN_POP = 10  # precip chances below this are noise; leave the cell blank
 
 # Colour pairs (see curses_init.py).
 C_CYAN = 1
@@ -83,17 +86,38 @@ def _hr(h: HourlyPeriod, app: "App") -> str:
     return t.strftime("%I%p").lstrip("0").lower()
 
 
+def _at(h: HourlyPeriod, app: "App") -> str:
+    """Hour label with a weekday once it's no longer today: '4pm' / 'Wed 4pm'."""
+    t = _local(h.start)
+    if t is None or t.date() == dt.date.today():
+        return _hr(h, app)
+    return f"{t.strftime('%a')} {_hr(h, app)}"
+
+
 def _span(hrs: List[HourlyPeriod], i: int, j: int, app: "App") -> str:
     """Describe hours i..j inclusive as a time range."""
     if i == 0 and j == len(hrs) - 1:
         return "all period"
     if i == 0:
-        return f"now–{_hr(hrs[j], app)}"
+        return f"now–{_at(hrs[j], app)}"
     if j == len(hrs) - 1:
-        return f"from {_hr(hrs[i], app)}"
+        return f"from {_at(hrs[i], app)}"
     if i == j:
-        return f"around {_hr(hrs[i], app)}"
-    return f"{_hr(hrs[i], app)}–{_hr(hrs[j], app)}"
+        return f"around {_at(hrs[i], app)}"
+    ti, tj = _local(hrs[i].start), _local(hrs[j].start)
+    same_day = ti is not None and tj is not None and ti.date() == tj.date()
+    end = _hr(hrs[j], app) if same_day else _at(hrs[j], app)
+    return f"{_at(hrs[i], app)}–{end}"
+
+
+def _wind_label(h: HourlyPeriod, with_unit: bool) -> str:
+    """'SW 12 mph' / 'SW 12', or 'calm' when there's no wind to speak of."""
+    if h.wind_speed_num is not None and h.wind_speed_num < 1:
+        return "calm"
+    if with_unit:
+        return f"{h.wind_dir} {h.wind_speed}".strip()
+    speed = "" if h.wind_speed_num is None else f"{h.wind_speed_num:.0f}"
+    return f"{h.wind_dir} {speed}".strip()
 
 
 def _runs(flags: List[bool]) -> List[Tuple[int, int]]:
@@ -163,8 +187,9 @@ def _precip_insight(hrs: List[HourlyPeriod], app: "App") -> Insight:
         if peak >= 15:
             return ("Precip", curses.color_pair(C_CYAN),
                     f"Mostly dry — only a slight chance (max {peak:.0f}%)")
+        horizon = f"{len(hrs)}h" if len(hrs) <= 48 else f"{len(hrs) // 24} days"
         return ("Precip", curses.color_pair(C_GREEN),
-                f"Dry for the next {len(hrs)}h")
+                f"Dry for the next {horizon}")
 
     i, j = runs[0]
     pk = _argmax(hrs, lambda h: h.pop, i, j) or i
@@ -172,10 +197,10 @@ def _precip_insight(hrs: List[HourlyPeriod], app: "App") -> Insight:
     p = pops[pk]
     odds = "likely" if p >= 60 else "possible"
     if i == 0 and j < len(hrs) - 1:
-        text = f"{kind} {odds} now, easing after {_hr(hrs[j], app)}"
+        text = f"{kind} {odds} now, easing after {_at(hrs[j], app)}"
     else:
         text = f"{kind} {odds} {_span(hrs, i, j, app)}"
-    text += f" · peak {p:.0f}% at {_hr(hrs[pk], app)}{amount}"
+    text += f" · peak {p:.0f}% at {_at(hrs[pk], app)}{amount}"
     if len(runs) > 1:
         text += f" · again {_span(hrs, *runs[1], app)}"
     attr = curses.color_pair(C_BLUE) | (curses.A_BOLD if p >= 60 else 0)
@@ -206,14 +231,14 @@ def _wind_insight(hrs: List[HourlyPeriod], app: "App", is_f: bool) -> Optional[I
             attr = curses.color_pair(C_RED if strong else C_YELLOW) | curses.A_BOLD
             return ("Wind", attr,
                     (f"Gusty {_span(hrs, i, j, app)} · up to {gust:.0f} {unit}"
-                     f" at {_hr(hrs[pk], app)}"))
+                     f" at {_at(hrs[pk], app)}"))
         return ("Wind", curses.color_pair(C_GREEN),
                 f"Light — gusts stay under {max(gust, 1):.0f} {unit}")
     spk = _argmax(hrs, lambda h: h.wind_speed_num)
     if spk is None:
         return None
     return ("Wind", curses.A_DIM,
-            f"Strongest {hrs[spk].wind_speed} at {_hr(hrs[spk], app)}")
+            f"Strongest {hrs[spk].wind_speed} at {_at(hrs[spk], app)}")
 
 
 def _feels_insight(hrs: List[HourlyPeriod], app: "App", is_f: bool) -> Optional[Insight]:
@@ -316,7 +341,7 @@ def _sky_insight(hrs: List[HourlyPeriod], app: "App") -> Optional[Insight]:
         if st and cur and st != cur:
             verb = "Clearing" if st == "clear" else "Clouding over"
             return ("Sky", curses.color_pair(C_CYAN),
-                    f"{verb} around {_hr(hrs[i], app)} ({s:.0f}% cover)")
+                    f"{verb} around {_at(hrs[i], app)} ({s:.0f}% cover)")
         cur = cur or st
     avg = sum(s for s in sky if s is not None) / max(1, sum(s is not None for s in sky))
     desc = (
@@ -371,32 +396,56 @@ def _ribbon_cell(h: HourlyPeriod) -> Tuple[str, int]:
     return "▒", curses.A_DIM
 
 
+def _group_rep(grp: List[HourlyPeriod]) -> HourlyPeriod:
+    """The hour that best represents a ribbon cell: the wettest if any
+    precipitation is on the cards, otherwise the middle hour."""
+    wet = max(grp, key=lambda h: h.pop or 0)
+    if (wet.pop or 0) >= 15:
+        return wet
+    return grp[len(grp) // 2]
+
+
 def _draw_ribbon(win, y: int, cols: int, hrs: List[HourlyPeriod], app: "App") -> int:
     """Draw the hour ticks + condition ribbon + legend. Returns rows used."""
     avail = cols - 2
-    cell = clamp(avail // max(1, len(hrs)), 1, 3)
-    n = min(len(hrs), avail // cell)
+    # Several hours per cell when the whole period won't fit one per column.
+    step = max(1, -(-len(hrs) // max(1, avail)))
+    groups = [hrs[k:k + step] for k in range(0, len(hrs), step)]
+    n = len(groups)
     if n < 6:
         return 0
+    cell = clamp(avail // n, 1, 3)
     x0 = max(0, (cols - n * cell) // 2)
+    # Past two days, hour ticks get too crowded to tell days apart — label
+    # each midnight with its weekday instead.
+    by_day = len(hrs) > 48
 
     # Tick labels, only where they don't collide with the previous one.
     next_free = 0
-    for i in range(n):
-        t = _local(hrs[i].start)
-        if t is None:
-            continue
-        if i == 0 or t.hour % 3 == 0:
-            label = "now" if i == 0 else _hr(hrs[i], app)
-            x = x0 + i * cell
-            if x >= next_free and x + len(label) <= cols - 1:
-                attr = curses.A_BOLD if i == 0 or t.hour == 0 else curses.A_DIM
-                safe_addstr(win, y, x, label, attr)
-                next_free = x + len(label) + 1
+    for g, grp in enumerate(groups):
+        label = ""
+        bold = g == 0
+        if g == 0:
+            label = "now"
+        elif by_day:
+            midnight = next(
+                (t for t in (_local(h.start) for h in grp) if t is not None and t.hour == 0),
+                None,
+            )
+            if midnight is not None:
+                label, bold = midnight.strftime("%a"), True
+        else:
+            t = _local(grp[0].start)
+            if t is not None and t.hour % 3 == 0:
+                label, bold = _hr(grp[0], app), t.hour == 0
+        x = x0 + g * cell
+        if label and x >= next_free and x + len(label) <= cols - 1:
+            safe_addstr(win, y, x, label, curses.A_BOLD if bold else curses.A_DIM)
+            next_free = x + len(label) + 1
 
-    for i in range(n):
-        ch, attr = _ribbon_cell(hrs[i])
-        safe_addstr(win, y + 1, x0 + i * cell, ch * cell, attr)
+    for g, grp in enumerate(groups):
+        ch, attr = _ribbon_cell(_group_rep(grp))
+        safe_addstr(win, y + 1, x0 + g * cell, ch * cell, attr)
 
     legend: List[Tuple[str, int]] = [
         ("▀ sun  ", curses.color_pair(C_YELLOW)),
@@ -526,9 +575,9 @@ def draw_hourly(app: "App", win) -> None:
     if first is not None and last is not None:
         span = f"  {first.strftime('%a')} {_hr(hrs[0], app)} → " \
                f"{last.strftime('%a')} {_hr(hrs[-1], app)}"
-    safe_addstr(win, 0, 0, f"Hourly · next {len(hrs)}h"[: cols - 1], curses.A_BOLD)
-    safe_addstr(win, 0, len(f"Hourly · next {len(hrs)}h"), span[: max(0, cols - 30)],
-                curses.A_DIM)
+    title = f"Next {len(hrs)} hours"
+    safe_addstr(win, 0, 0, title[: cols - 1], curses.A_BOLD)
+    safe_addstr(win, 0, len(title), span[: max(0, cols - 30)], curses.A_DIM)
 
     # ---- At a glance ------------------------------------------------------
     y = 2
@@ -542,11 +591,30 @@ def draw_hourly(app: "App", win) -> None:
         y += 1
     y += 1
 
+    days = _days(hrs)
+    col_w = _grid_col_w(cols, len(days))
+    if col_w is not None and len(days) >= 2:
+        # Only spend rows on the ribbon if the 24 hour rows still fit after it.
+        if rows - y - 4 >= GRID_HEAD + 24 + 1:
+            used = _draw_ribbon(win, y, cols, hrs, app)
+            y += used + (1 if used else 0)
+        _draw_grid(win, y, rows, cols, hrs, app, days, col_w, is_f)
+        win.noutrefresh()
+        return
+
     if rows - y >= 12:
         used = _draw_ribbon(win, y, cols, hrs, app)
         y += used + (1 if used else 0)
+    _draw_table(win, y, rows, cols, hrs, app, days, is_f)
+    win.noutrefresh()
 
-    # ---- Table -----------------------------------------------------------
+
+def _draw_table(
+    win, y: int, rows: int, cols: int, hrs: List[HourlyPeriod], app: "App",
+    days: List[Tuple[dt.date, Dict[int, int]]], is_f: bool,
+) -> None:
+    """One row per hour, scrolled vertically, for terminals too narrow for
+    the day-column grid."""
     # (key, header, width, min terminal cols to show it)
     columns = [
         ("time", "Time", 7, 0),
@@ -601,8 +669,209 @@ def draw_hourly(app: "App", win) -> None:
     hint = "j/k ↑↓ scroll"
     if len(table) > view_rows:
         hint = f"rows {app.hr_scroll + 1}–{shown_to} of {len(table)} · " + hint
+    if len(days) >= 2:
+        # +2 for the 1-column margin either side of the body window.
+        need = GRID_GUTTER + len(days) * (GRID_MIN_W + 1) + 1 + 2
+        hint += f" · widen to {need}+ cols to see days side by side"
     safe_addstr(win, rows - 1, 0, hint[: cols - 1], curses.A_DIM)
-    win.noutrefresh()
+
+
+# ---------------------------------------------------------------------------
+# Day-column grid (wide terminals)
+# ---------------------------------------------------------------------------
+
+GRID_GUTTER = 6   # hour-of-day labels down the left edge
+GRID_HEAD = 2     # day name + high/low rows above the columns
+GRID_MIN_W = 15   # narrowest day column: marker, icon, temp, precip
+GRID_WIND_W = 22  # wide enough to add wind
+GRID_TEXT_W = 32  # wide enough to add the short forecast
+
+
+def _days(hrs: List[HourlyPeriod]) -> List[Tuple[dt.date, Dict[int, int]]]:
+    """Hour indices grouped by local date, keyed by hour of day."""
+    out: List[Tuple[dt.date, Dict[int, int]]] = []
+    for idx, h in enumerate(hrs):
+        t = _local(h.start)
+        if t is None:
+            continue
+        if not out or out[-1][0] != t.date():
+            out.append((t.date(), {}))
+        out[-1][1][t.hour] = idx
+    return out
+
+
+def _grid_col_w(cols: int, ndays: int) -> Optional[int]:
+    """Width of each day column if every day fits side by side, else None."""
+    if ndays <= 0:
+        return None
+    w = (cols - 1 - GRID_GUTTER) // ndays - 1  # 1 for the separator
+    return w if w >= GRID_MIN_W else None
+
+
+def _sun_marks(days: List[Tuple[dt.date, Dict[int, int]]], app: "App") -> Dict[
+    Tuple[dt.date, int], str
+]:
+    """(date, hour) -> '↑' / '↓' for the hour holding sunrise / sunset."""
+    marks: Dict[Tuple[dt.date, int], str] = {}
+    for d, _ in days:
+        rise, sset = get_sunrise_sunset(app.lat, app.lon, d)
+        for when, glyph in ((rise, "↑"), (sset, "↓")):
+            t = _local(when)
+            if t is not None:
+                marks[(t.date(), t.hour)] = glyph
+    return marks
+
+
+def _day_summaries(
+    days: List[Tuple[dt.date, Dict[int, int]]], hrs: List[HourlyPeriod], app: "App",
+    is_f: bool,
+) -> List[Tuple[str, List[Tuple[str, int]]]]:
+    """Rows of (gutter label, per-day (text, attr)) summarising each day."""
+    light: List[Tuple[str, int]] = []
+    feels: List[Tuple[str, int]] = []
+    gusts: List[Tuple[str, int]] = []
+    rain: List[Tuple[str, int]] = []
+    unit = "mph" if is_f else "km/h"
+    for d, by_hour in days:
+        rise, sset = get_sunrise_sunset(app.lat, app.lon, d)
+        if rise and sset:
+            # The lookup can hand back the previous evening's sunset (UTC
+            # date boundary), so wrap into a single day.
+            mins = int((sset - rise).total_seconds() // 60) % (24 * 60)
+            light.append((f"{mins // 60}h {mins % 60:02d}m daylight", curses.A_DIM))
+        else:
+            light.append(("", 0))
+        day = [hrs[i] for i in by_hour.values()]
+        fl = [_deg(h.apparent_c, is_f) for h in day if h.apparent_c is not None]
+        if fl:
+            lo, hi = min(fl), max(fl)
+            feels.append((f"feels {lo:.0f}°–{hi:.0f}°", _temp_attr(hi, is_f)))
+        else:
+            feels.append(("", 0))
+        g = [_speed(h.gust_kmh, is_f) or 0 for h in day if h.gust_kmh is not None]
+        if g:
+            gusty = max(g) >= (_speed(40.0, is_f) or 0)
+            attr = (curses.color_pair(C_YELLOW) | curses.A_BOLD) if gusty else curses.A_DIM
+            gusts.append((f"gusts to {max(g):.0f} {unit}", attr))
+        else:
+            gusts.append(("", 0))
+        mm = sum(h.precip_mm for h in day if h.precip_mm is not None)
+        if mm >= 0.25:
+            amt = f"{mm_to_in(mm):.2f} in" if app.units == "us" else f"{mm:.1f} mm"
+            rain.append((f"{amt} precip", curses.color_pair(C_BLUE)))
+        else:
+            rain.append(("dry", curses.A_DIM))
+    return [("sun", light), ("feel", feels), ("wind", gusts), ("wet", rain)]
+
+
+def _hour_label(hour: int, app: "App") -> str:
+    if app.use_24h:
+        return f"{hour:02d}:00"
+    return f"{(hour % 12) or 12}{'am' if hour < 12 else 'pm'}"
+
+
+def _draw_grid(
+    win, y: int, rows: int, cols: int, hrs: List[HourlyPeriod], app: "App",
+    days: List[Tuple[dt.date, Dict[int, int]]], w: int, is_f: bool,
+) -> None:
+    """Days as columns, hours of the day as rows, so a whole week reads
+    across without scrolling."""
+    xs = [GRID_GUTTER + k * (w + 1) for k in range(len(days))]
+    sep = curses.A_DIM
+    # Short labels for every column if any long one won't fit, so they match.
+    short = any(len(_day_label(d)) > w for d, _ in days)
+
+    # ---- Day headers: name, then high/low and peak precip chance --------
+    for k, (d, by_hour) in enumerate(days):
+        x = xs[k] + 1
+        safe_addstr(win, y, xs[k], "│", sep)
+        safe_addstr(win, y + 1, xs[k], "│", sep)
+        label = f"{d.strftime('%a %b')} {d.day}" if short else _day_label(d)
+        safe_addstr(win, y, x, label[:w], curses.color_pair(C_CYAN) | curses.A_BOLD)
+
+        temps = [hrs[i].temperature for i in by_hour.values()
+                 if hrs[i].temperature is not None]
+        if not temps:
+            continue
+        hi, lo = max(temps), min(temps)
+        hi_s, lo_s = f"{hi:.0f}°", f"{lo:.0f}°"
+        safe_addstr(win, y + 1, x, hi_s, _temp_attr(hi, is_f))
+        safe_addstr(win, y + 1, x + len(hi_s), "/", curses.A_DIM)
+        safe_addstr(win, y + 1, x + len(hi_s) + 1, lo_s, _temp_attr(lo, is_f))
+        peak = max((hrs[i].pop or 0 for i in by_hour.values()), default=0)
+        px = x + len(hi_s) + 1 + len(lo_s) + 1
+        if peak >= 15 and px + 4 <= x + w:
+            safe_addstr(win, y + 1, px, f"{peak:.0f}%", _pop_attr(peak))
+    y += GRID_HEAD
+
+    # ---- Hour rows -------------------------------------------------------
+    view_rows = max(1, rows - y - 1)
+    app.hr_scroll = clamp(app.hr_scroll, 0, max(0, 24 - view_rows))
+    marks = _sun_marks(days, app)
+    for hour in range(app.hr_scroll, min(24, app.hr_scroll + view_rows)):
+        safe_addstr(win, y, 0, _hour_label(hour, app).rjust(GRID_GUTTER - 1), curses.A_DIM)
+        for k, (d, by_hour) in enumerate(days):
+            safe_addstr(win, y, xs[k], "│", sep)
+            idx = by_hour.get(hour)
+            if idx is not None:
+                _draw_grid_cell(win, y, xs[k] + 1, w, hrs[idx], idx == 0,
+                                marks.get((d, hour), ""), is_f)
+        y += 1
+
+    # Spare rows below the hours: a per-day summary.
+    summary = _day_summaries(days, hrs, app, is_f)
+    if view_rows >= 24 and rows - 1 - y >= len(summary) + 1:
+        safe_addstr(win, y, 0, "─" * (GRID_GUTTER - 1), sep)
+        for k in range(len(days)):
+            safe_addstr(win, y, xs[k], "┼" + "─" * w, sep)
+        y += 1
+        for label, per_day in summary:
+            safe_addstr(win, y, 0, label.rjust(GRID_GUTTER - 1), curses.A_DIM)
+            for k, (text, attr) in enumerate(per_day):
+                safe_addstr(win, y, xs[k], "│", sep)
+                safe_addstr(win, y, xs[k] + 2, text[: w - 1], attr)
+            y += 1
+
+    hint = "▸ now  ↑ sunrise  ↓ sunset"
+    if view_rows < 24:
+        shown_to = min(24, app.hr_scroll + view_rows)
+        hint = f"hours {app.hr_scroll + 1}–{shown_to} of 24 · j/k ↑↓ scroll · " + hint
+    safe_addstr(win, rows - 1, 0, hint[: cols - 1], curses.A_DIM)
+
+
+def _draw_grid_cell(
+    win, y: int, x: int, w: int, h: HourlyPeriod, now: bool, sun: str, is_f: bool,
+) -> None:
+    """One hour in a day column: marker, icon, temp, precip [, wind [, text]]."""
+    if now:
+        safe_addstr(win, y, x, "▸", curses.color_pair(C_CYAN) | curses.A_BOLD)
+    elif sun:
+        safe_addstr(win, y, x, sun, curses.color_pair(C_YELLOW))
+
+    icon = ICON_TINY.get(h.icon_key, "?") or "?"
+    safe_addstr(win, y, x + 1, icon[:2])
+
+    temp = "—" if h.temperature is None else f"{h.temperature:.0f}°"
+    attr = _temp_attr(h.temperature, is_f) | (curses.A_BOLD if now else 0)
+    safe_addstr(win, y, x + 4, temp.rjust(4), attr)
+
+    if h.pop and h.pop >= MIN_POP:
+        pop_attr = _pop_attr(h.pop)
+        safe_addstr(win, y, x + 9, f"{h.pop:.0f}%".rjust(4), pop_attr)
+        safe_addstr(win, y, x + 13, _pop_bar(h.pop), pop_attr)
+
+    if w >= GRID_WIND_W:
+        wind = _wind_label(h, with_unit=False)
+        gust = _speed(h.gust_kmh, is_f)
+        gusty = gust is not None and gust >= (_speed(40.0, is_f) or 0)
+        wattr = (curses.color_pair(C_YELLOW) | curses.A_BOLD) if gusty else curses.A_DIM
+        safe_addstr(win, y, x + 15, wind[:6], wattr)
+
+    if w >= GRID_TEXT_W:
+        fc = h.short_forecast or "—"
+        if (h.thunder_pct or 0) >= 15 and "thunder" not in fc.lower():
+            fc = f"{fc} (thunder)"
+        safe_addstr(win, y, x + 22, fc[: w - 22])
 
 
 def _draw_hour_row(
@@ -625,7 +894,7 @@ def _draw_hour_row(
         if feels is None:
             safe_addstr(win, y, xs["feels"], "—".rjust(6), curses.A_DIM)
         elif h.temperature is not None and abs(feels - h.temperature) < _delta(3, is_f):
-            safe_addstr(win, y, xs["feels"], "same".rjust(6), curses.A_DIM)
+            pass  # same as the air temperature — leave blank
         else:
             safe_addstr(win, y, xs["feels"], f"{feels:.0f}°".rjust(6),
                         _temp_attr(feels, is_f))
@@ -639,8 +908,8 @@ def _draw_hour_row(
         sstr = "—" if h.sky_pct is None else f"{h.sky_pct:.0f}%"
         safe_addstr(win, y, xs["sky"], sstr.rjust(5), curses.A_DIM)
 
-    wind = f"{h.wind_dir} {h.wind_speed}".strip()
-    safe_addstr(win, y, xs["wind"], wind[:13])
+    wind = _wind_label(h, with_unit=True)
+    safe_addstr(win, y, xs["wind"], wind[:13], curses.A_DIM if wind == "calm" else 0)
 
     if "gust" in xs:
         gust = _speed(h.gust_kmh, is_f)
@@ -651,10 +920,10 @@ def _draw_hour_row(
             attr = (curses.color_pair(C_YELLOW) | curses.A_BOLD) if gusty else curses.A_DIM
             safe_addstr(win, y, xs["gust"], f"{gust:.0f}".rjust(5), attr)
 
-    pop_attr = _pop_attr(h.pop)
-    pstr = "—" if h.pop is None else f"{h.pop:.0f}%"
-    safe_addstr(win, y, xs["pop"], pstr.rjust(5), pop_attr)
-    safe_addstr(win, y, xs["pop"] + 6, _pop_bar(h.pop), pop_attr)
+    if h.pop is not None and h.pop >= MIN_POP:
+        pop_attr = _pop_attr(h.pop)
+        safe_addstr(win, y, xs["pop"], f"{h.pop:.0f}%".rjust(5), pop_attr)
+        safe_addstr(win, y, xs["pop"] + 6, _pop_bar(h.pop), pop_attr)
 
     if w_fc >= 8:
         fc = h.short_forecast or "—"

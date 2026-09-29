@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING
 
 import curses
 
-from helpers import safe_addstr
+from helpers import fit_width, safe_addstr, text_width
+from views_dashboard import _is_here
 
 if TYPE_CHECKING:
     from app import App
@@ -19,33 +20,35 @@ def draw_favorites(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
 
-    safe_addstr(win, 0, 0, "Favorites Editor", curses.color_pair(1) | curses.A_BOLD)
-    safe_addstr(win, 1, 0, "\u2500" * min(cols - 1, 40), curses.A_DIM)
-
     if not app.favorites:
-        safe_addstr(win, 3, 0, "No favorites yet.", curses.A_DIM)
-        safe_addstr(win, 4, 0, "Press 'a' to add one, or 'F' from any view.", curses.A_DIM)
+        safe_addstr(win, 1, 0, "No favorites yet.", curses.A_BOLD)
+        safe_addstr(win, 2, 0, "Press a to add one, or F from any view.", curses.A_DIM)
     else:
-        header = f" {'#':>3}  {'Name':<30} {'Lat':>9}  {'Lon':>10}"
-        safe_addstr(win, 3, 0, header[:cols - 1], curses.A_DIM)
+        names = [str(f.get("name", "—")) for f in app.favorites]
+        # Name column as wide as the longest name, leaving room for lat/lon.
+        name_w = max(text_width("Name"), *(text_width(n) for n in names))
+        name_w = max(12, min(name_w, cols - 1 - 7 - 22))
+        safe_addstr(win, 1, 2, f"{'#':>3}  {fit_width('Name', name_w)}  {'Lat':>9}  {'Lon':>10}",
+                    curses.A_BOLD)
+        safe_addstr(win, 2, 0, "─" * min(cols - 1, 7 + name_w + 23), curses.A_DIM)
 
-        max_visible = rows - 7  # room for header, footer hints
         for i, fav in enumerate(app.favorites):
-            y = 4 + i
-            if i >= max_visible or y >= rows - 2:
+            y = 3 + i
+            if y >= rows - 2:
                 break
-            name = str(fav.get("name", "—"))[:30]
-            lat = fav.get("lat", 0.0)
-            lon = fav.get("lon", 0.0)
-            line = f" {i + 1:>3}  {name:<30} {lat:>9.4f}  {lon:>10.4f}"
+            selected = i == app.fav_edit_idx
+            try:
+                coords = f"{float(fav.get('lat', 0)):>9.4f}  {float(fav.get('lon', 0)):>10.4f}"
+            except (TypeError, ValueError):
+                coords = f"{'—':>9}  {'—':>10}"
+            safe_addstr(win, y, 0, "▸" if selected else " ", curses.color_pair(2) | curses.A_BOLD)
+            if _is_here(app, fav):
+                safe_addstr(win, y, 1, "*", curses.color_pair(1) | curses.A_BOLD)
+            line = f"{i + 1:>3}  {fit_width(names[i], name_w)}  {coords}"
+            attr = curses.color_pair(2) | curses.A_BOLD if selected else 0
+            safe_addstr(win, y, 2, line, attr)
 
-            if i == app.fav_edit_idx:
-                safe_addstr(win, y, 0, line[:cols - 1], curses.color_pair(2) | curses.A_BOLD)
-            else:
-                safe_addstr(win, y, 0, line[:cols - 1])
-
-    hint_y = rows - 2
-    hints = "j/k Move | d Delete | r Rename | a Add | J/K Reorder | Enter Jump | e/Esc Exit"
-    safe_addstr(win, hint_y, 0, hints[:cols - 1], curses.A_DIM)
-
+    hints = ("j/k move · J/K reorder · Enter jump · a add · r rename · d delete · "
+             "e/Esc exit    * = current location")
+    safe_addstr(win, rows - 1, 0, hints[: cols - 1], curses.A_DIM)
     win.noutrefresh()

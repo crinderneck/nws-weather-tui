@@ -5,6 +5,7 @@ NWS Weather TUI — Alerts view.
 
 from __future__ import annotations
 
+import datetime as dt
 from typing import TYPE_CHECKING, List
 
 import curses
@@ -51,15 +52,48 @@ def _build_alert_lines(app: "App", cols: int) -> List[tuple]:
     return out
 
 
+def _draw_no_alerts(app: "App", win, rows: int, cols: int) -> None:
+    """All clear here — say when that was checked, and what's active
+    elsewhere in the state."""
+    safe_addstr(win, 0, 0, f"✓ No active alerts for {app.location_name}"[: cols - 1],
+                curses.color_pair(3) | curses.A_BOLD)
+    checked = fmt_time(dt.datetime.fromtimestamp(app.last_refresh), app.use_24h) \
+        if app.last_refresh else "—"
+    safe_addstr(win, 1, 0,
+                f"Checked {checked} · refreshes every {app.auto_refresh_seconds // 60} min"
+                [: cols - 1], curses.A_DIM)
+    if not app.state_code:
+        return
+    y = 3
+    others = app.area_alerts
+    if not others:
+        safe_addstr(win, y, 0, f"Nothing active anywhere in {app.state_code} either.",
+                    curses.A_DIM)
+        return
+    head = f"Elsewhere in {app.state_code} · {len(others)} active"
+    safe_addstr(win, y, 0, head, curses.color_pair(2) | curses.A_BOLD)
+    y += 1
+    event_w = min(34, max(len(a.event) for a in others))
+    for a in others:
+        if y >= rows:
+            break
+        until = f"until {fmt_time(a.expires, app.use_24h, True)}" if a.expires else ""
+        attr = curses.color_pair(4) | curses.A_BOLD if a.severity in ("Extreme", "Severe") \
+            else curses.color_pair(2)
+        safe_addstr(win, y, 0, a.event[:event_w].ljust(event_w), attr)
+        rest_w = max(0, cols - event_w - 3 - len(until) - 3)
+        area = a.area_desc if len(a.area_desc) <= rest_w else a.area_desc[: rest_w - 1] + "…"
+        safe_addstr(win, y, event_w + 2, area)
+        if until and event_w + 2 + len(area) + 3 + len(until) < cols:
+            safe_addstr(win, y, cols - 1 - len(until), until, curses.A_DIM)
+        y += 1
+
+
 def draw_alerts(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
     if not app.alerts:
-        safe_addstr(
-            win, 0, 0,
-            "No active alerts for this point.",
-            curses.color_pair(3) | curses.A_BOLD,
-        )
+        _draw_no_alerts(app, win, rows, cols)
         win.noutrefresh()
         return
 

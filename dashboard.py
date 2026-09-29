@@ -10,7 +10,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, TYPE_CHECKING
 
-from models import extract_current
+from helpers import dbg
+from models import extract_alerts, extract_current, extract_forecast
 
 if TYPE_CHECKING:
     from app import App
@@ -51,7 +52,19 @@ def _fetch_one(app: "App", fav: Dict[str, Any]) -> Dict[str, Any]:
         if not isinstance(sid, str) or not sid:
             return {"error": "no station"}
         current = extract_current(app.client.latest_observation(sid))
-        return {"current": current}
+        data: Dict[str, Any] = {"current": current}
+        # Today's outlook and alerts are extras — a failure only blanks them.
+        try:
+            fc_url = props.get("forecast")
+            if isinstance(fc_url, str) and fc_url:
+                data["periods"] = extract_forecast(app.client.forecast(fc_url, app.units))
+        except Exception as fe:
+            dbg(f"Dashboard forecast fetch failed for {fav.get('name')}: {fe}")
+        try:
+            data["alerts"] = extract_alerts(app.client.alerts(lat, lon))
+        except Exception as ae:
+            dbg(f"Dashboard alerts fetch failed for {fav.get('name')}: {ae}")
+        return data
     except Exception as e:
         return {"error": str(e)}
 

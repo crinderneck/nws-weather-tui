@@ -117,6 +117,7 @@ def draw_city_overlay_line(
         if ch != " ":
             attr = {
                 "O": curses.color_pair(1) | curses.A_BOLD,
+                "◉": curses.color_pair(4) | curses.A_BOLD,
                 "@": curses.color_pair(12) | curses.A_BOLD,
             }.get(ch, curses.color_pair(3) | curses.A_BOLD)
             safe_addstr(win, y, x + max(0, x_off), ch, attr)

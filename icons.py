@@ -117,7 +117,7 @@ def pick_icon(short_forecast: str, is_day: Optional[bool]) -> str:
         return "thunder"
     if any(k in t for k in ["snow", "flurr", "sleet", "wintry", "blizzard", "ice"]):
         return "snow"
-    if any(k in t for k in ["rain", "showers", "drizzle", "sprinkles"]):
+    if any(k in t for k in ["rain", "showers", "drizzle", "sprinkles", "precip"]):
         if "showers" in t or "scattered" in t:
             return "showers"
         return "rain"

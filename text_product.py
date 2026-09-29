@@ -68,21 +68,37 @@ def parse_sections(raw_text: str) -> List[Tuple[str, str]]:
     return [(" ".join(t.split()), b) for t, b in sections if b]
 
 
+def _is_preformatted_para(non_empty: List[str]) -> bool:
+    votes = sum(1 for line in non_empty if _is_preformatted_line(line))
+    return len(non_empty) > 1 and votes >= max(1, len(non_empty) // 2)
+
+
+def widest_preformatted_line(raw_text: str) -> int:
+    """Length of the longest line in the product's tables/lists — the
+    narrowest a column can be without re-wrapping them into mush."""
+    widest = 0
+    for _, body in parse_sections(raw_text):
+        for para in re.split(r"\n\s*\n", body):
+            non_empty = [line.rstrip() for line in para.splitlines() if line.strip()]
+            if _is_preformatted_para(non_empty):
+                widest = max(widest, max(len(line) for line in non_empty))
+    return widest
+
+
 def _wrap_paragraph(text: str, width: int) -> List[str]:
     lines = text.splitlines()
     non_empty = [line for line in lines if line.strip()]
     if not non_empty:
         return []
 
-    preformatted_votes = sum(1 for line in non_empty if _is_preformatted_line(line))
-    if len(non_empty) > 1 and preformatted_votes >= max(1, len(non_empty) // 2):
+    if _is_preformatted_para(non_empty):
         out: List[str] = []
         for line in non_empty:
             line = line.rstrip()
             if len(line) <= width:
                 out.append(line)
             else:
-                out.extend(textwrap.wrap(line, width) or [""])
+                out.extend(textwrap.wrap(line, width, subsequent_indent="    ") or [""])
         return out
 
     flat = " ".join(line.strip() for line in lines).strip()

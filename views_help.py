@@ -1,127 +1,156 @@
 #!/usr/bin/env python3
 """
 NWS Weather TUI — Help screen view.
+
+Sections are packed into as many columns as the terminal fits (each
+section kept whole, placed in the shortest column), and scroll together
+when they don't all fit.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
 import curses
 
 from constants import CONFIG_PATH, STATE_PATH
+from geo import clamp
 from helpers import safe_addstr, wrap_lines
 from radar_renderer import draw_radar_legend
 
 if TYPE_CHECKING:
     from app import App
 
-_DBZ_LEGEND_SENTINEL = "\x00dbz-legend\x00"
+COL_MIN_W = 58
+COL_GAP = 4
+KEY_W = 9
+
+# Row kinds: ("title", text) | ("key", key, text) | ("text", text) | ("legend",) | ("blank",)
+Row = Tuple[str, ...]
+
+SECTIONS: List[Tuple[str, List[Tuple[Optional[str], str]]]] = [
+    ("Views", [
+        ("c", "Current conditions, radar and today's forecast"),
+        ("f", "Forecast — a column per day; ←/→ scroll when they don't all fit"),
+        ("h", "Hourly — highlights, condition ribbon, a column per day on wide screens"),
+        ("a", "Active alerts for this location"),
+        ("m", "Moon phase, rise/set and upcoming phases"),
+        ("d", "Area Forecast Discussion — forecaster narrative in columns"),
+        ("H", "Hazardous Weather Outlook — the office's 7-day heads-up"),
+        ("D", "Favorites dashboard — every favorite at a glance"),
+        ("?", "This help"),
+    ]),
+    ("Navigation", [
+        ("j / k", "Scroll down / up (turns the page on Discussion)"),
+        ("↓ / ↑", "Same as j / k"),
+        ("PgDn/PgUp", "Scroll by 10 lines"),
+        ("G", "Jump to the end"),
+        ("Esc", "Back to current conditions"),
+    ]),
+    ("Actions", [
+        ("l", "Search location (city/state, ZIP, or lat,lon)"),
+        ("r", "Refresh now"),
+        ("u", "Toggle US / SI units"),
+        ("t", "Toggle 12h / 24h clock"),
+        ("p", "Pause / resume auto-refresh"),
+        ("F", "Save / remove the current location as a favorite"),
+        ("n / b", "Next / previous favorite"),
+        ("e", "Open the favorites editor"),
+        ("q", "Quit"),
+    ]),
+    ("Favorites editor (e)", [
+        ("j / k", "Move the cursor"),
+        ("J / K", "Move the selected favorite up / down"),
+        ("Enter", "Jump to the selected favorite"),
+        ("a", "Add a favorite (search by city/ZIP)"),
+        ("r", "Rename the selected favorite"),
+        ("d", "Delete the selected favorite"),
+        ("e / Esc", "Leave the editor (q also works)"),
+    ]),
+    ("Favorites dashboard (D)", [
+        ("j / k", "Move the cursor"),
+        ("Enter", "Jump to the selected favorite"),
+        ("r", "Refresh every favorite"),
+        ("D / Esc", "Back to current conditions"),
+    ]),
+    ("Radar (current view)", [
+        ("A", "Play / pause the animation"),
+        ("< / >", "Step back / forward one frame"),
+        ("o", "Open weather.gov radar in a browser"),
+        ("click", "Click a city marker to jump there"),
+        (None, "◉ you marks the current location."),
+    ]),
+    ("Radar colors", [
+        (None, "256-color terminals: half-block cells on the NWS dBZ scale."),
+        (None, 'Otherwise an ASCII ramp " .:-=+*#%@", colored by precip type.'),
+        (None, "\x00legend"),
+        (None, "Sources, tried in order: NOAA MRMS composite, Iowa State IEM "
+               "NEXRAD, then the NWS station WMS."),
+    ]),
+    ("Files", [
+        ("config", CONFIG_PATH),
+        ("state", STATE_PATH),
+        (None, "Requires pillow and requests; astral adds sunrise/sunset and moon times."),
+    ]),
+]
+
+
+def _section_rows(title: str, entries: List[Tuple[Optional[str], str]], w: int) -> List[Row]:
+    rows: List[Row] = [("title", title)]
+    for key, text in entries:
+        if text == "\x00legend":
+            rows.append(("legend",))
+        elif key is None:
+            rows += [("text", line) for line in wrap_lines(text, w)]
+        else:
+            for i, line in enumerate(wrap_lines(text, max(10, w - KEY_W - 1))):
+                rows.append(("key", key if i == 0 else "", line))
+    return rows
 
 
 def draw_help(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
 
-    lines = [
-        "NWS Weather TUI \u2014 Help",
-        "",
-        "Views:",
-        "  c  Current conditions \u2014 station obs, radar panel",
-        "  f  Forecast (day/night NWS periods) \u2014 j/k to scroll",
-        "  h  Hourly (next N hours) \u2014 highlights, condition ribbon + table",
-        "  a  Alerts \u2014 j/k to scroll",
-        "  w  Full-screen radar map \u2014 press w again to return",
-        "  m  Moon phase \u2014 current phase, illumination, upcoming dates",
-        "  d  Area Forecast Discussion \u2014 latest forecaster narrative, j/k to scroll",
-        "  H  Hazardous Weather Outlook \u2014 rolling 7-day heads-up, j/k to scroll",
-        "  D  Favorites dashboard \u2014 at-a-glance conditions for all favorites",
-        "",
-        "Navigation:",
-        "  j / k        Scroll down / up",
-        "  PgDn / PgUp  Scroll by 10 lines",
-        "  G            Jump to bottom",
-        "  Esc          Return to current conditions",
-        "",
-        "Favourites editor (press e):",
-        "  j / k    Move cursor up / down",
-        "  d        Delete selected favourite",
-        "  r        Rename selected favourite",
-        "  a        Add new favourite (search by city/ZIP)",
-        "  J / K    Reorder selected favourite up / down",
-        "  Enter    Jump to selected favourite",
-        "  e / Esc  Exit editor (q also exits editor)",
-        "",
-        "Favourites dashboard (press D):",
-        "  j / k    Move cursor up / down",
-        "  Enter    Jump to selected favourite",
-        "  r        Force refresh of all favourites",
-        "  D / Esc  Return to current conditions",
-        "",
-        "Radar keys (active in current + radar views):",
-        "  A        Toggle animation (cycles through last N MRMS frames)",
-        "  < / >    Step backward / forward one animation frame",
-        "  o        Open weather.gov radar in browser",
-        "  Mouse    Left-click a city marker/label to jump there",
-        "",
-        "Radar colour mode:",
-        '  256-color: half-block (\u2580/\u2584) chars with NWS standard dBZ colour scale',
-        "             (requires terminal supporting 256 colours + curses.can_change_color)",
-        '  ASCII:     fallback ramp " .:-=+*#%@" with R/S/I precipitation kind colouring',
-        "",
-        "dBZ (reflectivity) legend:",
-        _DBZ_LEGEND_SENTINEL,
-        "",
-        "Radar sources (tried in order):",
-        "  1. NOAA MRMS ImageServer  (national composite, near real-time)",
-        "  2. Iowa State IEM NEXRAD WMS  (CONUS composite, NWS colour table)",
-        "  3. NWS station OpenGeoServer WMS  (per-station, lower resolution)",
-        "",
-        "Other actions:",
-        "  l  Search location (city/state, ZIP, or lat,lon)",
-        "  r  Force refresh",
-        "  u  Toggle US / SI units",
-        "  t  Toggle 12h/24h clock",
-        "  p  Pause/resume auto-refresh",
-        "  F  Toggle current location as favourite",
-        "  n / b  Cycle saved favourites",
-        "  e  Open favourites editor",
-        "  q  Quit",
-        "",
-        "Config:",
-        f"  {CONFIG_PATH}",
-        "",
-        "Offline state:",
-        f"  {STATE_PATH}",
-        "",
-        "Requires: pip install pillow requests",
-        "Optional: pip install astral  (for sunrise/sunset times)",
-    ]
+    n = clamp((cols - 1 + COL_GAP) // (COL_MIN_W + COL_GAP), 1, 4)
+    w = (cols - 1 - COL_GAP * (n - 1)) // n
 
-    # Expand wrapped lines (the dBZ legend sentinel is drawn specially, not wrapped)
-    all_lines: list[tuple[str, int]] = []  # (text, original_line_idx)
-    for i, line in enumerate(lines):
-        if line == _DBZ_LEGEND_SENTINEL:
-            all_lines.append((line, i))
-            continue
-        for wline in wrap_lines(line, cols - 1):
-            all_lines.append((wline, i))
+    # Masonry: each section, whole, into the currently shortest column.
+    columns: List[List[Row]] = [[] for _ in range(n)]
+    for title, entries in SECTIONS:
+        block = _section_rows(title, entries, w)
+        col = min(columns, key=len)
+        if col:
+            col.append(("blank",))
+        col.extend(block)
 
-    total = len(all_lines)
-    app.help_scroll = max(0, min(app.help_scroll, max(0, total - rows)))
+    height = max(len(c) for c in columns)
+    view_rows = rows - 1 if height > rows else rows
+    app.help_scroll = clamp(app.help_scroll, 0, max(0, height - view_rows))
 
-    y = 0
-    for wline, orig_idx in all_lines[app.help_scroll:]:
-        if y >= rows - 1:
-            break
-        if wline == _DBZ_LEGEND_SENTINEL:
-            draw_radar_legend(win, y, 0, cols, app._radar_has_256color)
-        else:
-            safe_addstr(win, y, 0, wline[: cols - 1], curses.A_BOLD if orig_idx == 0 else 0)
-        y += 1
+    for k, col in enumerate(columns):
+        x = k * (w + COL_GAP)
+        if k:
+            for y in range(min(view_rows, height)):
+                safe_addstr(win, y, x - COL_GAP // 2 - 1, "│", curses.A_DIM)
+        for y, row in enumerate(col[app.help_scroll:app.help_scroll + view_rows]):
+            kind = row[0]
+            if kind == "title":
+                safe_addstr(win, y, x, row[1], curses.color_pair(2) | curses.A_BOLD)
+                if len(row[1]) + 2 <= w:
+                    safe_addstr(win, y, x + len(row[1]) + 1, "─" * (w - len(row[1]) - 1),
+                                curses.A_DIM)
+            elif kind == "key":
+                safe_addstr(win, y, x, row[1][:KEY_W], curses.color_pair(1) | curses.A_BOLD)
+                safe_addstr(win, y, x + KEY_W + 1, row[2][: w - KEY_W - 1])
+            elif kind == "text":
+                safe_addstr(win, y, x, row[1][:w], curses.A_DIM)
+            elif kind == "legend":
+                draw_radar_legend(win, y, x, x + w, app._radar_has_256color)
 
-    if total > rows - 1:
-        hint = f"Scroll: {app.help_scroll + 1}/{max(1, total - rows + 1)} (j/k \u2191\u2193)"
+    if height > rows:
+        shown_to = min(height, app.help_scroll + view_rows)
+        hint = f"lines {app.help_scroll + 1}–{shown_to} of {height} · j/k ↑↓ scroll"
         safe_addstr(win, rows - 1, 0, hint[: cols - 1], curses.A_DIM)
 
     win.noutrefresh()

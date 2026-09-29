@@ -197,22 +197,12 @@ def city_overlay_and_hits_for_bbox(
         hlat, hlon = here
         if minlat <= hlat <= maxlat and minlon <= hlon <= maxlon:
             hx, hy = project(hlat, hlon)
-            if hy - 1 >= 0:
-                grid[hy - 1][hx] = "O"
-                occupied.add((hx, hy - 1))
-            if hy >= 0:
-                grid[hy][hx] = "|"
+            if 0 <= hy < rows and 0 <= hx < cols:
+                grid[hy][hx] = "◉"
                 occupied.add((hx, hy))
-            if hy >= 0 and hx - 1 >= 0 and hx + 1 < cols:
-                grid[hy][hx - 1] = "/"
-                grid[hy][hx + 1] = "\\"
-                occupied.add((hx - 1, hy))
-                occupied.add((hx + 1, hy))
-            if hy + 1 < rows and hx - 1 >= 0 and hx + 1 < cols:
-                grid[hy + 1][hx - 1] = "/"
-                grid[hy + 1][hx + 1] = "\\"
-                occupied.add((hx - 1, hy + 1))
-                occupied.add((hx + 1, hy + 1))
+                label = "you"
+                if hx + 1 + len(label) <= cols:
+                    place(hx + 1, hy, label)
 
     placed = 0
     for code, lat, lon in MAJOR_CITIES:
@@ -236,3 +226,28 @@ def city_overlay_and_hits_for_bbox(
         placed += 1
 
     return (["".join(r) for r in grid], hit_map)
+
+
+def shape_line_overlay(lines: List[str]) -> List[str]:
+    """Replace a raster line overlay's uniform marks with glyphs that follow
+    the line: '─' along horizontal runs, '│' along vertical runs and '·'
+    elsewhere, so borders read as lines rather than hatching."""
+    rows = len(lines)
+    width = max((len(line) for line in lines), default=0)
+    grid = [line.ljust(width) for line in lines]
+
+    def on(x: int, y: int) -> bool:
+        return 0 <= y < rows and 0 <= x < width and grid[y][x] != " "
+
+    out: List[str] = []
+    for y in range(rows):
+        row = []
+        for x in range(width):
+            if not on(x, y):
+                row.append(" ")
+                continue
+            horiz = on(x - 1, y) or on(x + 1, y)
+            vert = on(x, y - 1) or on(x, y + 1)
+            row.append("─" if horiz and not vert else "│" if vert and not horiz else "·")
+        out.append("".join(row).rstrip())
+    return out

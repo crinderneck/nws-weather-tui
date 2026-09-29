@@ -97,8 +97,10 @@ def get_moonrise_moonset(
         from astral import LocationInfo
         from astral.moon import moonrise, moonset
         loc = LocationInfo(latitude=lat, longitude=lon)
-        rise = moonrise(loc.observer, date)
-        mset = moonset(loc.observer, date)
+        # Default is the UTC day; use the local zone so "today" matches.
+        local_tz = dt.datetime.now().astimezone().tzinfo
+        rise = moonrise(loc.observer, date, tzinfo=local_tz)
+        mset = moonset(loc.observer, date, tzinfo=local_tz)
         return rise, mset
     except Exception:
         return None, None

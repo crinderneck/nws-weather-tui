@@ -14,7 +14,7 @@ from conversions import c_to_f, dewpoint_c, m_to_mi, mps_to_mph, pa_to_inhg
 from curses_init import WINDSOCK_ORANGE_PAIR
 from formatting import fmt_num, fmt_time
 from geo import clamp
-from helpers import safe_addstr
+from helpers import safe_addstr, wrap_lines
 from icons import ICON_BIG
 from models import uv_category
 from views_radar import draw_radar_panel
@@ -22,6 +22,9 @@ from windsock import WINDSOCK_MAX_W, windsock_lines
 
 if TYPE_CHECKING:
     from app import App
+
+SIDE_GAP = 5            # space either side of the divider before the radar
+SIDE_MIN_RADAR_W = 100  # radar width needed before it moves beside the text
 
 _CARDINAL = [
     "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
@@ -58,6 +61,35 @@ def _uv_attr(uv: float) -> int:
     if uv < 11:
         return curses.color_pair(4)                # Very High — red
     return curses.color_pair(4) | curses.A_BOLD    # Extreme
+
+
+# 3-row block digits for the headline temperature.
+_BIG_GLYPHS = {
+    "0": ("█▀█", "█ █", "▀▀▀"),
+    "1": ("▀█ ", " █ ", "▀▀▀"),
+    "2": ("▀▀█", "█▀▀", "▀▀▀"),
+    "3": ("▀▀█", " ▀█", "▀▀▀"),
+    "4": ("█ █", "▀▀█", "  ▀"),
+    "5": ("█▀▀", "▀▀█", "▀▀▀"),
+    "6": ("█▀▀", "█▀█", "▀▀▀"),
+    "7": ("▀▀█", "  █", "  ▀"),
+    "8": ("█▀█", "█▀█", "▀▀▀"),
+    "9": ("█▀█", "▀▀█", "▀▀▀"),
+    "-": ("   ", "▀▀▀", "   "),
+    "°": ("█▀█", "▀▀▀", "   "),
+    "F": ("█▀▀", "█▀ ", "▀  "),
+    "C": ("█▀▀", "█  ", "▀▀▀"),
+    "?": ("▀▀█", " █▀", " ▀ "),
+}
+
+
+def _big_text(text: str) -> List[str]:
+    rows = ["", "", ""]
+    for ch in text:
+        glyph = _BIG_GLYPHS.get(ch, _BIG_GLYPHS["?"])
+        for i in range(3):
+            rows[i] += glyph[i] + " "
+    return [r.rstrip() for r in rows]
 
 
 def _draw_windsock(win, lines: List[str], x0: int, has_256color: bool) -> None:
@@ -127,11 +159,15 @@ def draw_current(app: "App", win) -> None:
         and c.temperature_c is not None
         and abs(feels_like_c - c.temperature_c) >= 1.0
     )
+    temp_val = c_to_f(c.temperature_c) if app.units == "us" else c.temperature_c
+    big_temp = _big_text(
+        "?" if temp_val is None
+        else f"{fmt_num(temp_val, 0)}°{'F' if app.units == 'us' else 'C'}"
+    )
     if app.units == "us":
-        temp_str = f"{fmt_num(c_to_f(c.temperature_c), 1)} \u00b0F"
         dp_str = f"{fmt_num(c_to_f(dp_val), 1)} \u00b0F" if dp_val is not None else "\u2014"
         feels_str = f"{fmt_num(c_to_f(feels_like_c), 1)} \u00b0F"
-        wind_str = f"{fmt_num(mps_to_mph(c.wind_mps), 1)} mph"
+        wind_str = "—" if c.wind_mps is None else f"{fmt_num(mps_to_mph(c.wind_mps), 1)} mph"
         gust_str = (
             f"{fmt_num(mps_to_mph(c.gust_mps), 1)} mph"
             if c.gust_mps is not None else "\u2014"
@@ -145,10 +181,9 @@ def draw_current(app: "App", win) -> None:
             if c.visibility_m is not None else "\u2014"
         )
     else:
-        temp_str = f"{fmt_num(c.temperature_c, 1)} \u00b0C"
         dp_str = f"{fmt_num(dp_val, 1)} \u00b0C" if dp_val is not None else "\u2014"
         feels_str = f"{fmt_num(feels_like_c, 1)} \u00b0C"
-        wind_str = f"{fmt_num(c.wind_mps, 1)} m/s"
+        wind_str = "—" if c.wind_mps is None else f"{fmt_num(c.wind_mps, 1)} m/s"
         gust_str = f"{fmt_num(c.gust_mps, 1)} m/s" if c.gust_mps is not None else "\u2014"
         press_str = (
             f"{fmt_num((c.pressure_pa or 0) / 100.0, 1)} hPa"
@@ -163,12 +198,18 @@ def draw_current(app: "App", win) -> None:
         f"{_deg_to_cardinal(c.wind_dir_deg)} ({fmt_num(c.wind_dir_deg, 0)}\u00b0)"
         if c.wind_dir_deg is not None else "\u2014"
     )
+    # Stations report calm as 0 speed with a meaningless 0° (north) direction.
+    if c.wind_mps is not None and c.wind_mps < 0.5:
+        wind_str, wind_dir = "calm", "\u2014"
     hum_str = f"{fmt_num(c.humidity_pct, 0)}%" if c.humidity_pct is not None else "\u2014"
 
     # --- Build the text block first, so the icon can be vertically centered against it ---
-    text_lines: List[Tuple[str, int]] = [
-        (temp_str, curses.color_pair(2) | curses.A_BOLD),
-        (c.text_description, curses.A_DIM),
+    from views_hourly import _temp_attr
+    temp_attr = _temp_attr(temp_val, app.units == "us") | curses.A_BOLD
+    text_lines: List[Tuple[str, int]] = [(line, temp_attr) for line in big_temp]
+    text_lines += [
+        ("", 0),
+        (c.text_description.replace("Current Conditions: ", ""), curses.A_BOLD),
     ]
     if show_feels_like:
         label = "Heat Index" if c.heat_index_c is not None else "Wind Chill"
@@ -214,7 +255,10 @@ def draw_current(app: "App", win) -> None:
     block_w_with_sock = left_w + text_max_w + gap + sock_w
     show_sock = sock_w > 0 and block_w_with_sock <= cols - 1
     block_w = block_w_with_sock if show_sock else (left_w + text_max_w)
-    margin = max(0, (cols - block_w) // 2)
+    # Wide terminals: conditions on the left, radar beside them at full
+    # height, instead of a short radar strip under the text.
+    side_by_side = app.show_radar_map and cols - block_w - SIDE_GAP >= SIDE_MIN_RADAR_W
+    margin = 2 if side_by_side else max(0, (cols - block_w) // 2)
 
     icon_x0 = margin
     x0 = margin + left_w
@@ -237,8 +281,35 @@ def draw_current(app: "App", win) -> None:
     if show_sock:
         _draw_windsock(win, sock_lines[:rows], sock_x, app._radar_has_256color)
 
+    # --- Side-by-side: the NWS narrative for the next two periods fills
+    # the space under the conditions ---
+    if side_by_side:
+        y = max(y, len(icon_lines)) + 1
+        text_w = max(20, block_w - 2)
+        for period in app.forecast_periods[:2]:
+            if y >= rows - 2 or not period.detailed_forecast:
+                break
+            safe_addstr(win, y, margin, period.name, curses.color_pair(1) | curses.A_BOLD)
+            y += 1
+            for line in wrap_lines(period.detailed_forecast, text_w):
+                if y >= rows:
+                    break
+                safe_addstr(win, y, margin, line)
+                y += 1
+            y += 1
+
     # --- Radar panel ---
-    if app.show_radar_map and y + 4 < rows:
+    if side_by_side:
+        rx = margin + block_w + SIDE_GAP
+        for ry in range(rows):
+            safe_addstr(win, ry, rx - SIDE_GAP // 2 - 1, "│", curses.A_DIM)
+        try:
+            panel = win.derwin(rows, cols - rx, 0, rx)
+        except curses.error:
+            panel = None
+        if panel is not None:
+            draw_radar_panel(app, panel, 0, cols - rx, rows, full_screen=True)
+    elif app.show_radar_map and y + 4 < rows:
         draw_radar_panel(app, win, y, cols, rows, full_screen=False)
 
     win.noutrefresh()

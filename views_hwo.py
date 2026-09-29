@@ -1,62 +1,41 @@
 #!/usr/bin/env python3
 """
 NWS Weather TUI — Hazardous Weather Outlook (HWO) view.
+
+Same newspaper layout as the forecast discussion. Many offices only issue
+an outlook when there's something hazardous to flag, so the empty state
+says so rather than implying the data is still loading.
 """
 
 from __future__ import annotations
 
+import datetime as dt
 from typing import TYPE_CHECKING
 
 import curses
 
-from formatting import fmt_time, parse_iso
-from geo import clamp
-from helpers import safe_addstr
-from text_product import render_text_product
+from formatting import fmt_time
+from helpers import safe_addstr, wrap_lines
+from views_afd import draw_text_product
 
 if TYPE_CHECKING:
     from app import App
 
 
 def draw_hwo(app: "App", win) -> None:
-    win.erase()
-    rows, cols = win.getmaxyx()
+    def empty(win, rows: int, cols: int) -> None:
+        office = app.office_id or "this office"
+        safe_addstr(win, 0, 0, f"No Hazardous Weather Outlook from {office} right now"[: cols - 1],
+                    curses.color_pair(3) | curses.A_BOLD)
+        checked = fmt_time(dt.datetime.fromtimestamp(app.last_refresh), app.use_24h) \
+            if app.last_refresh else "—"
+        safe_addstr(win, 1, 0, f"Checked {checked}"[: cols - 1], curses.A_DIM)
+        note = ("Offices issue an outlook when there's hazardous weather to flag in the "
+                "coming week, so none usually means nothing notable is expected. "
+                "Press d for the forecaster's current discussion, or a for alerts.")
+        for i, line in enumerate(wrap_lines(note, min(cols - 1, 90))):
+            if 3 + i >= rows:
+                break
+            safe_addstr(win, 3 + i, 0, line)
 
-    hwo = app.hwo
-    if not hwo or not hwo.get("text"):
-        safe_addstr(
-            win, 0, 0,
-            "No hazardous weather outlook available yet.",
-            curses.color_pair(3) | curses.A_BOLD,
-        )
-        win.noutrefresh()
-        return
-
-    office = hwo.get("office") or "—"
-    issued_dt = parse_iso(hwo.get("issuance_time"))
-    issued_s = fmt_time(issued_dt, app.use_24h, True) if issued_dt else "—"
-    header = f"Hazardous Weather Outlook — {office}   Issued: {issued_s}"
-    safe_addstr(win, 0, 0, header[: cols - 1], curses.color_pair(15) | curses.A_BOLD)
-
-    lines = render_text_product(hwo["text"], max(1, cols - 1))
-    total = len(lines)
-    view_rows = rows - 3
-
-    app.hwo_scroll = clamp(app.hwo_scroll, 0, max(0, total - max(1, view_rows)))
-
-    y = 2
-    for line, is_title in lines[app.hwo_scroll:]:
-        if y >= rows - 1:
-            break
-        attr = curses.color_pair(2) | curses.A_BOLD if is_title else 0
-        safe_addstr(win, y, 0, line[: cols - 1], attr)
-        y += 1
-
-    scroll_pos = app.hwo_scroll + 1
-    scroll_max = max(1, total - max(1, view_rows) + 1)
-    safe_addstr(
-        win, rows - 1, 0,
-        f"Scroll: {scroll_pos}/{scroll_max} (j/k ↑↓)"[: cols - 1],
-        curses.A_DIM,
-    )
-    win.noutrefresh()
+    draw_text_product(app, win, app.hwo, "Hazardous Weather Outlook", "hwo_scroll", empty=empty)

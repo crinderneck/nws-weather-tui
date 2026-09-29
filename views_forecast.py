@@ -7,14 +7,14 @@ from __future__ import annotations
 
 import datetime as dt
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import curses
 
 from formatting import fmt_time, parse_iso
 from geo import clamp
 from helpers import get_sunrise_sunset, safe_addstr, wrap_lines
-from icons import ICON_BIG, ICON_TINY
+from icons import ICON_BIG
 from models import ForecastPeriod
 
 if TYPE_CHECKING:
@@ -108,14 +108,77 @@ def _build_day_cards(periods: List[ForecastPeriod]) -> List[DayCard]:
     return cards
 
 
+CARD_MIN_W = 15   # narrowest card that still fits the big icon
+CARD_MAX_W = 60
+GAP = 1           # separator column between cards
+ICON_ROWS = 5
+
+
+def _card_attr_temp(v: Optional[float], unit: str) -> int:
+    """Colour a temperature by how warm it is (same scale as Hourly)."""
+    from views_hourly import _temp_attr
+    return _temp_attr(v, unit.upper() != "C")
+
+
+def _card_lines(card: DayCard, w: int, app: "App") -> List[Tuple[str, int, bool]]:
+    """(text, attr, centered) lines for one card, top to bottom."""
+    # Fixed-height blocks so every card's rows line up across the screen.
+    out: List[Tuple[str, int, bool]] = []
+    icon_art = ICON_BIG.get(card.icon_key, ICON_BIG.get("unknown", ""))
+    icon = [line.rstrip()[:w] for line in (icon_art.strip("\n").split("\n") if icon_art else [])]
+    icon += [""] * (ICON_ROWS - len(icon))
+    out += [(line, curses.color_pair(2), True) for line in icon[:ICON_ROWS]]
+    short = list(wrap_lines(card.short_forecast, w))[:2]
+    short += [""] * (2 - len(short))
+    out += [(line, curses.A_BOLD, True) for line in short]
+
+    pops = [p.pop for p in (card.day, card.night) if p is not None and p.pop is not None]
+    pop = max(pops) if pops else None
+    if pop is not None and pop >= 10:
+        attr = curses.color_pair(6) | (curses.A_BOLD if pop >= 60 else 0)
+        out.append((f"Precip {pop:.0f}%", attr if pop >= 30 else curses.A_DIM, True))
+    else:
+        out.append(("Dry", curses.A_DIM, True))
+    wind_p = card.day or card.night
+    wind = ""
+    if wind_p and wind_p.wind_speed and wind_p.wind_speed != "—":
+        wind = f"{wind_p.wind_dir} {wind_p.wind_speed}"[:w]
+    out.append((wind, curses.A_DIM, True))
+
+    sun = ""
+    sdt = card.start_dt
+    if sdt:
+        rise, sset = get_sunrise_sunset(app.lat, app.lon, sdt.date())
+        sun = f"\u2191{fmt_time(rise, app.use_24h)}  \u2193{fmt_time(sset, app.use_24h)}"
+    out.append((sun if len(sun) <= w else "", curses.color_pair(2) | curses.A_DIM, True))
+
+    # Detailed day/night narratives fill whatever height is left.
+    for label, period in (("Day", card.day), ("Night", card.night)):
+        if period is None or not period.detailed_forecast or period.detailed_forecast == "—":
+            continue
+        out.append(("", 0, False))
+        out.append((label, curses.color_pair(1) | curses.A_BOLD, False))
+        for wl in wrap_lines(period.detailed_forecast, w):
+            out.append((wl, 0, False))
+    return out
+
+
+def _card_label(card: DayCard, w: int) -> str:
+    sdt = card.start_dt
+    name = "Tonight" if card.day is None and card.label in ("Nite", "Today") else card.label
+    if sdt is None:
+        return name
+    local = sdt.astimezone()
+    long = f"{name} · {local.strftime('%b')} {local.day}"
+    return long if len(long) <= w else name
+
+
 def draw_forecast(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
     periods = app.forecast_periods
     if not periods:
-        safe_addstr(
-            win, 0, 0, "No forecast yet. Press r to refresh.", curses.A_DIM
-        )
+        safe_addstr(win, 0, 0, "No forecast yet. Press r to refresh.", curses.A_DIM)
         win.noutrefresh()
         return
 
@@ -124,111 +187,48 @@ def draw_forecast(app: "App", win) -> None:
         win.noutrefresh()
         return
 
-    # --- Layout constants ---
-    CARD_W = 24          # width of each card column
-    GAP = 2              # gap between cards
-    HEADER_ROWS = 2      # title + blank line
+    # As many cards as fit at the minimum width (ideally all of them), then
+    # widen them to share the full terminal width.
+    avail = cols - 1
+    visible = clamp((avail + GAP) // (CARD_MIN_W + GAP), 1, len(cards))
+    card_w = min(CARD_MAX_W, (avail - GAP * (visible - 1)) // visible)
+    total_w = visible * card_w + GAP * (visible - 1)
+    x0 = max(0, (avail - total_w) // 2)
 
-    visible_cards = max(1, (cols + GAP) // (CARD_W + GAP))
-    app.fc_scroll = clamp(app.fc_scroll, 0, max(0, len(cards) - 1))
+    app.fc_scroll = clamp(app.fc_scroll, 0, max(0, len(cards) - visible))
+    start = app.fc_scroll
+    bottom = rows - 1 if len(cards) > visible else rows
 
-    # Center the cards if there's extra space
-    total_w = min(visible_cards, len(cards)) * (CARD_W + GAP) - GAP
-    x_offset = max(0, (cols - total_w) // 2)
+    for ci, card in enumerate(cards[start:start + visible]):
+        x = x0 + ci * (card_w + GAP)
+        if ci:
+            for sy in range(0, bottom):
+                safe_addstr(win, sy, x - 1, "\u2502", curses.A_DIM)
 
-    # Title
-    safe_addstr(win, 0, 0, "Forecast"[: cols - 1], curses.A_BOLD)
+        safe_addstr(win, 0, x, _card_label(card, card_w).center(card_w)[:card_w],
+                    curses.color_pair(1) | curses.A_BOLD)
+        unit = card.temp_unit or "F"
+        hi = "\u2014" if card.high is None else f"{card.high:.0f}\u00b0"
+        lo = "\u2014" if card.low is None else f"{card.low:.0f}\u00b0"
+        tx = x + (card_w - len(f"{hi} / {lo}")) // 2
+        safe_addstr(win, 1, tx, hi, _card_attr_temp(card.high, unit) | curses.A_BOLD)
+        safe_addstr(win, 1, tx + len(hi), " / ", curses.A_DIM)
+        safe_addstr(win, 1, tx + len(hi) + 3, lo, _card_attr_temp(card.low, unit))
 
-    # Determine which cards to show
-    start_idx = app.fc_scroll
-    if start_idx + visible_cards > len(cards):
-        start_idx = max(0, len(cards) - visible_cards)
-    end_idx = min(start_idx + visible_cards, len(cards))
-
-    # Precompute sunrise/sunset per date
-    sun_cache: Dict[str, Tuple[Optional[dt.datetime], Optional[dt.datetime]]] = {}
-
-    y_base = HEADER_ROWS
-
-    for ci, card_idx in enumerate(range(start_idx, end_idx)):
-        card = cards[card_idx]
-        x = x_offset + ci * (CARD_W + GAP)
-
-        if x + CARD_W > cols:
-            break
-
-        # Draw separator between cards
-        if ci > 0:
-            sep_x = x - GAP // 2 - 1
-            if 0 <= sep_x < cols:
-                for sy in range(y_base, min(rows - 1, y_base + 12)):
-                    safe_addstr(win, sy, sep_x, "\u2502", curses.A_DIM)
-
-        y = y_base
-
-        # Day label
-        attr = curses.A_BOLD
-        label_str = card.label.center(CARD_W)
-        safe_addstr(win, y, x, label_str[:CARD_W], attr)
-        y += 1
-
-        # Icon (big ASCII art, centered in card width)
-        icon_art = ICON_BIG.get(card.icon_key, ICON_BIG.get("unknown", ""))
-        icon_lines = icon_art.strip("\n").split("\n") if icon_art else []
-        for il in range(len(icon_lines)):
-            if y >= rows - 2:
+        y = 3
+        lines = _card_lines(card, card_w, app)
+        for i, (text, attr, centered) in enumerate(lines):
+            if y >= bottom:
                 break
-            line = icon_lines[il]
-            if len(line) > CARD_W:
-                line = line[:CARD_W]
-            padded = line.center(CARD_W)
-            safe_addstr(win, y, x, padded[:CARD_W], curses.A_DIM)
+            if y == bottom - 1 and i < len(lines) - 1:
+                text = (text[: card_w - 1] + "\u2026") if text else "\u2026"
+            safe_addstr(win, y, x + ((card_w - len(text)) // 2 if centered else 0),
+                        text[:card_w], attr)
             y += 1
 
-        # Temperature line: high° low°
-        if y < rows - 2:
-            unit_suffix = f"\u00b0{card.temp_unit}" if ci == 0 else "\u00b0"
-            hi = f"{card.high:.0f}{unit_suffix}" if card.high is not None else "\u2014"
-            lo = f"{card.low:.0f}{unit_suffix}" if card.low is not None else "\u2014"
-            hi_str = hi
-            lo_str = lo
-            temp_x = x + (CARD_W - len(f"{hi_str} {lo_str}")) // 2
-            safe_addstr(win, y, temp_x, hi_str, curses.A_BOLD)
-            safe_addstr(win, y, temp_x + len(hi_str), " ")
-            safe_addstr(win, y, temp_x + len(hi_str) + 1, lo_str, curses.A_DIM)
-            y += 1
-
-        # Short forecast (wrapped to card width, up to 2 lines)
-        if y < rows - 2 and card.short_forecast:
-            wrapped = wrap_lines(card.short_forecast, CARD_W)
-            for wl in wrapped[:2]:
-                if y >= rows - 2:
-                    break
-                centered = wl.center(CARD_W)
-                safe_addstr(win, y, x, centered[:CARD_W], curses.A_DIM)
-                y += 1
-
-        # Sunrise / Sunset
-        sdt = card.start_dt
-        if sdt and y < rows - 1:
-            date_key = sdt.date().isoformat()
-            if date_key not in sun_cache:
-                sun_cache[date_key] = get_sunrise_sunset(
-                    app.lat, app.lon, sdt.date()
-                )
-            sunrise_dt, sunset_dt = sun_cache[date_key]
-
-            use_24h = getattr(app, "use_24h", False)
-            sr_str = fmt_time(sunrise_dt, use_24h) if sunrise_dt else "—"
-            ss_str = fmt_time(sunset_dt, use_24h) if sunset_dt else "—"
-            sun_line = f"\u2600\u2191{sr_str}  \u2600\u2193{ss_str}"
-            sun_x = x + (CARD_W - len(sun_line)) // 2
-            safe_addstr(win, y, sun_x, sun_line[:CARD_W], curses.A_DIM)
-            y += 1
-
-    # Footer with scroll hint
-    if len(cards) > visible_cards:
-        hint = f"← {app.fc_scroll + 1}/{len(cards)} → (j/k)"[: cols - 1]
-        safe_addstr(win, rows - 1, 0, hint, curses.A_DIM)
+    if len(cards) > visible:
+        hint = (f"Days {start + 1}–{start + visible} of {len(cards)} · "
+                "j/k \u2190\u2192 scroll · widen the terminal to see every day")
+        safe_addstr(win, rows - 1, 0, hint[: cols - 1], curses.A_DIM)
 
     win.noutrefresh()

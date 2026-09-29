@@ -118,10 +118,27 @@ class NWSClient:
         url = f"{BASE}/alerts/active?point={lat:.4f},{lon:.4f}"
         return self._get_json(url, ttl=self.ttls["alerts"])
 
+    def alerts_area(self, state_code: str) -> Dict[str, Any]:
+        """Active alerts anywhere in a state (e.g. "WA")."""
+        url = f"{BASE}/alerts/active?area={state_code.strip().upper()}"
+        return self._get_json(url, ttl=self.ttls["alerts"])
+
     def forecast_discussion(self, office_id: str) -> Optional[Dict[str, Any]]:
         """Fetch the latest Area Forecast Discussion (AFD) text product
         issued by a WFO (e.g. "OTX")."""
         return self._latest_text_product(office_id, "AFD", ttl_key="afd")
+
+    def earlier_forecast_discussions(
+        self, office_id: str, count: int = 2
+    ) -> List[Dict[str, Any]]:
+        """The AFDs issued before the latest one, newest first — used to fill
+        spare room on the discussion screen."""
+        out = []
+        for index in range(1, count + 1):
+            prod = self._latest_text_product(office_id, "AFD", ttl_key="afd", index=index)
+            if prod:
+                out.append(prod)
+        return out
 
     def hazardous_weather_outlook(self, office_id: str) -> Optional[Dict[str, Any]]:
         """Fetch the latest Hazardous Weather Outlook (HWO) text product
@@ -130,8 +147,10 @@ class NWSClient:
         return self._latest_text_product(office_id, "HWO", ttl_key="hwo")
 
     def _latest_text_product(
-        self, office_id: str, product_type: str, ttl_key: str
+        self, office_id: str, product_type: str, ttl_key: str, index: int = 0
     ) -> Optional[Dict[str, Any]]:
+        """Fetch a text product issued by a WFO; `index` 0 is the latest,
+        1 the one before it, and so on."""
         office = (office_id or "").strip().upper()
         if not office:
             return None
@@ -141,9 +160,9 @@ class NWSClient:
                 ttl=self.ttls.get(ttl_key, 3600),
             )
             graph = (listing or {}).get("@graph") or []
-            if not graph:
+            if len(graph) <= index:
                 return None
-            prod_id = (graph[0] or {}).get("id")
+            prod_id = (graph[index] or {}).get("id")
             if not isinstance(prod_id, str) or not prod_id:
                 return None
             prod = self._get_json(

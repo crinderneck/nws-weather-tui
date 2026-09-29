@@ -67,7 +67,7 @@ class App:
         self.use_24h: bool = bool(cfg.get("use_24h", False))
         self.auto_refresh_seconds: int = int(cfg.get("auto_refresh_seconds", 300))
         self.timeout: int = int(cfg.get("http_timeout", 10))
-        self.hourly_hours: int = int(cfg.get("hourly_hours", 24))
+        self.hourly_hours: int = int(cfg.get("hourly_hours", 0))
         self.show_radar_map: bool = bool(cfg.get("show_radar_map", True))
         self.favorites: List[Dict[str, Any]] = list(cfg.get("favorites", []) or [])
         self.fav_idx: int = 0
@@ -116,9 +116,11 @@ class App:
         self.forecast_periods: List[ForecastPeriod] = []
         self.hourly_periods: List[HourlyPeriod] = []
         self.alerts: List[AlertItem] = []
+        self.area_alerts: List[AlertItem] = []  # elsewhere in the state
         self.air_quality: Optional[AirQuality] = None
         self.uv_index: Optional[UVIndex] = None
         self.afd: Optional[Dict[str, Any]] = None
+        self.afd_earlier: List[Dict[str, Any]] = []
         self.hwo: Optional[Dict[str, Any]] = None
         self.grid_data_url: Optional[str] = None
 
@@ -210,6 +212,8 @@ class App:
         self.state_code = None
         self.office_id = None
         self.afd = None
+        self.afd_earlier = []
+        self.area_alerts = []
         self.afd_scroll = 0
         self.hwo = None
         self.hwo_scroll = 0

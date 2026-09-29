@@ -43,6 +43,7 @@ def refresh_all(app: "App", force: bool = False, allow_offline: bool = False) ->
         "hourly_url": app.hourly_url, "stations_url": app.stations_url,
         "station_id": app.station_id, "hourly_hours": app.hourly_hours,
         "office_id": app.office_id, "grid_data_url": app.grid_data_url,
+        "state_code": app.state_code,
         "allow_offline": allow_offline,
     }
     gen = app._bg_generation
@@ -128,10 +129,19 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
         result["alerts"] = extract_alerts(
             app.client.alerts(ctx["lat"], ctx["lon"])
         )
+        # Alerts elsewhere in the state give the Alerts view something to
+        # say when this point has none; supplementary, so failures are quiet.
+        state = result.get("state_code", ctx["state_code"])
+        if state and not result["alerts"]:
+            try:
+                result["area_alerts"] = extract_alerts(app.client.alerts_area(state))
+            except Exception as ae:
+                dbg(f"Area alerts fetch failed: {ae}")
         # AFD/HWO are supplementary forecaster narratives — failures here
         # must not take the whole refresh offline.
         if office_id:
             result["afd"] = app.client.forecast_discussion(office_id)
+            result["afd_earlier"] = app.client.earlier_forecast_discussions(office_id)
             result["hwo"] = app.client.hazardous_weather_outlook(office_id)
         # Air quality and UV index are supplementary, non-NWS sources —
         # failures there are swallowed internally and must not take the
@@ -190,6 +200,8 @@ def apply_bg_weather(app: "App") -> None:
             app.grid_data_url = result["grid_data_url"]
         if "afd" in result and result["afd"]:
             app.afd = result["afd"]
+        if "afd_earlier" in result and result["afd_earlier"]:
+            app.afd_earlier = result["afd_earlier"]
         if "hwo" in result and result["hwo"]:
             app.hwo = result["hwo"]
 
@@ -201,6 +213,7 @@ def apply_bg_weather(app: "App") -> None:
             app.hourly_periods = result["hourly_periods"]
         if "alerts" in result:
             app.alerts = result["alerts"]
+            app.area_alerts = result.get("area_alerts", [])
         if "air_quality" in result:
             app.air_quality = result["air_quality"]
         if "uv_index" in result:

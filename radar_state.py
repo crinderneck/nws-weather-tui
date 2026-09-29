@@ -16,7 +16,12 @@ from constants import RADAR_LAST_PNG_PATH, ensure_dir
 from geo import bbox_around, clamp, expand_bbox_km
 from helpers import dbg
 from models import RadarFrame
-from overlays import city_overlay_and_hits_for_bbox, png_to_line_overlay, vector_lines_overlay
+from overlays import (
+    city_overlay_and_hits_for_bbox,
+    png_to_line_overlay,
+    shape_line_overlay,
+    vector_lines_overlay,
+)
 from radar_decode import png_to_ascii, png_to_halfblock_radar
 
 if TYPE_CHECKING:
@@ -150,6 +155,17 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
     minlon, minlat, maxlon, maxlat = bbox
     cos_lat = abs(math.cos(math.radians((minlat + maxlat) / 2)))
     geo_aspect = ((maxlon - minlon) * cos_lat) / max(1e-9, maxlat - minlat)
+    # On a panel wider than the state's shape, show more country east and
+    # west rather than leave the sides empty (terminal cells ~2:1, and the
+    # half-block renderer packs 2 pixels per row). Capped so a very wide
+    # screen doesn't zoom out to half the continent.
+    want_aspect = target_cols / max(1, target_rows * 2)
+    if want_aspect > geo_aspect * 1.05:
+        widen = min(want_aspect / geo_aspect, 4.0)
+        mid, half = (minlon + maxlon) / 2, (maxlon - minlon) * widen / 2
+        minlon, maxlon = mid - half, mid + half
+        bbox = (minlon, minlat, maxlon, maxlat)
+        geo_aspect *= widen
     req_h = max(64, target_rows * 12)
     req_w = max(64, int(req_h * geo_aspect))
 
@@ -259,6 +275,7 @@ def _bg_radar_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
                             ol, ctx["target_cols"], ctx["target_rows"],
                             mark="|", src_bbox=out_bbox, dst_bbox=ctx["bbox"],
                         )
+                state_overlay = shape_line_overlay(state_overlay)
             except Exception as oe:
                 dbg(f"RADAR state-lines overlay failed: {oe}")
 

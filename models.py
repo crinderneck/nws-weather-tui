@@ -45,6 +45,7 @@ class ForecastPeriod:
     short_forecast: str
     detailed_forecast: str
     icon_key: str
+    pop: Optional[float] = None
 
 
 @dataclass
@@ -83,6 +84,7 @@ class AlertItem:
     description: str
     instruction: str
     geometry: Optional[Dict[str, Any]] = None
+    area_desc: str = ""
 
 
 @dataclass
@@ -121,6 +123,19 @@ def extract_current(obs_json: Dict[str, Any]) -> CurrentConditions:
             return val if isinstance(val, (int, float)) else None
         return None
 
+    def speed_mps(path: str) -> Optional[float]:
+        """A speed in m/s. Observations normally report km/h, so honour the
+        unitCode rather than assume."""
+        val = v(path)
+        if val is None:
+            return None
+        unit = str((props.get(path) or {}).get("unitCode") or "")
+        if unit.endswith("km_h-1"):
+            return val / 3.6
+        if unit.endswith("kn"):
+            return val * 0.514444
+        return val
+
     timestamp = (
         parse_iso(props.get("timestamp"))
         if isinstance(props.get("timestamp"), str)
@@ -143,9 +158,9 @@ def extract_current(obs_json: Dict[str, Any]) -> CurrentConditions:
         station=station,
         timestamp=timestamp,
         temperature_c=v("temperature"),
-        wind_mps=v("windSpeed"),
+        wind_mps=speed_mps("windSpeed"),
         wind_dir_deg=v("windDirection"),
-        gust_mps=v("windGust"),
+        gust_mps=speed_mps("windGust"),
         humidity_pct=v("relativeHumidity"),
         pressure_pa=v("barometricPressure"),
         visibility_m=v("visibility"),
@@ -279,9 +294,14 @@ def extract_forecast(fc_json: Dict[str, Any]) -> List[ForecastPeriod]:
                 short_forecast=short,
                 detailed_forecast=str(p.get("detailedForecast") or "—"),
                 icon_key=pick_icon(short, is_day),
+                pop=_pct((p.get("probabilityOfPrecipitation") or {}).get("value")),
             )
         )
     return out
+
+
+def _pct(v: Any) -> Optional[float]:
+    return float(v) if isinstance(v, (int, float)) else None
 
 
 def extract_hourly(h_json: Dict[str, Any]) -> List[HourlyPeriod]:
@@ -443,6 +463,7 @@ def extract_alerts(alerts_json: Dict[str, Any]) -> List[AlertItem]:
                 instruction=str(props.get("instruction") or ""),
                 geometry=(f or {}).get("geometry")
                 if isinstance((f or {}).get("geometry"), dict) else None,
+                area_desc=str(props.get("areaDesc") or ""),
             )
         )
     sev_rank = {"Extreme": 0, "Severe": 1, "Moderate": 2, "Minor": 3, "Unknown": 4}

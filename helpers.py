@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import datetime as dt
 import textwrap
+import unicodedata
 from functools import lru_cache
 from typing import Optional, Tuple
 
@@ -46,7 +47,10 @@ def get_sunrise_sunset(
         return None, None
     try:
         loc = LocationInfo(latitude=lat, longitude=lon)
-        s = sun(loc.observer, date=date, tzinfo=loc.timezone)
+        # LocationInfo defaults to Europe/London, which puts the US's sunset
+        # on the previous calendar day; use the local zone the app displays in.
+        local_tz = dt.datetime.now().astimezone().tzinfo
+        s = sun(loc.observer, date=date, tzinfo=local_tz)
         return s["sunrise"], s["sunset"]
     except Exception:
         return None, None
@@ -69,6 +73,25 @@ def dbg(msg: str) -> None:
 # ---------------------------------------------------------------------------
 # Curses / text utilities
 # ---------------------------------------------------------------------------
+
+def text_width(s: str) -> int:
+    """Terminal cells `s` occupies — East Asian wide glyphs (⛅ ☔ ⚡ …)
+    take two, so padding by len() misaligns columns after them."""
+    return sum(2 if unicodedata.east_asian_width(ch) in "WF" else 1 for ch in s)
+
+
+def fit_width(s: str, width: int, align: str = "<") -> str:
+    """Truncate (with …) or pad `s` to exactly `width` cells."""
+    if text_width(s) > width:
+        out = ""
+        for ch in s:
+            if text_width(out + ch) > width - 1:
+                break
+            out += ch
+        s = out + "…"
+    pad = " " * max(0, width - text_width(s))
+    return pad + s if align == ">" else s + pad
+
 
 def safe_addstr(win, y: int, x: int, s: str, attr: int = 0) -> None:
     try:

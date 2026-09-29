@@ -62,11 +62,15 @@ def handle_key(app: "App", ch: int) -> bool:
     elif ch in (curses.KEY_UP, ord("k")):
         scroll(app, -1)
     elif ch in (curses.KEY_LEFT, ord("<")):
-        if app.view == "current":
+        if app.view == "forecast":
+            scroll(app, -1)
+        elif app.view == "current":
             from radar_state import step_radar_frame
             step_radar_frame(app, -1)
     elif ch in (curses.KEY_RIGHT, ord(">")):
-        if app.view == "current":
+        if app.view == "forecast":
+            scroll(app, 1)
+        elif app.view == "current":
             from radar_state import step_radar_frame
             step_radar_frame(app, 1)
     elif ch == 27:  # Escape

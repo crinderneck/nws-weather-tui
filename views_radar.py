@@ -5,11 +5,13 @@ NWS Weather TUI — Radar panel and full-screen radar view.
 
 from __future__ import annotations
 
+import datetime as dt
 import math
 from typing import TYPE_CHECKING, List
 
 import curses
 
+from formatting import fmt_time
 from helpers import safe_addstr
 from radar_renderer import (
     draw_alert_overlay_line,
@@ -46,7 +48,10 @@ def draw_radar_panel(
         else f"  frame {frame_idx}/{max(1, n_frames)}" if n_frames > 1
         else ""
     )
-    ts_tag = f"  {app._radar_ts_utc}" if app._radar_ts_utc else ""
+    ts_tag = ""
+    if app._radar_ts_ms:
+        local = dt.datetime.fromtimestamp(app._radar_ts_ms / 1000).astimezone()
+        ts_tag = f"  {fmt_time(local, app.use_24h)}"
     state_tag = f" \u2014 {app.state_code}" if app.state_code else ""
     header = f"Radar{state_tag}{ts_tag}{anim_tag}"
     header = header[: cols - 1]
@@ -68,7 +73,11 @@ def draw_radar_panel(
             cos_lat = abs(math.cos(math.radians((minlat + maxlat) / 2)))
             geo_aspect = (lon_span * cos_lat) / lat_span
             # Terminal chars are ~2x tall as wide; half-block = 2 vpx per row
-            ideal_cols = int(geo_aspect * map_rows * 2)
+            ideal_cols = int(round(geo_aspect * map_rows * 2))
+            # The bbox was fitted to the last size we asked for; don't chase
+            # rounding error into a refresh loop.
+            if abs(ideal_cols - app._radar_src_cols) <= 2:
+                ideal_cols = app._radar_src_cols
             map_cols = max(20, min(max_cols, ideal_cols))
 
     map_x = (cols - 1 - map_cols) // 2
