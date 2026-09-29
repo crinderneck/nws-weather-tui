@@ -97,7 +97,9 @@ pipx install "nws-weather-tui[all]"
 uv tool install "nws-weather-tui[all]"
 ```
 
-`[all]` pulls in the optional extras: `astral` for sunrise/sunset and moonrise/moonset times, and `numpy` for faster radar decoding. Drop it for the minimal install, or pick one extra with `[astral]` or `[numpy]`.
+`[all]` adds the optional `astral` package for sunrise/sunset and moonrise/moonset times. Leave it off and those times are simply not shown.
+
+To add extras to an existing pipx install, pass `--force` (`pipx install --force "nws-weather-tui[all]"`); without it, pipx leaves the existing install unchanged. `uv tool install` picks up new extras on its own.
 
 To run the latest unreleased code from `main`, install from git instead: `pipx install git+https://github.com/crinderneck/nws-weather-tui.git`. Releases are listed on the [releases page](https://github.com/crinderneck/nws-weather-tui/releases).
 
@@ -203,7 +205,7 @@ All code lives in the `src/nws_weather_tui/` package.
 - Python 3.8+
 - A terminal with curses support (most Linux and macOS terminals)
 - A 256-color terminal is recommended for radar; it falls back to ASCII automatically
-- `pillow` and `requests`; optionally `astral` and `numpy`
+- `numpy`, `pillow` and `requests` (installed automatically); optionally `astral`
 
 ## Data sources
 

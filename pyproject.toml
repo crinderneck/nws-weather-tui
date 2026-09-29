@@ -30,14 +30,14 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
+    "numpy",  # radar decoding
     "pillow",
     "requests",
 ]
 
 [project.optional-dependencies]
 astral = ["astral"]  # sunrise/sunset, moonrise/moonset
-numpy = ["numpy"]    # faster radar decoding
-all = ["astral", "numpy"]
+all = ["astral"]
 
 [project.urls]
 Homepage = "https://github.com/crinderneck/nws-weather-tui"
