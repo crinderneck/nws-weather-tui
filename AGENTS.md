@@ -4,9 +4,12 @@
 
 ### Running the Application
 ```bash
-python -m nws_weather_tui
+# one-time: editable install into a venv
+python -m venv .venv && . .venv/bin/activate && pip install -e .
+
+nws-weather-tui
 # or
-python -m nws_weather_tui --help
+python -m nws_weather_tui
 ```
 
 ### Linting
@@ -29,7 +32,8 @@ ruff check --fix .
 - Organize imports in three sections (separated by blank lines):
   1. Standard library (`import os`, `import re`, etc.)
   2. Third-party packages (`import curses`, `import requests`, etc.)
-  3. Local modules (`from client import NWSClient`, `from helpers import ...`)
+  3. Local modules, always absolute from the package root
+     (`from nws_weather_tui.api.client import NWSClient`, `from nws_weather_tui.helpers import ...`)
 - Sort alphabetically within each group
 - Use explicit imports (`from x import y, z`) rather than `import x`
 
@@ -88,23 +92,26 @@ def _refresh(self) -> None:
 - One blank line between top-level definitions
 
 #### File Organization
-- `app.py` - Main application class and entry point
-- `client.py` - NWS API client
+All code lives under `src/nws_weather_tui/`:
+- `__init__.py` - Package version only; keep it free of imports
+- `__main__.py` - Entry point (`run()`): stderr redirect + `curses.wrapper(app.main)`
+- `app.py` - Main application class and `main(stdscr)`
+- `input_handler.py` - Key and mouse handling, prompts
+- `weather_refresh.py` - Background weather fetch and apply
 - `models.py` - Data models and extraction functions
-- `views.py` - View/draw functions for each screen
-- `views_chrome.py` - Header and footer chrome
-- `views_radar.py` - Radar panel and full-screen radar view
-- `views_current.py` - Current conditions view
-- `views_forecast.py` - Multi-day forecast view
-- `views_hourly.py` - Hourly forecast view
-- `views_alerts.py` - Weather alerts view
-- `views_help.py` - Help screen
-- `views_moon.py` - Moon phase view
-- `views_favorites.py` - Favorites editor
-- `helpers.py` - Utility functions
-- `constants.py` - Constants and configuration
-- `cache.py` - Simple in-memory cache
-- `icons.py` - Weather icons
+- `text_product.py` - AFD/HWO cleanup and reflow
+- `constants.py` - Constants, config defaults and config loading
+- `persistence.py` - Config and state save/restore
+- `dashboard.py`, `favorites.py` - Favorites dashboard and editor logic
+- `helpers.py`, `formatting.py`, `geo.py`, `conversions.py` - Utility functions
+- `moon.py`, `windsock.py`, `icons.py`, `curses_init.py` - Moon math, windsock, icons, curses setup
+- `api/` - HTTP clients: `client.py` (NWS), `geocode.py`, `geo_boundaries.py`,
+  `air_quality.py`, `uv_index.py`, and `cache.py` (TTL cache)
+- `radar/` - `client.py`, `decode.py`, `renderer.py`, `palette.py`, `state.py`,
+  `overlays.py`, `cities.py`
+- `views/` - One module per screen (`current.py`, `forecast.py`, `hourly.py`, `alerts.py`,
+  `afd.py`, `hwo.py`, `moon.py`, `radar.py`, `favorites.py`, `dashboard.py`, `help.py`),
+  `chrome.py` for header/footer; `__init__.py` re-exports the `draw_*` functions
 
 #### Git Conventions
 - Use conventional commit messages

@@ -89,23 +89,32 @@ A terminal weather app for the US, powered by the [National Weather Service API]
 
 ## Installation
 
+Install it as a standalone command with [pipx](https://pipx.pypa.io/) or [uv](https://docs.astral.sh/uv/):
+
+```bash
+pipx install git+https://github.com/crinderneck/nws-weather-tui.git
+# or
+uv tool install git+https://github.com/crinderneck/nws-weather-tui.git
+```
+
+Optional extras: `astral` for sunrise/sunset and moonrise/moonset times, and `numpy` for faster radar decoding. You can add them to a pipx install with `pipx inject nws-weather-tui astral numpy`.
+
+### From a checkout
+
 ```bash
 git clone https://github.com/crinderneck/nws-weather-tui.git
 cd nws-weather-tui
-
-pip install pillow requests
-
-# Optional
-pip install astral   # sunrise/sunset and moonrise/moonset times
-pip install numpy    # faster radar decoding
+python -m venv .venv
+. .venv/bin/activate
+pip install -e .
 ```
 
 ## Usage
 
 ```bash
+nws-weather-tui
+# or
 python -m nws_weather_tui
-# or, from the repo root
-python __main__.py
 ```
 
 ## Keyboard shortcuts
@@ -169,19 +178,23 @@ Set `WEATHER_APP_UA` to override the User-Agent sent to the NWS API.
 
 ## Code layout
 
+All code lives in the `src/nws_weather_tui/` package.
+
 | Module | Purpose |
 |--------|---------|
+| `__main__.py` | Entry point (`nws-weather-tui`, `python -m nws_weather_tui`) |
 | `app.py` | `App` class, main loop and drawing dispatch |
 | `input_handler.py` | Key and mouse handling, prompts |
 | `weather_refresh.py` | Background fetch of all weather data |
-| `client.py` | NWS API client (delegates to the radar, geocoding, boundary, air quality and UV clients) |
 | `models.py` | Data classes and API response extraction |
 | `text_product.py` | Cleanup and reflow of NWS text products (AFD, HWO) |
-| `views_*.py` | One module per screen, plus `views_chrome.py` for the header and footer |
-| `radar_*.py`, `overlays.py` | Radar fetching, decoding, rendering and map overlays |
+| `api/` | HTTP clients: `client.py` (NWS API, delegates to the others), geocoding, state boundaries, air quality, UV, and the TTL cache |
+| `radar/` | Radar fetching, decoding, rendering, palette, map overlays, city data and radar state |
+| `views/` | One module per screen, plus `chrome.py` for the header and footer |
 | `dashboard.py`, `favorites.py` | Favorites dashboard fetch and favorites editing |
 | `moon.py`, `windsock.py`, `icons.py` | Moon math, windsock animation, weather icons |
 | `constants.py`, `persistence.py` | Default config, config and state files |
+| `helpers.py`, `formatting.py`, `geo.py`, `conversions.py` | Shared utilities |
 
 ## Requirements
 
