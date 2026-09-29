@@ -90,7 +90,7 @@ SECTIONS: List[Tuple[str, List[Tuple[Optional[str], str]]]] = [
     ("Files", [
         ("config", CONFIG_PATH),
         ("state", STATE_PATH),
-        (None, "Requires pillow and requests; astral adds sunrise/sunset and moon times."),
+        (None, "Requires astral, numpy, pillow and requests."),
     ]),
 ]
 

@@ -69,7 +69,7 @@ A terminal weather app for the US, powered by the [National Weather Service API]
 
 - A round, shaded moon showing the current illumination, sized to the terminal
 - Phase name, illumination, age and lunation number
-- Moonrise and moonset (requires `astral`), and the dates of upcoming phases
+- Moonrise and moonset, and the dates of upcoming phases
 
 ### Favorites (`F`, `n`/`b`, `e`, `D`)
 
@@ -92,12 +92,10 @@ A terminal weather app for the US, powered by the [National Weather Service API]
 Install it as a standalone command with [pipx](https://pipx.pypa.io/) or [uv](https://docs.astral.sh/uv/):
 
 ```bash
-pipx install "nws-weather-tui[all]"
+pipx install nws-weather-tui
 # or
-uv tool install "nws-weather-tui[all]"
+uv tool install nws-weather-tui
 ```
-
-`[all]` pulls in the optional extras: `astral` for sunrise/sunset and moonrise/moonset times, and `numpy` for faster radar decoding. Drop it for the minimal install, or pick one extra with `[astral]` or `[numpy]`.
 
 To run the latest unreleased code from `main`, install from git instead: `pipx install git+https://github.com/crinderneck/nws-weather-tui.git`. Releases are listed on the [releases page](https://github.com/crinderneck/nws-weather-tui/releases).
 
@@ -203,7 +201,7 @@ All code lives in the `src/nws_weather_tui/` package.
 - Python 3.8+
 - A terminal with curses support (most Linux and macOS terminals)
 - A 256-color terminal is recommended for radar; it falls back to ASCII automatically
-- `pillow` and `requests`; optionally `astral` and `numpy`
+- `astral`, `numpy`, `pillow` and `requests` (installed automatically)
 
 ## Data sources
 

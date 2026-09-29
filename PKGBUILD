@@ -8,12 +8,10 @@ url="https://github.com/crinderneck/nws-weather-tui"
 license=('MIT')
 depends=(
     'python'
+    'python-astral'
+    'python-numpy'
     'python-pillow'
     'python-requests'
-)
-optdepends=(
-    'python-astral: sunrise/sunset and moonrise/moonset times'
-    'python-numpy: faster radar decoding'
 )
 makedepends=(
     'python-build'
