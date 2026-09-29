@@ -58,8 +58,16 @@ class HourlyPeriod:
     short_forecast: str
     icon_key: str
     pop: Optional[float]
+    is_daytime: Optional[bool] = None
+    dewpoint_c: Optional[float] = None
+    humidity_pct: Optional[float] = None
+    # Merged in from gridpoint data (see merge_grid_into_hourly).
     precip_mm: Optional[float] = None
     snow_mm: Optional[float] = None
+    apparent_c: Optional[float] = None
+    sky_pct: Optional[float] = None
+    gust_kmh: Optional[float] = None
+    thunder_pct: Optional[float] = None
 
 
 @dataclass
@@ -293,11 +301,7 @@ def extract_hourly(h_json: Dict[str, Any]) -> List[HourlyPeriod]:
             is_day = None
         short = str(p.get("shortForecast") or "—")
 
-        pop = None
-        pop_obj = p.get("probabilityOfPrecipitation")
-        if isinstance(pop_obj, dict):
-            pv = pop_obj.get("value")
-            pop = pv if isinstance(pv, (int, float)) else None
+        pop = _quantity_value(p.get("probabilityOfPrecipitation"))
 
         out.append(
             HourlyPeriod(
@@ -312,9 +316,20 @@ def extract_hourly(h_json: Dict[str, Any]) -> List[HourlyPeriod]:
                 short_forecast=short,
                 icon_key=pick_icon(short, is_day),
                 pop=pop,
+                is_daytime=is_day,
+                dewpoint_c=_quantity_value(p.get("dewpoint")),
+                humidity_pct=_quantity_value(p.get("relativeHumidity")),
             )
         )
     return out
+
+
+def _quantity_value(obj: Any) -> Optional[float]:
+    """Pull the numeric value out of an NWS {unitCode, value} quantity."""
+    if not isinstance(obj, dict):
+        return None
+    v = obj.get("value")
+    return float(v) if isinstance(v, (int, float)) else None
 
 
 _DURATION_RE = re.compile(
@@ -349,15 +364,23 @@ def _parse_grid_values(
     return out
 
 
-def extract_grid_precip(
+def extract_grid_series(
     grid_json: Dict[str, Any]
 ) -> Dict[str, List[Tuple[dt.datetime, dt.datetime, float]]]:
-    """Parse NWS gridpoint quantitative precipitation / snowfall time series."""
+    """Parse the NWS gridpoint time series that the hourly view uses.
+
+    Keys are HourlyPeriod attribute names. Units are fixed by the API
+    regardless of the requested unit system: mm, degC, percent and km/h.
+    """
     props = (grid_json or {}).get("properties", {}) or {}
     out: Dict[str, List[Tuple[dt.datetime, dt.datetime, float]]] = {}
     for key, field in [
         ("precip_mm", "quantitativePrecipitation"),
         ("snow_mm", "snowfallAmount"),
+        ("apparent_c", "apparentTemperature"),
+        ("sky_pct", "skyCover"),
+        ("gust_kmh", "windGust"),
+        ("thunder_pct", "probabilityOfThunder"),
     ]:
         obj = props.get(field)
         values = obj.get("values") if isinstance(obj, dict) else None
@@ -365,19 +388,32 @@ def extract_grid_precip(
     return out
 
 
-def merge_grid_precip_into_hourly(
+_GRID_ACCUMULATIONS = frozenset({"precip_mm", "snow_mm"})
+
+
+def merge_grid_into_hourly(
     hourly: List["HourlyPeriod"],
     grid: Dict[str, List[Tuple[dt.datetime, dt.datetime, float]]],
 ) -> None:
-    """Attach per-hour precip/snow accumulation (mm) from gridpoint data."""
+    """Attach per-hour gridpoint values (precip, feels-like, gusts, ...).
+
+    Accumulations are reported over multi-hour windows (typically 6h), so
+    they are spread evenly across the window's hours; summing the hourly
+    values then gives the true total instead of counting each window
+    once per hour.
+    """
     for key, series in grid.items():
         if not series:
             continue
+        accumulates = key in _GRID_ACCUMULATIONS
         for h in hourly:
             if h.start is None:
                 continue
             for start, end, val in series:
                 if start <= h.start < end:
+                    if accumulates:
+                        hours = max(1.0, (end - start).total_seconds() / 3600.0)
+                        val = val / hours
                     setattr(h, key, val)
                     break
 

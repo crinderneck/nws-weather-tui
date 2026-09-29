@@ -105,7 +105,6 @@ def _refresh(self) -> None:
 - `constants.py` - Constants and configuration
 - `cache.py` - Simple in-memory cache
 - `icons.py` - Weather icons
-- `sparklines.py` - ASCII sparkline generation
 
 #### Git Conventions
 - Use conventional commit messages

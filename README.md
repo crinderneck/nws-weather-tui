@@ -15,7 +15,7 @@ A terminal-based weather application for the US, powered by the [National Weathe
 
 ### Forecast & Hourly
 - Multi-day forecast with day/night periods from NWS (scrollable)
-- Hourly forecast with a high-resolution Braille line graph of the temperature trend, a precipitation-chance bar, and a tabular breakdown for the next 24 hours (configurable)
+- Hourly forecast that surfaces what's notable instead of charting the obvious daily temperature curve: an "at a glance" list (when precipitation starts/stops and how much, lightning risk, gusts, feels-like divergence, temperature swings that run against the day/night cycle, humidity, cloud transitions), a colour-coded condition ribbon, and a table grouped by day with sunrise/sunset markers plus feels-like, dew point, sky cover and gust columns (next 24 hours, configurable)
 - Expected precipitation and snowfall accumulation (from NWS gridpoint data), shown as a period total
 
 ### Radar

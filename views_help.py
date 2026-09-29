@@ -29,7 +29,7 @@ def draw_help(app: "App", win) -> None:
         "Views:",
         "  c  Current conditions \u2014 station obs, radar panel",
         "  f  Forecast (day/night NWS periods) \u2014 j/k to scroll",
-        "  h  Hourly (next N hours) \u2014 sparklines + tabular view",
+        "  h  Hourly (next N hours) \u2014 highlights, condition ribbon + table",
         "  a  Alerts \u2014 j/k to scroll",
         "  w  Full-screen radar map \u2014 press w again to return",
         "  m  Moon phase \u2014 current phase, illumination, upcoming dates",

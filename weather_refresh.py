@@ -16,10 +16,10 @@ from models import (
     extract_alerts,
     extract_current,
     extract_forecast,
-    extract_grid_precip,
+    extract_grid_series,
     extract_hourly,
     extract_uv_index,
-    merge_grid_precip_into_hourly,
+    merge_grid_into_hourly,
 )
 
 if TYPE_CHECKING:
@@ -112,17 +112,17 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
             )
             h = ctx["hourly_hours"]
             hourly_periods = hf[:h] if h > 0 else hf
-            # Gridpoint precip/snow amounts are supplementary — a failure
-            # here must not take the whole refresh offline, and simply
-            # leaves the hourly periods without accumulation figures.
+            # Gridpoint series (precip, feels-like, gusts, sky, thunder) are
+            # supplementary — a failure here must not take the whole refresh
+            # offline, and simply leaves those hourly fields empty.
             if grid_data_url:
                 try:
-                    grid = extract_grid_precip(
+                    grid = extract_grid_series(
                         app.client.forecast_grid_data(grid_data_url)
                     )
-                    merge_grid_precip_into_hourly(hourly_periods, grid)
+                    merge_grid_into_hourly(hourly_periods, grid)
                 except Exception as ge:
-                    dbg(f"Gridpoint precip/snow fetch failed: {ge}")
+                    dbg(f"Gridpoint data fetch failed: {ge}")
             result["hourly_periods"] = hourly_periods
 
         result["alerts"] = extract_alerts(
