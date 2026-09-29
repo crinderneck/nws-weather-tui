@@ -1,6 +1,6 @@
 # Maintainer: crinderneck <cjrinderneck@protonmail.com>
 pkgname=nws-weather-tui
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="A terminal-based weather application for the US, powered by the National Weather Service API"
 arch=('any')
@@ -13,14 +13,15 @@ depends=(
 )
 optdepends=(
     'python-astral: sunrise/sunset and moonrise/moonset times'
+    'python-numpy: faster radar decoding'
 )
 makedepends=(
     'python-build'
     'python-installer'
     'python-setuptools'
-    'python-wheel'
 )
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+# After pushing the v$pkgver tag, run `updpkgsums` to fill this in (see RELEASING.md).
 sha256sums=('SKIP')
 
 build() {

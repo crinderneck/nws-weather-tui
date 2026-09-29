@@ -92,12 +92,14 @@ A terminal weather app for the US, powered by the [National Weather Service API]
 Install it as a standalone command with [pipx](https://pipx.pypa.io/) or [uv](https://docs.astral.sh/uv/):
 
 ```bash
-pipx install git+https://github.com/crinderneck/nws-weather-tui.git
+pipx install "nws-weather-tui[all]"
 # or
-uv tool install git+https://github.com/crinderneck/nws-weather-tui.git
+uv tool install "nws-weather-tui[all]"
 ```
 
-Optional extras: `astral` for sunrise/sunset and moonrise/moonset times, and `numpy` for faster radar decoding. You can add them to a pipx install with `pipx inject nws-weather-tui astral numpy`.
+`[all]` pulls in the optional extras: `astral` for sunrise/sunset and moonrise/moonset times, and `numpy` for faster radar decoding. Drop it for the minimal install, or pick one extra with `[astral]` or `[numpy]`.
+
+To run the latest unreleased code from `main`, install from git instead: `pipx install git+https://github.com/crinderneck/nws-weather-tui.git`. Releases are listed on the [releases page](https://github.com/crinderneck/nws-weather-tui/releases).
 
 ### From a checkout
 
