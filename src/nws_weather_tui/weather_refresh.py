@@ -214,6 +214,7 @@ def apply_bg_weather(app: "App") -> None:
         if "alerts" in result:
             app.alerts = result["alerts"]
             app.area_alerts = result.get("area_alerts", [])
+            app.alert_notifier.update(app.alerts, app.lat, app.lon)
         if "air_quality" in result:
             app.air_quality = result["air_quality"]
         if "uv_index" in result:

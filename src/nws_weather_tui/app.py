@@ -34,6 +34,7 @@ from nws_weather_tui.models import (
     RadarFrame,
     UVIndex,
 )
+from nws_weather_tui.notify import AlertNotifier
 from nws_weather_tui.persistence import load_app_state, save_app_config
 from nws_weather_tui.radar.decode import RadarCell
 from nws_weather_tui.radar.state import reset_radar_state
@@ -73,6 +74,7 @@ class App:
         self.timeout: int = int(cfg.get("http_timeout", 10))
         self.hourly_hours: int = int(cfg.get("hourly_hours", 0))
         self.show_radar_map: bool = bool(cfg.get("show_radar_map", True))
+        self.alert_notifier = AlertNotifier(cfg.get("alert_notify") or [])
         self.favorites: List[Dict[str, Any]] = list(cfg.get("favorites", []) or [])
         self.fav_idx: int = 0
         self.fav_edit_idx: int = 0
@@ -165,6 +167,8 @@ class App:
         self._radar_last: float = 0.0
         self._radar_err: Optional[str] = None
         self._radar_bbox: Optional[Tuple[float, float, float, float]] = None
+        # State code the current bbox was built for (None = radius fallback)
+        self._radar_bbox_state: Optional[str] = None
         self._radar_src_cols: int = 0
         self._radar_src_rows: int = 0
         self._radar_map_x: int = 0
@@ -389,4 +393,7 @@ def main(stdscr) -> None:
     cfg, config_warning = load_config()
     signal.signal(signal.SIGINT, lambda *_: None)
     app = App(stdscr, cfg, startup_warning=config_warning)
-    app.run()
+    try:
+        app.run()
+    finally:
+        app.alert_notifier.restore()

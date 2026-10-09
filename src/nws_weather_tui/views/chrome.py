@@ -5,11 +5,13 @@ NWS Weather TUI — Header and footer chrome.
 
 from __future__ import annotations
 
+import datetime as dt
 import time
 from typing import List, Tuple, TYPE_CHECKING
 
 import curses
 
+from nws_weather_tui.formatting import fmt_time
 from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import safe_addstr
 
@@ -47,6 +49,14 @@ def draw_header(app: "App", rows: int, cols: int) -> None:
     )
     right_x = clamp(cols - len(right) - 1, 1, cols - 1)
     max_title = max(1, right_x - 2)
+
+    # Centered clock; dropped when the title and right-side tags leave no room.
+    clock = fmt_time(dt.datetime.now().astimezone(), app.use_24h)
+    clock_x = (cols - len(clock)) // 2
+    if clock_x + len(clock) + 1 < right_x and clock_x - 2 > 1:
+        max_title = min(max_title, clock_x - 2)
+        safe_addstr(app.stdscr, 0, clock_x, clock, curses.A_BOLD)
+
     safe_addstr(app.stdscr, 0, 1, title[:max_title], curses.color_pair(1) | curses.A_BOLD)
     safe_addstr(
         app.stdscr, 0, right_x,

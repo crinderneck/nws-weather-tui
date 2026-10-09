@@ -85,6 +85,7 @@ class AlertItem:
     instruction: str
     geometry: Optional[Dict[str, Any]] = None
     area_desc: str = ""
+    id: str = ""
 
 
 @dataclass
@@ -464,6 +465,7 @@ def extract_alerts(alerts_json: Dict[str, Any]) -> List[AlertItem]:
                 geometry=(f or {}).get("geometry")
                 if isinstance((f or {}).get("geometry"), dict) else None,
                 area_desc=str(props.get("areaDesc") or ""),
+                id=str(props.get("id") or ""),
             )
         )
     sev_rank = {"Extreme": 0, "Severe": 1, "Moderate": 2, "Minor": 3, "Unknown": 4}

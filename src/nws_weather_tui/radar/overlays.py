@@ -10,7 +10,7 @@ import math
 from typing import Any, Dict, List, Optional, Tuple
 
 from nws_weather_tui.radar.cities import MAJOR_CITIES
-from nws_weather_tui.geo import clamp, project_to_grid
+from nws_weather_tui.geo import clamp
 
 try:
     from PIL import Image
@@ -103,6 +103,32 @@ def _draw_segment(
             y0 += sy
 
 
+def _clip_segment(
+    p0: Tuple[float, float], p1: Tuple[float, float], cols: int, rows: int
+) -> Optional[Tuple[float, float, float, float]]:
+    """Liang-Barsky clip of a grid-space segment to the cell area; None if outside."""
+    x0, y0 = p0
+    dx, dy = p1[0] - x0, p1[1] - y0
+    lo, hi = -0.49, (cols - 0.51, rows - 0.51)
+    t0, t1 = 0.0, 1.0
+    for p, q in (
+        (-dx, x0 - lo), (dx, hi[0] - x0),
+        (-dy, y0 - lo), (dy, hi[1] - y0),
+    ):
+        if p == 0:
+            if q < 0:
+                return None
+            continue
+        t = q / p
+        if p < 0:
+            t0 = max(t0, t)
+        else:
+            t1 = min(t1, t)
+        if t0 > t1:
+            return None
+    return (x0 + t0 * dx, y0 + t0 * dy, x0 + t1 * dx, y0 + t1 * dy)
+
+
 def vector_lines_overlay(
     features: List[Dict[str, Any]],
     bbox4326: Tuple[float, float, float, float],
@@ -114,6 +140,9 @@ def vector_lines_overlay(
     cols = max(1, cols)
     rows = max(1, rows)
     grid: List[List[str]] = [[" "] * cols for _ in range(rows)]
+    minlon, minlat, maxlon, maxlat = bbox4326
+    lon_span = max(1e-9, maxlon - minlon)
+    lat_span = max(1e-9, maxlat - minlat)
     for f in features:
         g = (f or {}).get("geometry") or {}
         seqs: List[Any] = []
@@ -136,16 +165,24 @@ def vector_lines_overlay(
         for seq in seqs:
             if not isinstance(seq, list) or len(seq) < 2:
                 continue
-            prev: Optional[Tuple[int, int]] = None
+            prev: Optional[Tuple[float, float]] = None
             for pt in seq:
                 if not isinstance(pt, list) or len(pt) < 2:
                     continue
                 lon, lat = pt[0], pt[1]
                 if not (isinstance(lon, (int, float)) and isinstance(lat, (int, float))):
                     continue
-                cur = project_to_grid(float(lon), float(lat), bbox4326, cols, rows)
+                cur = (
+                    (float(lon) - minlon) / lon_span * (cols - 1),
+                    (maxlat - float(lat)) / lat_span * (rows - 1),
+                )
                 if prev is not None:
-                    _draw_segment(grid, prev[0], prev[1], cur[0], cur[1], mark)
+                    # Clip rather than clamp: clamping squashes off-map parts of
+                    # a shape onto the map edges as bogus straight lines.
+                    seg = _clip_segment(prev, cur, cols, rows)
+                    if seg is not None:
+                        x0, y0, x1, y1 = (int(round(v)) for v in seg)
+                        _draw_segment(grid, x0, y0, x1, y1, mark)
                 prev = cur
     return ["".join(r).rstrip() for r in grid]
 

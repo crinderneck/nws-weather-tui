@@ -45,6 +45,7 @@ def reset_radar_state(app: "App") -> None:
     app._radar_last = 0.0
     app._radar_src_cols = 0
     app._radar_src_rows = 0
+    app._radar_bbox_state = None
     app._radar_map_x = 0
     app._radar_map_y = 0
     app._radar_map_cols = 0
@@ -122,6 +123,9 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
         and (app._radar_cells or app._radar_ascii)
         and app._radar_src_cols == target_cols
         and app._radar_src_rows == target_rows
+        # The first fetch can happen before the weather load sets state_code,
+        # leaving a radius view around the user; rebuild once the state is known.
+        and app._radar_bbox_state == app.state_code
     ):
         return
 
@@ -170,6 +174,7 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
     req_w = max(64, int(req_h * geo_aspect))
 
     app._radar_bbox = bbox
+    app._radar_bbox_state = app.state_code
     app._radar_src_cols = target_cols
     app._radar_src_rows = target_rows
     app._radar_last = time.time()

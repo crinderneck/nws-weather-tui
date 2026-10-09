@@ -55,6 +55,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     ),
     "hourly_hours": 0,  # 0 = everything the API returns (~156h)
     "show_radar_map": True,
+    "alert_notify": ["bell", "tab"],  # any of: bell, desktop, tab
     "favorites": [],
     "radar": {
         "show_state_lines": True,
