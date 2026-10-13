@@ -25,7 +25,6 @@ Steps 2 and 3 run independently, so a GitHub release still gets created if PyPI 
 ```bash
 # 1. Bump the version
 $EDITOR src/nws_weather_tui/__init__.py      # __version__ = "X.Y.Z"
-$EDITOR PKGBUILD                              # pkgver=X.Y.Z, pkgrel=1
 git commit -am "chore: release vX.Y.Z"
 git push
 
@@ -35,14 +34,3 @@ git push origin vX.Y.Z
 ```
 
 When the workflow finishes, users can install with `pipx install nws-weather-tui` or `uv tool install nws-weather-tui`.
-
-## Arch (PKGBUILD)
-
-The PKGBUILD builds from the GitHub tag tarball. After the tag is pushed, fill in the checksum and check that the package builds:
-
-```bash
-updpkgsums
-makepkg -si
-```
-
-Then commit the updated `sha256sums`, and push to the AUR if it's published there.
