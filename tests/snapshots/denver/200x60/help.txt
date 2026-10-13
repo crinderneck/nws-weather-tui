@@ -18,11 +18,11 @@
                                                                  │  e / Esc   Leave the editor (q also works)                       │  r         Refresh every favorite
  Radar (current view) ────────────────────────────────────────── │                                                                  │  D / Esc   Back to current conditions
  A         Play / pause the animation                            │  Radar colors ────────────────────────────────────────────────── │
- < / >     Step back / forward one frame                         │  256-color terminals: half-block cells on the NWS dBZ scale.     │  Files ─────────────────────────────────────────────────────────
- o         Open weather.gov radar in a browser                   │  Otherwise an ASCII ramp " .:-=+*#%@", colored by precip type.   │  config    ~/.config/nws-weather-tui/config.json
- click     Click a city marker to jump there                     │  dBZ: ▀ 5 ▀10 ▀15 ▀20 ▀25 ▀30 ▀35 ▀40 ▀45 ▀50 ▀55 ▀60 ▀65 ▀      │  state     ~/.config/nws-weather-tui/state.json
- ◉ you marks the current location.                               │  Sources, tried in order: NOAA MRMS composite, Iowa State IEM    │  Requires astral, numpy, pillow and requests.
-                                                                 │  NEXRAD, then the NWS station WMS.                               │
+ < / >     Step back / forward one frame                         │  256-color terminals: half-block cells on the NWS dBZ scale.     │  About ─────────────────────────────────────────────────────────
+ o         Open weather.gov radar in a browser                   │  Otherwise an ASCII ramp " .:-=+*#%@", colored by precip type.   │  version   <version>
+ click     Click a city marker to jump there                     │  dBZ: ▀ 5 ▀10 ▀15 ▀20 ▀25 ▀30 ▀35 ▀40 ▀45 ▀50 ▀55 ▀60 ▀65 ▀      │  config    ~/.config/nws-weather-tui/config.json
+ ◉ you marks the current location.                               │  Sources, tried in order: NOAA MRMS composite, Iowa State IEM    │  state     ~/.config/nws-weather-tui/state.json
+                                                                 │  NEXRAD, then the NWS station WMS.                               │  Requires astral, numpy, pillow and requests.
 
 
 

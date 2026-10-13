@@ -35,6 +35,6 @@
  J / K     Move the selected favorite up / down
  Enter     Jump to the selected favorite
  a         Add a favorite (search by city/ZIP)
- lines 1–34 of 61 · j/k ↑↓ scroll
+ lines 1–34 of 62 · j/k ↑↓ scroll
 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
    c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion  │  l Locate · r Refresh  │  ? Help · q Quit

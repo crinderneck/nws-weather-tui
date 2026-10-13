@@ -19,6 +19,6 @@
  PgDn/PgUp Scroll by 10 lines
  G         Jump to the end
  Esc       Back to current conditions
- lines 1–18 of 63 · j/k ↑↓ scroll
+ lines 1–18 of 64 · j/k ↑↓ scroll
 ───────────────────────────────────────────────────────────────────────────────
  c Current · f Forecast · h Hourly · a Alerts  │  l Locate  │  ? Help · q Quit

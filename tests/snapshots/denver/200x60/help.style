@@ -46,7 +46,7 @@
  20: 1-5 fg=cyan bold
  20: 135-139 fg=brown bold
  21: 1-1 fg=cyan bold
- 21: 135-140 fg=cyan bold
+ 21: 135-141 fg=cyan bold
  22: 1-5 fg=cyan bold
  22: 73-73 fg=000000 bg=000000
  22: 77-77 fg=00005f bg=00005f
@@ -62,7 +62,8 @@
  22: 117-117 fg=005fff bg=005fff
  22: 121-121 fg=008700 bg=008700
  22: 125-125 fg=00875f bg=00875f
- 22: 135-139 fg=cyan bold
+ 22: 135-140 fg=cyan bold
+ 23: 135-139 fg=cyan bold
  59: 5-5 fg=cyan bold
  59: 17-17 fg=cyan bold
  59: 30-30 fg=cyan bold

@@ -14,6 +14,7 @@ from typing import List, Optional, Tuple, TYPE_CHECKING
 
 import curses
 
+from nws_weather_tui import __version__
 from nws_weather_tui.constants import CONFIG_PATH, STATE_PATH
 from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import safe_addstr, wrap_lines
@@ -95,7 +96,8 @@ SECTIONS: List[Tuple[str, List[Tuple[Optional[str], str]]]] = [
         (None, "Sources, tried in order: NOAA MRMS composite, Iowa State IEM "
                "NEXRAD, then the NWS station WMS."),
     ]),
-    ("Files", [
+    ("About", [
+        ("version", __version__),
         ("config", _tilde(CONFIG_PATH)),
         ("state", _tilde(STATE_PATH)),
         (None, "Requires astral, numpy, pillow and requests."),

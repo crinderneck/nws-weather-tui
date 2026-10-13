@@ -14,6 +14,8 @@ from typing import Any, List
 
 import pytest
 
+from nws_weather_tui import __version__
+
 from harness.locations import LOCATIONS, MANIFEST_PATH, SIZES, SNAPSHOT_DIR, views_for
 
 CASES = [
@@ -70,6 +72,8 @@ def test_snapshot(
     result = renders.get(loc, cols, rows)
     assert view in result["screens"], f"{view} was not rendered: {result.get('error')}"
     actual = _text(result["screens"][view]["text" if kind == "txt" else "style"])
+    if view == "help":  # the version changes every release; see test_help_shows_version
+        actual = actual.replace(__version__, "<version>")
     path = _snapshot_path(loc, cols, rows, view, kind)
     if request.config.getoption("--update-snapshots"):
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -106,3 +110,12 @@ def test_chrome_intact(renders: Any, loc: str, cols: int, rows: int, view: str) 
     assert len(lines) == rows
     assert str(LOCATIONS[loc]["name"]) in lines[0] or view == "dashboard"
     assert "q Quit" in lines[-1] or "Esc" in lines[-1], lines[-1]
+
+
+@pytest.mark.parametrize("cols,rows", SIZES)
+def test_help_shows_version(renders: Any, cols: int, rows: int) -> None:
+    """The real version is on the help screen (the snapshots mask it)."""
+    lines = renders.get("denver", cols, rows)["screens"]["help"]["text"]
+    if not any("About" in line for line in lines):
+        pytest.skip("About section is below the fold at this size")
+    assert any(re.search(rf"version\s+{re.escape(__version__)}\b", line) for line in lines)
