@@ -1,0 +1,324 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": [
+   "https://geojson.org/geojson-ld/geojson-context.jsonld",
+   {
+    "@version": "1.1",
+    "@vocab": "https://api.weather.gov/ontology#",
+    "geo": "http://www.opengis.net/ont/geosparql#",
+    "unit": "http://codes.wmo.int/common/unit/",
+    "wx": "https://api.weather.gov/ontology#"
+   }
+  ],
+  "geometry": {
+   "coordinates": [
+    [
+     [
+      -119.2768,
+      34.2802
+     ],
+     [
+      -119.2817,
+      34.3023
+     ],
+     [
+      -119.3085,
+      34.2983
+     ],
+     [
+      -119.3035,
+      34.2762
+     ],
+     [
+      -119.2768,
+      34.2802
+     ]
+    ]
+   ],
+   "type": "Polygon"
+  },
+  "properties": {
+   "elevation": {
+    "unitCode": "wmoUnit:m",
+    "value": 56.0832
+   },
+   "forecastGenerator": "BaselineForecastGenerator",
+   "generatedAt": "2026-10-13T21:45:57+00:00",
+   "periods": [
+    {
+     "detailedForecast": "Sunny, with a high near 69. West wind around 10 mph.",
+     "endTime": "2026-10-13T18:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/day/skc?size=medium",
+     "isDaytime": true,
+     "name": "This Afternoon",
+     "number": 1,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Sunny",
+     "startTime": "2026-10-13T14:00:00-07:00",
+     "temperature": 69,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "W",
+     "windSpeed": "10 mph"
+    },
+    {
+     "detailedForecast": "Mostly clear, with a low around 57. North wind 5 to 10 mph.",
+     "endTime": "2026-10-14T06:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+     "isDaytime": false,
+     "name": "Tonight",
+     "number": 2,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Mostly Clear",
+     "startTime": "2026-10-13T18:00:00-07:00",
+     "temperature": 57,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "N",
+     "windSpeed": "5 to 10 mph"
+    },
+    {
+     "detailedForecast": "Sunny, with a high near 73. North northwest wind 5 to 10 mph.",
+     "endTime": "2026-10-14T18:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/day/few?size=medium",
+     "isDaytime": true,
+     "name": "Wednesday",
+     "number": 3,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Sunny",
+     "startTime": "2026-10-14T06:00:00-07:00",
+     "temperature": 73,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "NNW",
+     "windSpeed": "5 to 10 mph"
+    },
+    {
+     "detailedForecast": "Mostly clear, with a low around 60. North wind 5 to 10 mph.",
+     "endTime": "2026-10-15T06:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+     "isDaytime": false,
+     "name": "Wednesday Night",
+     "number": 4,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Mostly Clear",
+     "startTime": "2026-10-14T18:00:00-07:00",
+     "temperature": 60,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "N",
+     "windSpeed": "5 to 10 mph"
+    },
+    {
+     "detailedForecast": "Sunny, with a high near 82. North northeast wind around 10 mph.",
+     "endTime": "2026-10-15T18:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/day/skc?size=medium",
+     "isDaytime": true,
+     "name": "Thursday",
+     "number": 5,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Sunny",
+     "startTime": "2026-10-15T06:00:00-07:00",
+     "temperature": 82,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "NNE",
+     "windSpeed": "10 mph"
+    },
+    {
+     "detailedForecast": "Mostly clear, with a low around 64.",
+     "endTime": "2026-10-16T06:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+     "isDaytime": false,
+     "name": "Thursday Night",
+     "number": 6,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Mostly Clear",
+     "startTime": "2026-10-15T18:00:00-07:00",
+     "temperature": 64,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "NNE",
+     "windSpeed": "10 to 15 mph"
+    },
+    {
+     "detailedForecast": "Sunny, with a high near 86.",
+     "endTime": "2026-10-16T18:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/day/wind_skc?size=medium",
+     "isDaytime": true,
+     "name": "Friday",
+     "number": 7,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Sunny",
+     "startTime": "2026-10-16T06:00:00-07:00",
+     "temperature": 86,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "NE",
+     "windSpeed": "15 to 25 mph"
+    },
+    {
+     "detailedForecast": "Mostly clear, with a low around 67.",
+     "endTime": "2026-10-17T06:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+     "isDaytime": false,
+     "name": "Friday Night",
+     "number": 8,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Mostly Clear",
+     "startTime": "2026-10-16T18:00:00-07:00",
+     "temperature": 67,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "NE",
+     "windSpeed": "10 to 20 mph"
+    },
+    {
+     "detailedForecast": "Sunny, with a high near 83.",
+     "endTime": "2026-10-17T18:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/day/few?size=medium",
+     "isDaytime": true,
+     "name": "Saturday",
+     "number": 9,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Sunny",
+     "startTime": "2026-10-17T06:00:00-07:00",
+     "temperature": 83,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "WNW",
+     "windSpeed": "10 mph"
+    },
+    {
+     "detailedForecast": "Mostly clear, with a low around 63.",
+     "endTime": "2026-10-18T06:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+     "isDaytime": false,
+     "name": "Saturday Night",
+     "number": 10,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Mostly Clear",
+     "startTime": "2026-10-17T18:00:00-07:00",
+     "temperature": 63,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "NNW",
+     "windSpeed": "5 to 10 mph"
+    },
+    {
+     "detailedForecast": "Sunny, with a high near 77.",
+     "endTime": "2026-10-18T18:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/day/few?size=medium",
+     "isDaytime": true,
+     "name": "Sunday",
+     "number": 11,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Sunny",
+     "startTime": "2026-10-18T06:00:00-07:00",
+     "temperature": 77,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "SW",
+     "windSpeed": "5 to 10 mph"
+    },
+    {
+     "detailedForecast": "Mostly clear, with a low around 61.",
+     "endTime": "2026-10-19T06:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+     "isDaytime": false,
+     "name": "Sunday Night",
+     "number": 12,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Mostly Clear",
+     "startTime": "2026-10-18T18:00:00-07:00",
+     "temperature": 61,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "NNW",
+     "windSpeed": "0 to 10 mph"
+    },
+    {
+     "detailedForecast": "Sunny, with a high near 73.",
+     "endTime": "2026-10-19T18:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/day/few?size=medium",
+     "isDaytime": true,
+     "name": "Monday",
+     "number": 13,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 0
+     },
+     "shortForecast": "Sunny",
+     "startTime": "2026-10-19T06:00:00-07:00",
+     "temperature": 73,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "WSW",
+     "windSpeed": "0 to 10 mph"
+    },
+    {
+     "detailedForecast": "Mostly clear, with a low around 55.",
+     "endTime": "2026-10-20T06:00:00-07:00",
+     "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+     "isDaytime": false,
+     "name": "Monday Night",
+     "number": 14,
+     "probabilityOfPrecipitation": {
+      "unitCode": "wmoUnit:percent",
+      "value": 3
+     },
+     "shortForecast": "Mostly Clear",
+     "startTime": "2026-10-19T18:00:00-07:00",
+     "temperature": 55,
+     "temperatureTrend": null,
+     "temperatureUnit": "F",
+     "windDirection": "NW",
+     "windSpeed": "5 to 20 mph"
+    }
+   ],
+   "units": "us",
+   "updateTime": "2026-10-13T19:52:14+00:00",
+   "validTimes": "2026-10-13T13:00:00+00:00/P7DT12H"
+  },
+  "type": "Feature"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/gridpoints/LOX/119,62/forecast?units=us"
+}

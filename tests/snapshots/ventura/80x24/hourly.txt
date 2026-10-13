@@ -1,0 +1,24 @@
+ Ventura, CA — NWS Weather TUI              [HOURLY] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────
+
+ Next 156 hours  Tue 2pm → Tue 1am
+
+  Precip  Dry for the next 6 days
+    Wind  Gusty Fri 8am–4pm · up to 32 mph at Fri 11am
+     Air  Very dry — humidity down to 8% (dew point 16°)
+     Sky  Mostly clear throughout (avg 6% cover)
+
+              now        Thu     Fri     Sat     Sun     Mon     Tue
+              ▀····▀▀▀▀····▀▀▀▀····▀▀▀▀····▀▀▀▀····▀▀▀▀····▀▀▀▀···
+         ▀ sun  ░ partly  ▒ cloudy  · clear night  ▓█ precip  █ storms
+
+  Time          Temp  Feels Wind           Precip Forecast
+ ── Today · Oct 13 ──────────────────────────────────────────────────────────
+      now  ☀     69°        W 10 mph              Sunny
+   3:00pm  ☀     69°        W 10 mph              Sunny
+   4:00pm  ☀     69°        W 10 mph              Sunny
+   5:00pm  ☀     69°        WNW 10 mph            Sunny
+   6:00pm  ☾     64°        WNW 10 mph            Clear
+ rows 1–6 of 177 · j/k ↑↓ scroll · widen to 137+ cols to see days side by side
+───────────────────────────────────────────────────────────────────────────────
+ c Current · f Forecast · h Hourly · a Alerts  │  l Locate  │  ? Help · q Quit

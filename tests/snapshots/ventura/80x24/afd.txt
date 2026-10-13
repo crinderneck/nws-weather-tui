@@ -1,0 +1,24 @@
+ Ventura, CA — NWS Weather TUI          [DISCUSSION] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────
+
+ Area Forecast Discussion — LOX   Issued Tue Oct 13, 2:07pm
+ ═════════════════════════════════════════════════════════════════════════════
+ SYNOPSIS ────────────────────────────────────────────────────────────────────
+ 13/206 PM.
+
+ A Santa Ana wind pattern will create much warmer temperatures this week as
+ well as gusty northeast winds at times, strongest Thursday and Friday.
+ Another significant cool down is likely into next week.
+
+ SHORT TERM (TDY-FRI) ────────────────────────────────────────────────────────
+ 13/206 PM.
+
+ HIGH CONFIDENCE in a MODERATE TO STRONG SANTA ANA event peaking this Thursday
+ and Friday with damaging wind, power outages and large fast moving fires
+ possible in the region. HIGH WIND WATCHES, Wind Advisories and Red Flag
+ Warnings cover the typical Santa Ana Wind Corridor in Los Angeles to Ventura
+ County for Thursday and Friday. A Fire Weather Watch is also in effect Friday
+ for the Santa Barbara and San Luis Obispo interior mountains. A Heat Advisory
+ Scroll: 1/164 (j/k ↑↓)
+───────────────────────────────────────────────────────────────────────────────
+ c Current · f Forecast · h Hourly · a Alerts  │  l Locate  │  ? Help · q Quit

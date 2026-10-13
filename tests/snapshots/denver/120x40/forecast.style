@@ -1,0 +1,94 @@
+  0: 1-28 fg=cyan bold
+  0: 57-62 bold
+  0: 82-118 fg=magenta
+  3: 4-18 fg=cyan bold
+  3: 20-34 fg=cyan bold
+  3: 36-50 fg=cyan bold
+  3: 52-66 fg=cyan bold
+  3: 68-82 fg=cyan bold
+  3: 84-98 fg=cyan bold
+  3: 100-114 fg=cyan bold
+  4: 7-9 fg=green bold
+  4: 13-15 fg=cyan
+  4: 23-25 fg=cyan bold
+  4: 29-31 fg=cyan
+  4: 39-41 fg=green bold
+  4: 45-47 fg=cyan
+  4: 55-57 fg=green bold
+  4: 61-63 fg=cyan
+  4: 71-73 fg=brown bold
+  4: 77-79 fg=cyan
+  4: 87-89 fg=brown bold
+  4: 93-95 fg=cyan
+  4: 103-105 fg=brown bold
+  4: 109-111 fg=cyan
+  6: 6-16 fg=brown
+  6: 22-32 fg=brown
+  6: 38-48 fg=brown
+  6: 55-63 fg=brown
+  6: 71-79 fg=brown
+  6: 86-96 fg=brown
+  6: 103-111 fg=brown
+  7: 6-16 fg=brown
+  7: 22-32 fg=brown
+  7: 38-48 fg=brown
+  7: 55-63 fg=brown
+  7: 71-79 fg=brown
+  7: 86-96 fg=brown
+  7: 103-111 fg=brown
+  8: 6-16 fg=brown
+  8: 22-32 fg=brown
+  8: 38-48 fg=brown
+  8: 55-63 fg=brown
+  8: 71-79 fg=brown
+  8: 86-96 fg=brown
+  8: 103-111 fg=brown
+  9: 6-16 fg=brown
+  9: 22-32 fg=brown
+  9: 38-48 fg=brown
+  9: 55-63 fg=brown
+  9: 71-79 fg=brown
+  9: 86-96 fg=brown
+  9: 103-111 fg=brown
+ 10: 6-16 fg=brown
+ 10: 22-32 fg=brown
+ 10: 38-48 fg=brown
+ 10: 55-63 fg=brown
+ 10: 71-79 fg=brown
+ 10: 103-111 fg=brown
+ 11: 5-17 bold
+ 11: 21-32 bold
+ 11: 38-47 bold
+ 11: 57-61 bold
+ 11: 73-77 bold
+ 11: 85-96 bold
+ 11: 105-109 bold
+ 12: 5-16 bold
+ 12: 40-45 bold
+ 13: 6-15 fg=blue bold
+ 13: 22-31 fg=blue bold
+ 13: 38-47 fg=blue bold
+ 17: 5-7 fg=cyan bold
+ 17: 21-23 fg=cyan bold
+ 17: 37-39 fg=cyan bold
+ 17: 53-55 fg=cyan bold
+ 17: 69-71 fg=cyan bold
+ 17: 85-87 fg=cyan bold
+ 17: 101-103 fg=cyan bold
+ 21: 53-57 fg=cyan bold
+ 21: 69-73 fg=cyan bold
+ 21: 101-105 fg=cyan bold
+ 22: 85-89 fg=cyan bold
+ 31: 37-41 fg=cyan bold
+ 36: 21-25 fg=cyan bold
+ 37: 5-10 fg=cyan bold
+ 39: 3-3 fg=cyan bold
+ 39: 15-15 fg=cyan bold
+ 39: 28-28 fg=cyan bold
+ 39: 39-39 fg=cyan bold
+ 39: 50-50 fg=cyan bold
+ 39: 59-59 fg=cyan bold
+ 39: 76-76 fg=cyan bold
+ 39: 87-87 fg=cyan bold
+ 39: 101-101 fg=cyan bold
+ 39: 110-110 fg=cyan bold

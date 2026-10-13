@@ -1,0 +1,14 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": {
+   "@version": "1.1"
+  },
+  "features": [],
+  "title": "Current watches, warnings, and advisories for 39.9612 N, 82.9988 W",
+  "type": "FeatureCollection",
+  "updated": "2026-10-13T21:57:19+00:00"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/alerts/active?point=39.9612,-82.9988"
+}

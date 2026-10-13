@@ -1,0 +1,40 @@
+ Columbus, OH — NWS Weather TUI                          5:59pm                    [OUTLOOK] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Hazardous Weather Outlook — ILN   Issued Tue Oct 13, 3:56am
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+ DAY ONE ───────────────────────────────────────────────── │ afternoon into Thursday night with damaging winds the
+ Today and tonight.                                        │ primary threat.
+                                                           │
+ There is a low probability for widespread hazardous       │ Gusty winds upwards of 40 mph will be possible on Friday.
+ weather.                                                  │
+                                                           │ There will be the potential for frost this weekend.
+ DAYS TWO THROUGH SEVEN ────────────────────────────────── │
+ Wednesday through Monday.                                 │ SPOTTER INFORMATION STATEMENT ───────────────────────────
+                                                           │ Spotter activation may be needed on Thursday.
+ There is a chance for isolated severe storms Thursday     │
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion  │  l Locate · r Refresh  │  ? Help · q Quit

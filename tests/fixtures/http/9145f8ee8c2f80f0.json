@@ -1,0 +1,130 @@
+{
+ "content_type": "application/ld+json",
+ "json": {
+  "@context": {
+   "@version": "1.1",
+   "@vocab": "https://api.weather.gov/ontology#"
+  },
+  "@graph": [
+   {
+    "@id": "https://api.weather.gov/products/a8808ea0-5f74-4fc7-a6a6-85e29bf9864b",
+    "id": "a8808ea0-5f74-4fc7-a6a6-85e29bf9864b",
+    "issuanceTime": "2026-10-13T07:56:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/88de7d70-2723-4e2c-9ae8-9688322af530",
+    "id": "88de7d70-2723-4e2c-9ae8-9688322af530",
+    "issuanceTime": "2026-10-12T14:42:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/d7a0c4d6-ea00-4227-a7a0-11cfd89daf83",
+    "id": "d7a0c4d6-ea00-4227-a7a0-11cfd89daf83",
+    "issuanceTime": "2026-10-12T09:13:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/98c96dcb-78b6-4a8b-91b7-8258425e8e73",
+    "id": "98c96dcb-78b6-4a8b-91b7-8258425e8e73",
+    "issuanceTime": "2026-10-12T09:12:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/1fda9b50-f927-4f39-9417-41df474b8013",
+    "id": "1fda9b50-f927-4f39-9417-41df474b8013",
+    "issuanceTime": "2026-10-12T06:23:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/0f7dfdba-38d3-4d27-b005-b93ac6c7dd20",
+    "id": "0f7dfdba-38d3-4d27-b005-b93ac6c7dd20",
+    "issuanceTime": "2026-10-12T04:13:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/6c606355-226c-486a-a186-c3e7c93ae5bd",
+    "id": "6c606355-226c-486a-a186-c3e7c93ae5bd",
+    "issuanceTime": "2026-10-11T06:43:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/259fc68f-ffbf-473c-b064-2321222b7a61",
+    "id": "259fc68f-ffbf-473c-b064-2321222b7a61",
+    "issuanceTime": "2026-10-11T01:50:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/984b4e49-4f44-4b2b-b3b2-a86db2891684",
+    "id": "984b4e49-4f44-4b2b-b3b2-a86db2891684",
+    "issuanceTime": "2026-10-10T14:13:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/e87ce491-5255-4c3f-8a02-f6d968e2c89f",
+    "id": "e87ce491-5255-4c3f-8a02-f6d968e2c89f",
+    "issuanceTime": "2026-10-10T06:38:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/422089f1-967f-4414-bf99-11198392b2fe",
+    "id": "422089f1-967f-4414-bf99-11198392b2fe",
+    "issuanceTime": "2026-10-09T05:56:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/f11c4f9f-d4e1-4cf7-8917-a3d6aef68c50",
+    "id": "f11c4f9f-d4e1-4cf7-8917-a3d6aef68c50",
+    "issuanceTime": "2026-10-08T06:44:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   },
+   {
+    "@id": "https://api.weather.gov/products/4f01bc56-15d0-4643-bd1b-a6cff8ae5796",
+    "id": "4f01bc56-15d0-4643-bd1b-a6cff8ae5796",
+    "issuanceTime": "2026-10-07T08:00:00+00:00",
+    "issuingOffice": "KILN",
+    "productCode": "HWO",
+    "productName": "Hazardous Weather Outlook",
+    "wmoCollectiveId": "FLUS41"
+   }
+  ]
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/products/types/HWO/locations/ILN"
+}

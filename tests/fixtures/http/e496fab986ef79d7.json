@@ -1,0 +1,530 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": [
+   "https://geojson.org/geojson-ld/geojson-context.jsonld",
+   {
+    "@version": "1.1",
+    "@vocab": "https://api.weather.gov/ontology#",
+    "wx": "https://api.weather.gov/ontology#"
+   }
+  ],
+  "features": [
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.cd4fcc2e324c1ea02757f8b08d9168ece24dc4ea.002.1",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.cd4fcc2e324c1ea02757f8b08d9168ece24dc4ea.002.1",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/forecast/COZ018",
+      "https://api.weather.gov/zones/forecast/COZ019"
+     ],
+     "areaDesc": "Northwestern San Juan Mountains; Southwest San Juan Mountains",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "* WHAT...Snow expected above 10000 feet. Total snow accumulations\nbetween 4 and 8 inches with locally higher amounts possible above\ntimberline. Winds gusting as high as 35 mph.\n\n* WHERE...Northwest San Juan Mountains and Southwest San Juan\nMountains.\n\n* WHEN...From 6 AM to 6 PM MDT Wednesday.\n\n* IMPACTS...Plan on slushy and icy road conditions on mountain\npasses. The hazardous conditions could impact the Wednesday morning\nand evening commutes.",
+     "effective": "2026-10-13T13:09:00-06:00",
+     "ends": "2026-10-14T18:00:00-06:00",
+     "event": "Winter Weather Advisory",
+     "eventCode": {
+      "NationalWeatherService": [
+       "WWY"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-14T01:15:00-06:00",
+     "geocode": {
+      "SAME": [
+       "008051",
+       "008053",
+       "008085",
+       "008091",
+       "008113",
+       "008007",
+       "008033",
+       "008067",
+       "008083",
+       "008111"
+      ],
+      "UGC": [
+       "COZ018",
+       "COZ019"
+      ]
+     },
+     "headline": "Winter Weather Advisory issued October 13 at 1:09PM MDT until October 14 at 6:00PM MDT by NWS Grand Junction CO",
+     "id": "urn:oid:2.49.0.1.840.0.cd4fcc2e324c1ea02757f8b08d9168ece24dc4ea.002.1",
+     "instruction": "Slow down and use caution while traveling. The latest road conditions\nfor the state you are calling from can be obtained by calling 5 1 1.",
+     "language": "en-US",
+     "messageType": "Alert",
+     "note": null,
+     "onset": "2026-10-14T06:00:00-06:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "WSWGJT"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "WINTER WEATHER ADVISORY IN EFFECT FROM 6 AM TO 6 PM MDT WEDNESDAY ABOVE 10000 FEET"
+      ],
+      "VTEC": [
+       "/O.NEW.KGJT.WW.Y.0015.261014T1200Z-261015T0000Z/"
+      ],
+      "WMOidentifier": [
+       "WWUS45 KGJT 131909"
+      ],
+      "eventEndingTime": [
+       "2026-10-14T18:00:00-06:00"
+      ]
+     },
+     "references": [],
+     "response": "Execute",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Grand Junction CO",
+     "sent": "2026-10-13T13:09:00-06:00",
+     "severity": "Moderate",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.cd4fcc2e324c1ea02757f8b08d9168ece24dc4ea.001.1",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.cd4fcc2e324c1ea02757f8b08d9168ece24dc4ea.001.1",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/forecast/COZ004",
+      "https://api.weather.gov/zones/forecast/COZ009",
+      "https://api.weather.gov/zones/forecast/COZ010",
+      "https://api.weather.gov/zones/forecast/COZ012",
+      "https://api.weather.gov/zones/forecast/COZ013"
+     ],
+     "areaDesc": "Elkhead and Park Mountains; Grand and Battlement Mesas; Gore and Elk Mountains/Central Mountain Valleys; West Elk and Sawatch Mountains; Flat Tops",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "* WHAT...Snow expected above 9500 feet. Total snow accumulations\nbetween 4 and 8 inches with locally higher amounts possible above\ntimberline. Winds gusting as high as 35 mph.\n\n* WHERE...Elkhead and Park Mountains, Flat Tops, Gore and Elk\nMountains/Central Mountain Valleys, Grand and Battlement Mesas, and\nWest Elk and Sawatch Mountains.\n\n* WHEN...From 6 AM Wednesday to 6 AM MDT Thursday.\n\n* IMPACTS...Plan on slushy and icy road conditions on mountain\npasses. The hazardous conditions could impact the Wednesday morning\nand evening commutes.",
+     "effective": "2026-10-13T13:09:00-06:00",
+     "ends": "2026-10-15T06:00:00-06:00",
+     "event": "Winter Weather Advisory",
+     "eventCode": {
+      "NationalWeatherService": [
+       "WWY"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-14T01:15:00-06:00",
+     "geocode": {
+      "SAME": [
+       "008081",
+       "008107",
+       "008029",
+       "008045",
+       "008077",
+       "008037",
+       "008097",
+       "008051",
+       "008085",
+       "008103"
+      ],
+      "UGC": [
+       "COZ004",
+       "COZ009",
+       "COZ010",
+       "COZ012",
+       "COZ013"
+      ]
+     },
+     "headline": "Winter Weather Advisory issued October 13 at 1:09PM MDT until October 15 at 6:00AM MDT by NWS Grand Junction CO",
+     "id": "urn:oid:2.49.0.1.840.0.cd4fcc2e324c1ea02757f8b08d9168ece24dc4ea.001.1",
+     "instruction": "Slow down and use caution while traveling. The latest road conditions\nfor the state you are calling from can be obtained by calling 5 1 1.",
+     "language": "en-US",
+     "messageType": "Alert",
+     "note": null,
+     "onset": "2026-10-14T06:00:00-06:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "WSWGJT"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "WINTER WEATHER ADVISORY IN EFFECT FROM 6 AM WEDNESDAY TO 6 AM MDT THURSDAY ABOVE 9500 FEET"
+      ],
+      "VTEC": [
+       "/O.NEW.KGJT.WW.Y.0015.261014T1200Z-261015T1200Z/"
+      ],
+      "WMOidentifier": [
+       "WWUS45 KGJT 131909"
+      ],
+      "eventEndingTime": [
+       "2026-10-15T06:00:00-06:00"
+      ]
+     },
+     "references": [],
+     "response": "Execute",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Grand Junction CO",
+     "sent": "2026-10-13T13:09:00-06:00",
+     "severity": "Moderate",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.413e98ff71354a2dea32b30c7d8745d8648d4e90.001.2",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.413e98ff71354a2dea32b30c7d8745d8648d4e90.001.2",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/forecast/COZ069",
+      "https://api.weather.gov/zones/forecast/COZ070",
+      "https://api.weather.gov/zones/forecast/COZ071"
+     ],
+     "areaDesc": "Del Norte Vicinity/Northern San Luis Valley Below 8500 Ft; Alamosa  Vicinity/Central San Luis Valley Below 8500 Ft; Southern San Luis Valley",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "* WHAT...Thursday morning low temperatures in the mid 20s to lower\n30s.\n\n* WHERE...The San Luis Valley.\n\n* WHEN...From midnight Wednesday Night to 8 AM MDT Thursday.\n\n* IMPACTS...Freezing temperatures could kill crops, other sensitive\nvegetation and possibly damage unprotected outdoor plumbing.\n\n* ADDITIONAL DETAILS...A killing freeze will be possible which could\nbring an end to the growing season across the San Luis Valley.",
+     "effective": "2026-10-13T12:25:00-06:00",
+     "ends": "2026-10-15T08:00:00-06:00",
+     "event": "Freeze Warning",
+     "eventCode": {
+      "NationalWeatherService": [
+       "FZW"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-13T20:30:00-06:00",
+     "geocode": {
+      "SAME": [
+       "008105",
+       "008109",
+       "008003",
+       "008021",
+       "008023"
+      ],
+      "UGC": [
+       "COZ069",
+       "COZ070",
+       "COZ071"
+      ]
+     },
+     "headline": "Freeze Warning issued October 13 at 12:25PM MDT until October 15 at 8:00AM MDT by NWS Pueblo CO",
+     "id": "urn:oid:2.49.0.1.840.0.413e98ff71354a2dea32b30c7d8745d8648d4e90.001.2",
+     "instruction": "Take steps now to protect tender plants from the cold.\n\nTo prevent water pipes from freezing; wrap or drain or allow them to\ndrip slowly.",
+     "language": "en-US",
+     "messageType": "Alert",
+     "note": null,
+     "onset": "2026-10-15T00:00:00-06:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "NPWPUB"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "FREEZE WARNING IN EFFECT FROM MIDNIGHT WEDNESDAY NIGHT TO 8 AM MDT THURSDAY"
+      ],
+      "VTEC": [
+       "/O.NEW.KPUB.FZ.W.0005.261015T0600Z-261015T1400Z/"
+      ],
+      "WMOidentifier": [
+       "WWUS75 KPUB 131825"
+      ],
+      "eventEndingTime": [
+       "2026-10-15T08:00:00-06:00"
+      ]
+     },
+     "references": [],
+     "response": "Execute",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Pueblo CO",
+     "sent": "2026-10-13T12:25:00-06:00",
+     "severity": "Severe",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.a3de434c6cd0848eda97aadae2faea73c939cef2.001.1",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.a3de434c6cd0848eda97aadae2faea73c939cef2.001.1",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/forecast/COZ068"
+     ],
+     "areaDesc": "Eastern San Juan Mountains Above 10000 Ft",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "* WHAT...Snow expected. Total snow accumulations 4 to 9 inches.\n\n* WHERE...Eastern San Juan Mountains Above 10000 Feet including Wolf\nCreek Pass.\n\n* WHEN...From midnight tonight to 6 PM MDT Wednesday.\n\n* IMPACTS...Plan on slippery road conditions.",
+     "effective": "2026-10-13T12:19:00-06:00",
+     "ends": "2026-10-14T18:00:00-06:00",
+     "event": "Winter Weather Advisory",
+     "eventCode": {
+      "NationalWeatherService": [
+       "WWY"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-13T20:30:00-06:00",
+     "geocode": {
+      "SAME": [
+       "008021",
+       "008079",
+       "008105"
+      ],
+      "UGC": [
+       "COZ068"
+      ]
+     },
+     "headline": "Winter Weather Advisory issued October 13 at 12:19PM MDT until October 14 at 6:00PM MDT by NWS Pueblo CO",
+     "id": "urn:oid:2.49.0.1.840.0.a3de434c6cd0848eda97aadae2faea73c939cef2.001.1",
+     "instruction": "Slow down and use caution while traveling. The latest road conditions\nfor the state you are calling from can be obtained by calling 5 1 1.",
+     "language": "en-US",
+     "messageType": "Alert",
+     "note": null,
+     "onset": "2026-10-14T00:00:00-06:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "WSWPUB"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "WINTER WEATHER ADVISORY IN EFFECT FROM MIDNIGHT TONIGHT TO 6 PM MDT WEDNESDAY"
+      ],
+      "VTEC": [
+       "/O.NEW.KPUB.WW.Y.0012.261014T0600Z-261015T0000Z/"
+      ],
+      "WMOidentifier": [
+       "WWUS45 KPUB 131819"
+      ],
+      "eventEndingTime": [
+       "2026-10-14T18:00:00-06:00"
+      ]
+     },
+     "references": [],
+     "response": "Execute",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Pueblo CO",
+     "sent": "2026-10-13T12:19:00-06:00",
+     "severity": "Moderate",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.a3de434c6cd0848eda97aadae2faea73c939cef2.002.1",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.a3de434c6cd0848eda97aadae2faea73c939cef2.002.1",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/forecast/COZ058",
+      "https://api.weather.gov/zones/forecast/COZ060"
+     ],
+     "areaDesc": "Western Mosquito Range/East Lake County Above 11000 Ft; Eastern Sawatch Mountains above 11000 Ft",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "* WHAT...Snow expected. Total snow accumulations between 5 and 10\ninches. Winds gusting up to 35 mph.\n\n* WHERE...Eastern Sawatch Mountains Above 11000 Feet and Western\nMosquito Range  Lake County Above 11000 Feet.\n\n* WHEN...From 6 AM Wednesday to midnight MDT Wednesday Night.\n\n* IMPACTS...Travel could be difficult with slick and snow covered\nroads.\n\n* ADDITIONAL DETAILS...The greatest amounts are expected on the\nhigher terrain north of Cottonwood Pass.",
+     "effective": "2026-10-13T12:19:00-06:00",
+     "ends": "2026-10-15T00:00:00-06:00",
+     "event": "Winter Weather Advisory",
+     "eventCode": {
+      "NationalWeatherService": [
+       "WWY"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-13T20:30:00-06:00",
+     "geocode": {
+      "SAME": [
+       "008065",
+       "008015",
+       "008109"
+      ],
+      "UGC": [
+       "COZ058",
+       "COZ060"
+      ]
+     },
+     "headline": "Winter Weather Advisory issued October 13 at 12:19PM MDT until October 15 at 12:00AM MDT by NWS Pueblo CO",
+     "id": "urn:oid:2.49.0.1.840.0.a3de434c6cd0848eda97aadae2faea73c939cef2.002.1",
+     "instruction": "Slow down and use caution while traveling. The latest road conditions\nfor the state you are calling from can be obtained by calling 5 1 1.",
+     "language": "en-US",
+     "messageType": "Alert",
+     "note": null,
+     "onset": "2026-10-14T06:00:00-06:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "WSWPUB"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "WINTER WEATHER ADVISORY IN EFFECT FROM 6 AM WEDNESDAY TO MIDNIGHT MDT WEDNESDAY NIGHT"
+      ],
+      "VTEC": [
+       "/O.NEW.KPUB.WW.Y.0012.261014T1200Z-261015T0600Z/"
+      ],
+      "WMOidentifier": [
+       "WWUS45 KPUB 131819"
+      ],
+      "eventEndingTime": [
+       "2026-10-15T00:00:00-06:00"
+      ]
+     },
+     "references": [],
+     "response": "Execute",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Pueblo CO",
+     "sent": "2026-10-13T12:19:00-06:00",
+     "severity": "Moderate",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.b275105220c0cc95538a6f21422f9da112bd4a72.001.1",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.b275105220c0cc95538a6f21422f9da112bd4a72.001.1",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/forecast/COZ031",
+      "https://api.weather.gov/zones/forecast/COZ033",
+      "https://api.weather.gov/zones/forecast/COZ034"
+     ],
+     "areaDesc": "West Jackson and West Grand Counties Above 9000 Feet; South and East Jackson/Larimer/North and Northeast Grand/Northwest Boulder Counties Above 9000 Feet; South and Southeast Grand/West Central and Southwest Boulder/Gilpin/Clear Creek/Summit/North and West Park Counties Above 9000 Feet",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "* WHAT...Snow expected. Total snow accumulations between 6 and 12\ninches.\n\n* WHERE...Rabbit Ears Pass, Rocky Mountain National Park and the\nMedicine Bow Range, and The Mountains of Summit County, the\nMosquito Range, and the Indian Peaks.\n\n* WHEN...From noon Wednesday to 6 AM MDT Thursday.\n\n* IMPACTS...Snow covered roads will make travel hazardous, especially\nthrough mountain passes. Use caution when traveling.",
+     "effective": "2026-10-13T12:16:00-06:00",
+     "ends": "2026-10-15T06:00:00-06:00",
+     "event": "Winter Weather Advisory",
+     "eventCode": {
+      "NationalWeatherService": [
+       "WWY"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-14T06:00:00-06:00",
+     "geocode": {
+      "SAME": [
+       "008049",
+       "008057",
+       "008013",
+       "008069",
+       "008019",
+       "008047",
+       "008059",
+       "008093",
+       "008117"
+      ],
+      "UGC": [
+       "COZ031",
+       "COZ033",
+       "COZ034"
+      ]
+     },
+     "headline": "Winter Weather Advisory issued October 13 at 12:16PM MDT until October 15 at 6:00AM MDT by NWS Denver CO",
+     "id": "urn:oid:2.49.0.1.840.0.b275105220c0cc95538a6f21422f9da112bd4a72.001.1",
+     "instruction": "Roads will be slick resulting in slow and hazardous travel. Allow\nextra time to reach your destination.\n\nIf traveling to the mountains, be prepared for winter driving\nconditions. Check cotrip.org for road closures and traction laws.",
+     "language": "en-US",
+     "messageType": "Alert",
+     "note": null,
+     "onset": "2026-10-14T12:00:00-06:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "WSWBOU"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "WINTER WEATHER ADVISORY IN EFFECT FROM NOON WEDNESDAY TO 6 AM MDT THURSDAY"
+      ],
+      "VTEC": [
+       "/O.NEW.KBOU.WW.Y.0019.261014T1800Z-261015T1200Z/"
+      ],
+      "WMOidentifier": [
+       "WWUS45 KBOU 131816"
+      ],
+      "eventEndingTime": [
+       "2026-10-15T06:00:00-06:00"
+      ]
+     },
+     "references": [],
+     "response": "Execute",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Denver CO",
+     "sent": "2026-10-13T12:16:00-06:00",
+     "severity": "Moderate",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   }
+  ],
+  "title": "Current watches, warnings, and advisories for Colorado",
+  "type": "FeatureCollection",
+  "updated": "2026-10-13T21:57:19+00:00"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/alerts/active?area=CO"
+}

@@ -1,0 +1,24 @@
+ Denver, CO — NWS Weather TUI            [DASHBOARD] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────
+
+
+    Location          Now        Conditions       Today   Precip   Alerts
+ ──────────────────────────────────────────────────────────────────────────
+ ▸* Denver, CO       63°F   ⛅   Partly Clou…   61°/43°      80%   none
+    Columbus, OH     84°F   ☀    Sunny (fcst)   86°/67°       7%   none
+    Ventura, CA      70°F   ☀    Sunny (fcst)   69°/57°            ⚠ Red F…
+
+
+
+
+
+
+
+
+
+
+
+
+ j/k move · Enter jump · r refresh · D/Esc back    * = current location
+───────────────────────────────────────────────────────────────────────────────
+ c Current · f Forecast · h Hourly · a Alerts  │  l Locate  │  ? Help · q Quit

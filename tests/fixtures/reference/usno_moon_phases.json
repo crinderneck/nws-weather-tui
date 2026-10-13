@@ -1,0 +1,37 @@
+{
+ "source": "USNO moon phases API",
+ "phases": [
+  {
+   "phase": "First Quarter",
+   "utc": "2026-10-18T16:12:00+00:00"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-10-26T04:12:00+00:00"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-11-01T20:28:00+00:00"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-11-09T07:02:00+00:00"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-11-17T11:48:00+00:00"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-11-24T14:53:00+00:00"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-12-01T06:08:00+00:00"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-12-09T00:52:00+00:00"
+  }
+ ]
+}

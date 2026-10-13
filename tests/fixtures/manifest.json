@@ -1,0 +1,24 @@
+{
+ "frozen_at": "2026-10-13T21:59:06+00:00",
+ "locations": {
+  "columbus": {
+   "lat": 39.9612,
+   "lon": -82.9988,
+   "name": "Columbus, OH",
+   "tz": "America/New_York"
+  },
+  "denver": {
+   "lat": 39.7392,
+   "lon": -104.9903,
+   "name": "Denver, CO",
+   "tz": "America/Denver"
+  },
+  "ventura": {
+   "lat": 34.2805,
+   "lon": -119.2945,
+   "name": "Ventura, CA",
+   "tz": "America/Los_Angeles"
+  }
+ },
+ "recorded_at": "2026-10-13T21:58:30+00:00"
+}

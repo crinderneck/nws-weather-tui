@@ -1,0 +1,11 @@
+{
+ "content_type": "application/ld+json",
+ "json": {
+  "@context": {
+   "@version": "1.1"
+  },
+  "@graph": []
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/products/types/HWO/locations/BOU"
+}

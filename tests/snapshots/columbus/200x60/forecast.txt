@@ -1,0 +1,60 @@
+ Columbus, OH — NWS Weather TUI                                                                  5:59pm                                                           [FORECAST] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+         Today · Oct 13      │        Wed · Oct 14       │        Thu · Oct 15       │        Fri · Oct 16       │        Sat · Oct 17       │        Sun · Oct 18       │        Mon · Oct 19
+           86° / 67°         │         82° / 58°         │         71° / 61°         │         64° / 40°         │         55° / 35°         │         64° / 43°         │         68° / 47°
+                             │                           │                           │                           │                           │                           │
+             \   /           │            .--.           │            .--.           │            .--.           │           \   /           │           \   /           │          \  /
+              .-.            │         .-(    ).         │         .-(    ).         │         .-(    ).         │            .-.            │            .-.            │        _ /"".-
+           ― (   ) ―         │        (___.__)__)        │        (___.__)__)        │        (___.__)__)        │         ― (   ) ―         │         ― (   ) ―         │          \_(   ).
+              `-’            │           ⚡⚡⚡          │         ' '  ' '          │           ⚡⚡⚡          │            `-’            │            `-’            │          /(___(__)
+             /   \           │          ' ' ' '          │          ' ' '            │          ' ' ' '          │           /   \           │           /   \           │
+             Sunny           │ Mostly Sunny then Showers │    Chance Rain Showers    │ Showers And Thunderstorms │           Sunny           │           Sunny           │       Mostly Sunny
+                             │ And Thunderstorms Likely  │                           │                           │                           │                           │
+              Dry            │        Precip 83%         │        Precip 83%         │        Precip 83%         │            Dry            │            Dry            │            Dry
+           SW 12 mph         │       W 3 to 8 mph        │          E 7 mph          │      W 14 to 21 mph       │       N 7 to 12 mph       │       S 2 to 8 mph        │       S 3 to 7 mph
+       ↑7:40am  ↓6:55pm      │     ↑7:41am  ↓6:53pm      │     ↑7:42am  ↓6:52pm      │     ↑7:43am  ↓6:50pm      │     ↑7:44am  ↓6:49pm      │     ↑7:45am  ↓6:47pm      │     ↑7:46am  ↓6:46pm
+                             │                           │                           │                           │                           │                           │
+     Day                     │   Day                     │   Day                     │   Day                     │   Day                     │   Day                     │   Day
+     Sunny, with a high      │   A chance of rain        │   A chance of rain        │   Showers and             │   Sunny, with a high      │   Sunny, with a high      │   Mostly sunny, with a
+     near 86. Southwest      │   showers between noon    │   showers between 8am     │   thunderstorms before    │   near 55.                │   near 64.                │   high near 68.
+     wind around 12 mph,     │   and 2pm, then showers   │   and 5pm, then a         │   2pm. Mostly cloudy,     │                           │                           │
+     with gusts as high as   │   and thunderstorms       │   chance of showers and   │   with a high near 64.    │   Night                   │   Night                   │   Night
+     22 mph.                 │   likely. Mostly sunny,   │   thunderstorms. Mostly   │   Chance of               │   Clear, with a low       │   Mostly clear, with a    │   Mostly cloudy, with a
+                             │   with a high near 82.    │   cloudy, with a high     │   precipitation is 80%.   │   around 35.              │   low around 43.          │   low around 47.
+     Night                   │   West wind 3 to 8 mph.   │   near 71. East wind      │                           │                           │                           │
+     Mostly clear, with a    │   Chance of               │   around 7 mph. Chance    │   Night                   │                           │                           │
+     low around 67.          │   precipitation is 60%.   │   of precipitation is     │   Partly cloudy, with a   │                           │                           │
+     Southwest wind 3 to     │   New rainfall amounts    │   50%. New rainfall       │   low around 40.          │                           │                           │
+     10 mph.                 │   between a tenth and     │   amounts less than a     │                           │                           │                           │
+                             │   quarter of an inch      │   tenth of an inch        │                           │                           │                           │
+                             │   possible.               │   possible.               │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │   Night                   │   Night                   │                           │                           │                           │
+                             │   Showers and             │   Showers and             │                           │                           │                           │
+                             │   thunderstorms before    │   thunderstorms. Mostly   │                           │                           │                           │
+                             │   5am. Mostly cloudy,     │   cloudy, with a low      │                           │                           │                           │
+                             │   with a low around 58.   │   around 61. Chance of    │                           │                           │                           │
+                             │   Northeast wind around   │   precipitation is 80%.   │                           │                           │                           │
+                             │   8 mph. Chance of        │   New rainfall amounts    │                           │                           │                           │
+                             │   precipitation is 80%.   │   between a tenth and     │                           │                           │                           │
+                             │   New rainfall amounts    │   quarter of an inch      │                           │                           │                           │
+                             │   between a tenth and     │   possible.               │                           │                           │                           │
+                             │   quarter of an inch      │                           │                           │                           │                           │
+                             │   possible.               │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+     c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · p Pause  │  e Favs · D Dashboard · Esc Back · ? Help · q Quit

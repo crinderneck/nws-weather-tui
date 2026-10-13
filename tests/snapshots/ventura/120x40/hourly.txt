@@ -1,0 +1,40 @@
+ Ventura, CA — NWS Weather TUI                           2:59pm                     [HOURLY] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Next 156 hours  Tue 2pm → Tue 1am
+
+  Precip  Dry for the next 6 days
+    Wind  Gusty Fri 8am–4pm · up to 32 mph at Fri 11am
+     Air  Very dry — humidity down to 8% (dew point 16°)
+     Sky  Mostly clear throughout (avg 6% cover)
+
+                     now  Wed         Thu         Fri         Sat         Sun         Mon         Tue
+                     ▀▀······▀▀▀▀▀▀······▀▀▀▀▀▀······▀▀▀▀▀▀······▀▀▀▀▀▀······▀▀▀▀▀▀······▀▀▀▀▀▀····
+                             ▀ sun  ░ partly  ▒ cloudy  · clear night  ▓█ precip  █ storms
+
+  Time          Temp  Feels   Dew   Sky Wind           Gust  Precip Forecast
+ ── Today · Oct 13 ──────────────────────────────────────────────────────────────────────────────────────────────────
+      now  ☀     69°          43°    4% W 10 mph         13         Sunny
+   3:00pm  ☀     69°          42°    4% W 10 mph         13         Sunny
+   4:00pm  ☀     69°          47°    4% W 10 mph         13         Sunny
+   5:00pm  ☀     69°          48°    5% WNW 10 mph       13         Sunny
+   6:00pm  ☾     64°          49°    5% WNW 10 mph       13         Clear
+  ┄┄┄┄┄┄┄  ☀↓ sunset 6:24pm
+   7:00pm  ☾     57°          45°    5% WNW 10 mph       13         Clear
+   8:00pm  ☾     59°          46°    5% N 5 mph           7         Clear
+   9:00pm  ☾     59°          44°    5% N 5 mph           7         Clear
+  10:00pm  ☾     62°          47°    5% N 5 mph           7         Clear
+  11:00pm  ☁☾    59°          44°    6% NNE 10 mph       10         Mostly Clear
+ ── Tomorrow · Oct 14 ───────────────────────────────────────────────────────────────────────────────────────────────
+  12:00am  ☁☾    62°          45°    6% NNE 10 mph       10         Mostly Clear
+   1:00am  ☁☾    59°          41°    6% NNE 10 mph       10         Mostly Clear
+   2:00am  ☁☾    59°          40°    6% N 5 mph           8         Mostly Clear
+   3:00am  ☁☾    59°          41°    6% N 5 mph           8         Mostly Clear
+   4:00am  ☁☾    57°          37°    6% N 5 mph           8         Mostly Clear
+   5:00am  ☁☾    57°          37°    7% NNE 5 mph         7         Mostly Clear
+   6:00am  ☀     57°          37°    7% NNE 5 mph         7         Sunny
+   7:00am  ☀     57°          37°    7% NNE 5 mph         7         Sunny
+  ┄┄┄┄┄┄┄  ☀↑ sunrise 7:02am
+ rows 1–22 of 177 · j/k ↑↓ scroll · widen to 137+ cols to see days side by side
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion  │  l Locate · r Refresh  │  ? Help · q Quit

@@ -1,0 +1,24 @@
+ Denver, CO — NWS Weather TUI               [HOURLY] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────
+
+ Next 156 hours  Tue 3pm → Tue 2am
+
+  Precip  Rain likely 6pm–Thu 5pm · peak 95% at Wed 12pm · 0.75 in
+    Wind  Gusty Thu 9am–5pm · up to 35 mph at Thu 1pm
+   Feels  Up to 7° colder than the air Wed 3am–Thu 10pm (wind chill)
+     Air  Comfortable — dew point 47° or lower
+     Sky  Clearing around Fri 12am (23% cover)
+
+  Time          Temp  Feels Wind           Precip Forecast
+ ── Today · Oct 13 ──────────────────────────────────────────────────────────
+      now  ☔    60°        NNE 8 mph       18% ▁ Slight Chance Rain Showers
+   4:00pm  ☔    59°        NNE 8 mph       18% ▁ Slight Chance Rain Showers
+   5:00pm  ☔    58°        NNE 7 mph       18% ▁ Slight Chance Rain Showers
+   6:00pm  ☔    58°        NNE 7 mph       58% ▅ Rain Showers Likely
+  ┄┄┄┄┄┄┄  ☀↓ sunset 6:23pm
+   7:00pm  ☔    54°        NNE 6 mph       58% ▅ Rain Showers Likely
+   8:00pm  ☔    53°        NNE 5 mph       58% ▅ Rain Showers Likely
+   9:00pm  ☔    53°        NNE 5 mph       58% ▅ Rain Showers Likely
+ rows 1–9 of 177 · j/k ↑↓ scroll · widen to 137+ cols to see days side by side
+───────────────────────────────────────────────────────────────────────────────
+ c Current · f Forecast · h Hourly · a Alerts  │  l Locate  │  ? Help · q Quit

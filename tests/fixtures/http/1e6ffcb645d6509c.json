@@ -1,0 +1,6 @@
+{
+ "base64": "iVBORw0KGgoAAAANSUhEUgAAAO0AAABACAYAAAD2z/C/AAABJklEQVR4nO3YvSvFcRQH4HN1vVzKa7coAxb8Ca6ZYlAyyMrgP7CxGCyyiCwGpJtisymLGJUryshsk8hLX7HK+tOt51nPcD6d+iwnAgAAAAAAAAAAAAAAACAer5vT8kF96txtTWMXG8lJ4G81kbGeSulXKWfeFmOzcyA+O4rxUDjNOhJUlXxWi9JJpPWX+li5f4jRhb3U/FEXh2vTue9Z4/FglJpWo7alELn8e9zEUVaxoOr8lCYrxdu+1B+T0XU2Hg3tbfHx9Brl2VJuZvs8leeGf7JMVcop/9wUB0MTmWYDgOqytN+dipc9nkpQLY+ou96teL16ipH5HcUFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiH/xBUpFPNgIubuXAAAAAElFTkSuQmCC",
+ "content_type": "image/png",
+ "status": 200,
+ "url": "https://mapservices.weather.noaa.gov/eventdriven/rest/services/radar/radar_base_reflectivity_time/ImageServer/exportImage?adjustAspectRatio=false&bbox=-92.213210%2C38.223559%2C-73.125696%2C42.157278&bboxSR=4326&f=image&format=png32&imageSR=4326&size=237%2C64&time=1791926517000&transparent=true"
+}

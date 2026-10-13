@@ -1,0 +1,144 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": [
+   "https://geojson.org/geojson-ld/geojson-context.jsonld",
+   {
+    "@version": "1.1",
+    "@vocab": "https://api.weather.gov/ontology#",
+    "bearing": {
+     "@type": "s:QuantitativeValue"
+    },
+    "city": "s:addressLocality",
+    "county": {
+     "@type": "@id"
+    },
+    "distance": {
+     "@id": "s:Distance",
+     "@type": "s:QuantitativeValue"
+    },
+    "forecastGridData": {
+     "@type": "@id"
+    },
+    "forecastOffice": {
+     "@type": "@id"
+    },
+    "geo": "http://www.opengis.net/ont/geosparql#",
+    "geometry": {
+     "@id": "s:GeoCoordinates",
+     "@type": "geo:wktLiteral"
+    },
+    "publicZone": {
+     "@type": "@id"
+    },
+    "s": "https://schema.org/",
+    "state": "s:addressRegion",
+    "unit": "http://codes.wmo.int/common/unit/",
+    "unitCode": {
+     "@id": "s:unitCode",
+     "@type": "@id"
+    },
+    "value": {
+     "@id": "s:value"
+    },
+    "wx": "https://api.weather.gov/ontology#"
+   }
+  ],
+  "geometry": {
+   "coordinates": [
+    -82.88,
+    40
+   ],
+   "type": "Point"
+  },
+  "id": "https://api.weather.gov/stations/KCMH/observations/2026-10-13T21:45:00+00:00",
+  "properties": {
+   "@id": "https://api.weather.gov/stations/KCMH/observations/2026-10-13T21:45:00+00:00",
+   "@type": "wx:ObservationStation",
+   "barometricPressure": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:Pa",
+    "value": 101219.16
+   },
+   "cloudLayers": [],
+   "dewpoint": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": 14
+   },
+   "elevation": {
+    "unitCode": "wmoUnit:m",
+    "value": 249
+   },
+   "heatIndex": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": 28.597040427734445
+   },
+   "icon": null,
+   "maxTemperatureLast24Hours": {
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "minTemperatureLast24Hours": {
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "precipitationLast3Hours": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:mm",
+    "value": null
+   },
+   "presentWeather": [],
+   "rawMessage": "",
+   "relativeHumidity": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:percent",
+    "value": 39.896068281859
+   },
+   "seaLevelPressure": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:Pa",
+    "value": null
+   },
+   "station": "https://api.weather.gov/stations/KCMH",
+   "stationId": "KCMH",
+   "stationName": "John Glenn Columbus International Airport",
+   "temperature": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": 29
+   },
+   "textDescription": "",
+   "timestamp": "2026-10-13T21:45:00+00:00",
+   "visibility": {
+    "qualityControl": "C",
+    "unitCode": "wmoUnit:m",
+    "value": 16093.44
+   },
+   "windChill": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "windDirection": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degree_(angle)",
+    "value": 240
+   },
+   "windGust": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:km_h-1",
+    "value": null
+   },
+   "windSpeed": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:km_h-1",
+    "value": 20.376
+   }
+  },
+  "type": "Feature"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/stations/KCMH/observations/latest"
+}

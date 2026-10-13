@@ -1,0 +1,40 @@
+ Columbus, OH — NWS Weather TUI                          5:59pm                     [HOURLY] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Next 156 hours  Tue 5pm → Tue 4am
+
+   Precip  Storms likely Wed 12pm–9pm · peak 83% at Wed 7pm · 0.40 in · again around Thu 4am
+  Thunder  Lightning risk Wed 2pm–7pm · peak 24%
+     Wind  Gusty Fri 4am–Sat 4am · up to 40 mph at Fri 4pm
+    Feels  Up to 7° colder than the air Fri 10pm–Sat 1pm (wind chill)
+      Air  Muggy Wed 9am–10pm · dew point up to 69°
+      Sky  Clouding over around Wed 1pm (74% cover)
+
+                     now            Thu         Fri         Sat         Sun         Mon         Tue
+                     ······▀▀▀▓▓▓██▓▓▒▓▒▒▒▒▓▓▓███████▓▓▓░░░░░··▀▀▀▀▀▀······▀▀▀▀▀▀····░░░░░░░░░░░░░░
+                             ▀ sun  ░ partly  ▒ cloudy  · clear night  ▓█ precip  █ storms
+
+  Time          Temp  Feels   Dew   Sky Wind           Gust  Precip Forecast
+ ── Today · Oct 13 ──────────────────────────────────────────────────────────────────────────────────────────────────
+      now  ☀     84°          63°    8% SW 12 mph        22         Sunny
+   6:00pm  ☁☾    82°          63°    7% SW 10 mph        20         Mostly Clear
+  ┄┄┄┄┄┄┄  ☀↓ sunset 6:55pm
+   7:00pm  ☾     79°          62°    1% SW 9 mph         17         Clear
+   8:00pm  ☾     77°          63°    1% SW 7 mph         15         Clear
+   9:00pm  ☾     74°          64°    1% SW 7 mph         14         Clear
+  10:00pm  ☾     73°          64°    1% SW 6 mph         13         Clear
+  11:00pm  ☾     72°          63°    3% SW 6 mph         13         Clear
+ ── Tomorrow · Oct 14 ───────────────────────────────────────────────────────────────────────────────────────────────
+  12:00am  ☾     71°          63°    2% S 5 mph          12         Clear
+   1:00am  ☾     70°          63°    2% S 5 mph          12         Clear
+   2:00am  ☾     69°          63°    5% S 5 mph          10         Clear
+   3:00am  ☁☾    69°          63°   15% S 3 mph          10         Mostly Clear
+   4:00am  ☁☾    68°          63°   15% S 5 mph          12         Mostly Clear
+   5:00am  ☁☾    68°          63°   38% S 5 mph          12         Partly Cloudy
+   6:00am  ⛅    67°          63°   29% S 5 mph          12         Mostly Sunny
+   7:00am  ⛅    67°          63°   39% S 3 mph          10         Mostly Sunny
+  ┄┄┄┄┄┄┄  ☀↑ sunrise 7:41am
+   8:00am  ⛅    67°          64°   27% S 3 mph          10   12% ▁ Mostly Sunny
+ rows 1–20 of 177 · j/k ↑↓ scroll · widen to 137+ cols to see days side by side
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion  │  l Locate · r Refresh  │  ? Help · q Quit

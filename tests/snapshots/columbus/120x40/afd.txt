@@ -1,0 +1,40 @@
+ Columbus, OH — NWS Weather TUI                          5:59pm                 [DISCUSSION] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Area Forecast Discussion — ILN   Issued Tue Oct 13, 2:03pm
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+ WHAT HAS CHANGED ──────────────────────────────────────── │ 2-2.25 inch range through Wednesday afternoon and then
+ No significant changes.                                   │ remaining high along and south of the boundary into
+                                                           │ Thursday. Given the increasing moisture and forcing,
+ KEY MESSAGES ──────────────────────────────────────────── │ expect widespread showers and embedded thunderstorms to
+ 1) An active weather pattern is expected from Wednesday   │ develop Wednesday afternoon and continue into Wednesday
+ through Friday, which will bring the potential for strong │ evening with some of the precipitation likely lingering
+ storms, heavy rainfall, and gusty winds.                  │ through the night south of the boundary.
+                                                           │
+ 2) Cooler weather and frost possible this weekend.        │ To the south of the boundary, temperatures will remain
+                                                           │ unseasonably warm during the day on Wednesday with highs
+ DISCUSSION ────────────────────────────────────────────── │ ranging from the upper 70s north to the mid 80s across
+ Key Message 1)                                            │ our far south. This will allow for some MLCapes of around
+                                                           │ 1000 J/KG or so, mainly to the south of the I-70 corridor
+ A more active weather pattern will develop Wednesday and  │ through Wednesday afternoon. With the strengthening mid
+ continue into Friday. Mid level ridging currently in      │ level flow, deep layer shear will increase through the
+ place across the region will begin to break down tonight  │ day on Wednesday, so a few strong to severe thunderstorms
+ into Wednesday as some mid level energy moves out of the  │ will be possible Wednesday afternoon into the evening,
+ mid Mississippi Valley and into the Ohio Valley. This     │ with damaging wind the main threat. The best chance for
+ will allow for a weak frontal boundary to sag slowly      │ this will be across our southern areas, but the overall
+ southeast into our area through the day on Wednesday. The │ severe threat will be contingent on how well we are able
+ boundary will likely stall out somewhere along the Ohio   │ to destabilize through the day.
+ River Wednesday night before beginning to lift back to    │
+ the north as a warm front through the day on Thursday as  │ Locally heavy rainfall will also be possible given the
+ a weak surface wave rides east along it. Finally, a       │ high PWs. Initially, storms look to be somewhat
+ stronger mid level short wave will help carve out a sharp │ progressive Wednesday afternoon, but as the boundary
+ upper level trough across the Great Lakes region Thursday │ begins to stall out, some training storms may begin to
+ night into Friday, with an associated strong cold front   │ develop, leading to some potential flooding concerns
+ moving southeast across our area Friday morning into      │ heading into Wednesday night.
+ early afternoon.                                          │
+                                                           │ Chances for showers and storms will again be possible
+ Developing moisture advection ahead of the boundary on    │ Thursday afternoon into Thursday evening as the frontal
+ Wednesday will lead to increasing PWs, climbing into the  │ boundary lifts back to the north. Good deep layer shear
+ Page 1/2 · j/k ↑↓ turn page · continued →
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion  │  l Locate · r Refresh  │  ? Help · q Quit

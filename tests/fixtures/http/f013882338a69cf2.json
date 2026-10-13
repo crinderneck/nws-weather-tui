@@ -1,0 +1,1682 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": [
+   "https://geojson.org/geojson-ld/geojson-context.jsonld",
+   {
+    "@version": "1.1",
+    "@vocab": "https://api.weather.gov/ontology#",
+    "bearing": {
+     "@type": "s:QuantitativeValue"
+    },
+    "city": "s:addressLocality",
+    "county": {
+     "@type": "@id"
+    },
+    "distance": {
+     "@id": "s:Distance",
+     "@type": "s:QuantitativeValue"
+    },
+    "forecastGridData": {
+     "@type": "@id"
+    },
+    "forecastOffice": {
+     "@type": "@id"
+    },
+    "geo": "http://www.opengis.net/ont/geosparql#",
+    "geometry": {
+     "@id": "s:GeoCoordinates",
+     "@type": "geo:wktLiteral"
+    },
+    "observationStations": {
+     "@container": "@list",
+     "@type": "@id"
+    },
+    "publicZone": {
+     "@type": "@id"
+    },
+    "s": "https://schema.org/",
+    "state": "s:addressRegion",
+    "unit": "http://codes.wmo.int/common/unit/",
+    "unitCode": {
+     "@id": "s:unitCode",
+     "@type": "@id"
+    },
+    "value": {
+     "@id": "s:value"
+    },
+    "wx": "https://api.weather.gov/ontology#"
+   }
+  ],
+  "features": [
+   {
+    "geometry": {
+     "coordinates": [
+      -105.10417,
+      39.90085
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KBJC",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KBJC",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 330
+     },
+     "county": "https://api.weather.gov/zones/county/COC059",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 19333.36205419
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1691.9448
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ239",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ039",
+     "name": "Broomfield / Jeffco",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KBJC",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.75806,
+      39.71331
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KBKF",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KBKF",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 101
+     },
+     "county": "https://api.weather.gov/zones/county/COC005",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 20361.38362392
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1699.8696
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ240",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ040",
+     "name": "Buckley Space Force Base",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KBKF",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.84841,
+      39.55991
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KAPA",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KAPA",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 149
+     },
+     "county": "https://api.weather.gov/zones/county/COC035",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 24434.184998377
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1788.8712
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ240",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ040",
+     "name": "Denver - Centennial Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KAPA",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -105.05033,
+      40.01169
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KEIK",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KEIK",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 350
+     },
+     "county": "https://api.weather.gov/zones/county/COC123",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 29517.121542317
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1549.908
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ243",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ043",
+     "name": "Erie Municipal Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KEIK",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.65622,
+      39.84658
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KDEN",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KDEN",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 69
+     },
+     "county": "https://api.weather.gov/zones/county/COC031",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 30569.592742874
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1647.1392
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ240",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ040",
+     "name": "Denver, Denver International Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KDEN",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -105.2258217,
+      40.0394297
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KBDU",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KBDU",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 328
+     },
+     "county": "https://api.weather.gov/zones/county/COC013",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 37882.874558438
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1611.7824
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ239",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ039",
+     "name": "Boulder Municipal Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KBDU",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.53764,
+      39.78419
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KCFO",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KCFO",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 84
+     },
+     "county": "https://api.weather.gov/zones/county/COC001",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 38959.077761039
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1680.972
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ240",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ040",
+     "name": "Colorado Air and Space Port Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KCFO",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -105.16042,
+      40.16115
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KLMO",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KLMO",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 342
+     },
+     "county": "https://api.weather.gov/zones/county/COC013",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 47922.740893463
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1535.8872
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ239",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ039",
+     "name": "Vance Brand Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KLMO",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.64226,
+      39.22317
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KMNH",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KMNH",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 152
+     },
+     "county": "https://api.weather.gov/zones/county/COC039",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 65807.508283647
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2146.4016
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ241",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ041",
+     "name": "Elbert Mountain - Monument Pass",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KMNH",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -105.01667,
+      40.45
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KFNL",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KFNL",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 358
+     },
+     "county": "https://api.weather.gov/zones/county/COC069",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 77852.040367222
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1528.8768
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ238",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ038",
+     "name": "Fort Collins/Loveland - Northern Colorado Regional Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KFNL",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.63333,
+      40.43333
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KGXY",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KGXY",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 21
+     },
+     "county": "https://api.weather.gov/zones/county/COC123",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 81844.101963274
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1431.9504
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ243",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ043",
+     "name": "Greeley, Greeley-Weld County Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KGXY",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -105.91664,
+      40.09006
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KGNB",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KGNB",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 295
+     },
+     "county": "https://api.weather.gov/zones/county/COC049",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 87497.675879526
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2501.4936
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ213",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ032",
+     "name": "Granby-Grand County Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KGNB",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.81667,
+      38.96667
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KAFF",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KAFF",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 170
+     },
+     "county": "https://api.weather.gov/zones/county/COC041",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 88401.136778622
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2003.1456
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ226",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ085",
+     "name": "Air Force Academy",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KAFF",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -105.51444,
+      39.05028
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/K4BM",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/K4BM",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 210
+     },
+     "county": "https://api.weather.gov/zones/county/COC093",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 89868.524075097
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 3438.144
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ214",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ037",
+     "name": "Wilkerson Pass",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "K4BM",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.15228,
+      39.47523
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KCCU",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KCCU",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 253
+     },
+     "county": "https://api.weather.gov/zones/county/COC117",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 104041.88912241
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 3666.1344
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ212",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ034",
+     "name": "Copper Mountain - Red Cliff Pass",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KCCU",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.68873,
+      38.80949
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KCOS",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KCOS",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 165
+     },
+     "county": "https://api.weather.gov/zones/county/COC041",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 107787.77598147
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1885.4928
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ227",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ085",
+     "name": "City of Colorado Springs Municipal Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KCOS",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -103.80704,
+      40.33148
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KFMM",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KFMM",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 56
+     },
+     "county": "https://api.weather.gov/zones/county/COC087",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 119758.60133074
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1373.124
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ244",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ044",
+     "name": "Fort Morgan Municipal Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KFMM",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.75977,
+      38.68312
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KFCS",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KFCS",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 170
+     },
+     "county": "https://api.weather.gov/zones/county/COC041",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 120311.07289157
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1780.6416
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ227",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ085",
+     "name": "Butts Army Airfield (Fort Carson)",
+     "provider": "NonFedAWOS",
+     "stationIdentifier": "KFCS",
+     "subProvider": "TG",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.36889,
+      40.05361
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/K20V",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/K20V",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 286
+     },
+     "county": "https://api.weather.gov/zones/county/COC049",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 122259.68051027
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2258.8728
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ213",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ032",
+     "name": "Kremmling, Mc Elroy Airfield",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "K20V",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -103.66738,
+      39.27334
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KLIC",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KLIC",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 114
+     },
+     "county": "https://api.weather.gov/zones/county/COC073",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 125337.45524421
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1633.1184
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ246",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ046",
+     "name": "Limon Municipal Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KLIC",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.31611,
+      39.22806
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KLXV",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KLXV",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 243
+     },
+     "county": "https://api.weather.gov/zones/county/COC065",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 127649.20463478
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 3026.0544
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ220",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ059",
+     "name": "Leadville, Lake County Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KLXV",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.12069,
+      38.81416
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KAEJ",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KAEJ",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 223
+     },
+     "county": "https://api.weather.gov/zones/county/COC015",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 142407.15354566
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2421.9408
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ220",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ062",
+     "name": "Central Colorado Regional Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KAEJ",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.2754,
+      40.7454
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/K33V",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/K33V",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 315
+     },
+     "county": "https://api.weather.gov/zones/county/COC057",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 155317.71205026
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2485.0344
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ211",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ030",
+     "name": "Walden-Jackson County Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "K33V",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.80812,
+      41.15789
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KCYS",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KCYS",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 5
+     },
+     "county": "https://api.weather.gov/zones/county/WYC021",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 157301.35806596
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1864.1568
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/WYZ430",
+     "forecast": "https://api.weather.gov/zones/forecast/WYZ118",
+     "name": "Cheyenne, Cheyenne Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KCYS",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -103.21459,
+      40.17428
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KAKO",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KAKO",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 72
+     },
+     "county": "https://api.weather.gov/zones/county/COC121",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 158596.24237023
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1427.0736
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ249",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ049",
+     "name": "Colorado Plains Regional Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KAKO",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.04864,
+      38.53828
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KANK",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KANK",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 214
+     },
+     "county": "https://api.weather.gov/zones/county/COC015",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 162700.2390614
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2293.0104
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ220",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ062",
+     "name": "Harriet Alexander Field Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KANK",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.91667,
+      39.65
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KEGE",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KEGE",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 266
+     },
+     "county": "https://api.weather.gov/zones/county/COC037",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 165094.30953248
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1993.0872
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ205",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ008",
+     "name": "Eagle County Regional",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KEGE",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -104.5057,
+      38.28869
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KPUB",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KPUB",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 165
+     },
+     "county": "https://api.weather.gov/zones/county/COC101",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 167831.7791737
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1424.0256
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ228",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ086",
+     "name": "Pueblo Memorial Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KPUB",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.87051,
+      39.22992
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KASE",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KASE",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 250
+     },
+     "county": "https://api.weather.gov/zones/county/COC097",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 171317.14143309
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2338.7304
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ205",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ010",
+     "name": "Aspen-Pitkin County Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KASE",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -103.26109,
+      40.61331
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KSTK",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KSTK",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 56
+     },
+     "county": "https://api.weather.gov/zones/county/COC075",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 175544.00385194
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1227.1248
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ248",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ048",
+     "name": "Sterling Municipal Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KSTK",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.3197,
+      38.4972
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KMYP",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KMYP",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 219
+     },
+     "county": "https://api.weather.gov/zones/county/COC015",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 180387.2495066
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 3624.9864
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ220",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ060",
+     "name": "Salida - Monarch Pass",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KMYP",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -105.67287,
+      41.3165
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KLAR",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KLAR",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 341
+     },
+     "county": "https://api.weather.gov/zones/county/WYC001",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 183448.16885348
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2215.896
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/WYZ428",
+     "forecast": "https://api.weather.gov/zones/forecast/WYZ115",
+     "name": "Laramie Regional Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KLAR",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -103.66667,
+      41.18333
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KIBM",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KIBM",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 34
+     },
+     "county": "https://api.weather.gov/zones/county/NEC105",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 194812.11472818
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1501.14
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/NEZ437",
+     "forecast": "https://api.weather.gov/zones/forecast/NEZ054",
+     "name": "Kimball, Kimball Municipal Airport/Robert E Arraj Field",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KIBM",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -107.21667,
+      40.48333
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KHDN",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KHDN",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 294
+     },
+     "county": "https://api.weather.gov/zones/county/COC107",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 206040.43861223
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2011.9848
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ201",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ002",
+     "name": "Hayden, Yampa Valley Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KHDN",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.16861,
+      38.09722
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/K04V",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/K04V",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 209
+     },
+     "county": "https://api.weather.gov/zones/county/COC109",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 210121.84915078
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2385.06
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ224",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ069",
+     "name": "Saguache, Saguache Municipal Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "K04V",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -106.93333,
+      38.53333
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KGUC",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KGUC",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 231
+     },
+     "county": "https://api.weather.gov/zones/county/COC051",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 215297.68526378
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2339.9496
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ293",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ014",
+     "name": "Gunnison, Gunnison-Crested Butte Regional Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KGUC",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -102.98556,
+      41.09944
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KSNY",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KSNY",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 47
+     },
+     "county": "https://api.weather.gov/zones/county/NEC033",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 226564.74072276
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1313.9928
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/NEZ437",
+     "forecast": "https://api.weather.gov/zones/forecast/NEZ055",
+     "name": "Sidney, Sidney Municipal Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KSNY",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -103.51334,
+      38.04949
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KLHX",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KLHX",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 145
+     },
+     "county": "https://api.weather.gov/zones/county/COC089",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 228284.87071212
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1278.0264
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ232",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ093",
+     "name": "La Junta Municipal Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KLHX",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -107.52394,
+      40.49297
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KCAG",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KCAG",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 291
+     },
+     "county": "https://api.weather.gov/zones/county/COC081",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 230633.34393889
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1883.9688
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ202",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ002",
+     "name": "Craig-Moffat Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KCAG",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -102.2819,
+      39.24149
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KITR",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KITR",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 102
+     },
+     "county": "https://api.weather.gov/zones/county/COC063",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 239253.13530398
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1278.0264
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ253",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ091",
+     "name": "Burlington - Carson County Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KITR",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -102.27676,
+      40.57155
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KHEQ",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KHEQ",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 67
+     },
+     "county": "https://api.weather.gov/zones/county/COC095",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 248090.63031001
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1135.0752
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ251",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ051",
+     "name": "Holyoke Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KHEQ",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -102.68745,
+      38.07178
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KLAA",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KLAA",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 132
+     },
+     "county": "https://api.weather.gov/zones/county/COC099",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 273044.77993024
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1122.8832
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ236",
+     "forecast": "https://api.weather.gov/zones/forecast/COZ098",
+     "name": "Lamar Municipal Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KLAA",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -101.69306,
+      39.3675
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KGLD",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KGLD",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 97
+     },
+     "county": "https://api.weather.gov/zones/county/KSC181",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 285918.31479264
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 1114.044
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/KSZ013",
+     "forecast": "https://api.weather.gov/zones/forecast/KSZ013",
+     "name": "Goodland, Renner Field",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KGLD",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -101.61667,
+      40.51667
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KIML",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KIML",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 72
+     },
+     "county": "https://api.weather.gov/zones/county/NEC029",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 299261.24533519
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 997.0008
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/NEZ210",
+     "forecast": "https://api.weather.gov/zones/forecast/NEZ069",
+     "name": "Imperial, Imperial Municipal Airport",
+     "provider": "ASOS-HFM",
+     "stationIdentifier": "KIML",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": {
+     "coordinates": [
+      -101.76889,
+      41.11972
+     ],
+     "type": "Point"
+    },
+    "id": "https://api.weather.gov/stations/KOGA",
+    "properties": {
+     "@id": "https://api.weather.gov/stations/KOGA",
+     "@type": "wx:ObservationStation",
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 59
+     },
+     "county": "https://api.weather.gov/zones/county/NEC101",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 312337.88318024
+     },
+     "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 999.1344
+     },
+     "fireWeatherZone": "https://api.weather.gov/zones/fire/NEZ204",
+     "forecast": "https://api.weather.gov/zones/forecast/NEZ057",
+     "name": "Ogallala, Searle Field Airport",
+     "provider": "OTHER-MTR",
+     "stationIdentifier": "KOGA",
+     "subProvider": "",
+     "timeZone": "America/Denver"
+    },
+    "type": "Feature"
+   }
+  ],
+  "observationStations": [
+   "https://api.weather.gov/stations/KBJC",
+   "https://api.weather.gov/stations/KBKF",
+   "https://api.weather.gov/stations/KAPA",
+   "https://api.weather.gov/stations/KEIK",
+   "https://api.weather.gov/stations/KDEN",
+   "https://api.weather.gov/stations/KBDU",
+   "https://api.weather.gov/stations/KCFO",
+   "https://api.weather.gov/stations/KLMO",
+   "https://api.weather.gov/stations/KMNH",
+   "https://api.weather.gov/stations/KFNL",
+   "https://api.weather.gov/stations/KGXY",
+   "https://api.weather.gov/stations/KGNB",
+   "https://api.weather.gov/stations/KAFF",
+   "https://api.weather.gov/stations/K4BM",
+   "https://api.weather.gov/stations/KCCU",
+   "https://api.weather.gov/stations/KCOS",
+   "https://api.weather.gov/stations/KFMM",
+   "https://api.weather.gov/stations/KFCS",
+   "https://api.weather.gov/stations/K20V",
+   "https://api.weather.gov/stations/KLIC",
+   "https://api.weather.gov/stations/KLXV",
+   "https://api.weather.gov/stations/KAEJ",
+   "https://api.weather.gov/stations/K33V",
+   "https://api.weather.gov/stations/KCYS",
+   "https://api.weather.gov/stations/KAKO",
+   "https://api.weather.gov/stations/KANK",
+   "https://api.weather.gov/stations/KEGE",
+   "https://api.weather.gov/stations/KPUB",
+   "https://api.weather.gov/stations/KASE",
+   "https://api.weather.gov/stations/KSTK",
+   "https://api.weather.gov/stations/KMYP",
+   "https://api.weather.gov/stations/KLAR",
+   "https://api.weather.gov/stations/KIBM",
+   "https://api.weather.gov/stations/KHDN",
+   "https://api.weather.gov/stations/K04V",
+   "https://api.weather.gov/stations/KGUC",
+   "https://api.weather.gov/stations/KSNY",
+   "https://api.weather.gov/stations/KLHX",
+   "https://api.weather.gov/stations/KCAG",
+   "https://api.weather.gov/stations/KITR",
+   "https://api.weather.gov/stations/KHEQ",
+   "https://api.weather.gov/stations/KLAA",
+   "https://api.weather.gov/stations/KGLD",
+   "https://api.weather.gov/stations/KIML",
+   "https://api.weather.gov/stations/KOGA"
+  ],
+  "pagination": {
+   "next": "https://api.weather.gov/stations?id%5B0%5D=K04V&id%5B1%5D=K20V&id%5B2%5D=K33V&id%5B3%5D=K4BM&id%5B4%5D=KABH&id%5B5%5D=KAEJ&id%5B6%5D=KAFF&id%5B7%5D=KAKO&id%5B8%5D=KANK&id%5B9%5D=KAPA&id%5B10%5D=KASE&id%5B11%5D=KBDU&id%5B12%5D=KBJC&id%5B13%5D=KBKF&id%5B14%5D=KCAG&id%5B15%5D=KCCU&id%5B16%5D=KCFO&id%5B17%5D=KCOS&id%5B18%5D=KCYS&id%5B19%5D=KDCP&id%5B20%5D=KDEN&id%5B21%5D=KEGE&id%5B22%5D=KEIK&id%5B23%5D=KFCS&id%5B24%5D=KFMM&id%5B25%5D=KFNL&id%5B26%5D=KFTG&id%5B27%5D=KGLD&id%5B28%5D=KGNB&id%5B29%5D=KGUC&id%5B30%5D=KGXY&id%5B31%5D=KHDN&id%5B32%5D=KHEQ&id%5B33%5D=KIBM&id%5B34%5D=KIML&id%5B35%5D=KITR&id%5B36%5D=KLAA&id%5B37%5D=KLAR&id%5B38%5D=KLHX&id%5B39%5D=KLIC&id%5B40%5D=KLMO&id%5B41%5D=KLXV&id%5B42%5D=KMNH&id%5B43%5D=KMYP&id%5B44%5D=KOGA&id%5B45%5D=KPUB&id%5B46%5D=KSNY&id%5B47%5D=KSTK&cursor=eyJzIjo1MDB9"
+  },
+  "type": "FeatureCollection"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/gridpoints/BOU/63,62/stations"
+}

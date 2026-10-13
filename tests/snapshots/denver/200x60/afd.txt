@@ -1,0 +1,60 @@
+ Denver, CO — NWS Weather TUI                                                                    3:59pm                                                         [DISCUSSION] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Area Forecast Discussion — BOU   Issued Tue Oct 13, 1:44pm
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+ KEY MESSAGES ────────────────────────────────────────────────── │ An upper level high will be centered over the intermountain     │ EARLIER DISCUSSION · issued Tue Oct 13, 12:04pm ═══════════════
+ - Much cooler temperatures and wet conditions is still on       │ west, with a closed low trapped beneathit off the coast of      │ KEY MESSAGES ──────────────────────────────────────────────────
+ track.                                                          │ northwest Mexico on Friday. Cross sections show a very dry      │ - Change in the weather to cool, wet conditions is still on
+                                                                 │ airmass, resulting in sunny skies all day on Friday. Cool air   │ track.
+ - Rain and mountain snow showers will become more numerous      │ lingers with highs in the upper 50s to lower 60s, but light     │
+ tonight, mainly west of I-25. More widespread rain and mountain │ winds and sunny skies will make it feel warmer. The upper level │ - Showers will become more numerous in and near the mountains
+ snow still on schedule for Wednesday afternoon - Wednesday      │ ridge slides east of the region Saturday. Southwestflow aloft   │ late Tuesday and Tuesday night, but then more widespread rain
+ night, before winding down Thursday.                            │ will prevail behind the ridge bringing warmer air to the area.  │ and mountain snow still on schedule for Wednesday - Wednesday
+                                                                 │ Temperatures climb above normal with highs expected to reach    │ night, before winding down Thursday.
+ - Several inches (6-12") of snow expected for the mountains     │ upper 60s to lower 70s across northeast Colorado.               │
+ above 9,000 to 10,000 feet with travel impacts late Wednesday   │                                                                 │ - Several inches of snow expected for the mountains above
+ thru Thursday morning. Lighter snow and at least a dusting into │ A weak trough in the flow aloft tracks across the Central       │ 9,500-10,000 feet with some travel impacts late Wednesday -
+ the mountain valleys and higher foothills.                      │ Rockies on Sunday. It also absorbs the upper level low off the  │ Thursday morning. Lighter snow and at least a dusting into the
+                                                                 │ northwest Mexico coast. Models indicate very little moisture    │ mountain valleys and higher foothills.
+ - Drier and warmer again for next weekend.                      │ will accompany this trough, thus dry conditions are expected to │
+                                                                 │ continue Sunday. Temperatures may take a small step back.       │ - Drier and warmer again for next weekend.
+ DISCUSSION /Through Tuesday/ ────────────────────────────────── │                                                                 │
+ Issued at 144 PM MDT Tue Oct 13 2026                            │ Mild and dry conditions are expected for Monday andTuesday as   │ DISCUSSION /Through Monday/ ───────────────────────────────────
+                                                                 │ southwest flow redevelops over the Central Rockies ahead of a   │ Issued at 1018 PM MDT Mon Oct 12 2026
+ Satellite imagery shows the upper level low diving southeast    │ deepening trough along the west coast. This trough tracks       │
+ across Nevada. The low will bottom out over northern Arizona    │ eastward mid to late next week bringing the next chance for     │ An upper level low will be over central Nevada by 12z Tue and
+ tonight and be centered over the Four Corners 18Z Wednesday.    │ rain, mountain snow, and cooler temperatures.                   │ then will move to near the Four Corners area by 12z Wed.  Will
+ Water vapor imagery and radar show an area of lift over eastern │                                                                 │ gradually see a better chc of showers along with a few tstms by
+ Utah and western Colorado, with widespread showers. This area   │ AVIATION /18Z TAFS through 18Z Wednesday/ ───────────────────── │ Tue aftn in the mtns.  Across the plains, cooler temps will
+ of lift shifts eastward tonight bringing rain and mountain snow │ Issued at 1204 PM MDT Tue Oct 13 2026                           │ occur behind a front as weak upslope flow develops.  Highs will
+ showers to the western two-thirds of Colorado. Easterly low     │                                                                 │ drop into the lower to mid 60 across nern CO. Any chc of
+ level flow will continue tonight and Wednesday around the low   │ Satellite shows the stratus deck is slowly breaking, with one   │ showers by late aftn will be confined to areas closer to the
+ to our southwest and a surface high to the north. Cross         │ patch of brief clearing currently working southwest toward      │ foothills.
+ sections show that the low levels will become saturated         │ KDEN, with a somewhat higher deck forming behind that near      │
+ overnight and Wednesday. This saturated layer becomes deep      │ 2000-3000 ft AGL. We should see a slow but continued breaking   │ By Tue night, will see widespread showers across the higher
+ enough for drizzle late tonight and Wednesday. The upper level  │ of the deck with additional daytime heating, with mostly VFR    │ terrain with snow levels lowering to 9500 ft overnight.  Across
+ low tracks northeast across Colorado Wednesday afternoon        │ conditions for a few hours late this afternoon and early        │ the plains, best chc of showers overnight will be mainly along
+ through Wednesday night bringing widespread rain and high       │ evening. Then low clouds will settle in again and overspread    │ the I-25 Corridor with lessor chances further east.
+ country snow. The best snowfall for the mountains comes later   │ the TAF sites, most likely 03Z-06Z and then lowering to         │
+ Wednesday and Wednesday night when flow becomes a favorable     │ IFR/LIFR with ceilings down to 500 ft or less starting 06Z-08Z. │ For Wed thru Wed night, the main question is where will the
+ northwest direction (for orographic lift). We've issued a       │ These will hold through all day Wednesday. One batch of showers │ upper level low track, as it begins to move from swrn CO east
+ Winter Weather Advisory for the mountains where 6 to 12 inches  │ will attempt to move across the airports 23Z-04Z, with more     │ northeast towards ern CO. The Canadian, ECMWF and NAM have a
+ of snow are expected.The snow level tonight will be 10,000 to   │ widespread showers and drizzle likely affecting KBJC after      │ more northern track as it moves into nern CO by 12z Thu.
+ 11,000 feet dipping below 10,000 feet over the northern         │ midnight. KDEN and KAPA would be more prone to the drizzle side │ Meanwhile, the GFS has a more southern track with the upper
+ mountains towards sunrise Wednesday morning. Once the low moves │ through 16Z since moisture is quite shallow there. Showers will │ level low being over east central CO. Looking at ensemble data
+ over Colorado, the snow level falls to 8,000 feet around sunset │ become more widespread across all TAF sites after 21Z           │ from the ECMWF and GFS shows a more northern solution with the
+ Wednesday evening and 7,500 feet by Thursday morning. Rain and  │ Wednesday, with a low (10%) chance of thunder.                  │ low being over nern CO. Meanwhile, sfc high pres will continue
+ snow linger into Thursday, especially across northern Colorado, │                                                                 │ to build into nern CO with the low level flow becoming ESE.
+ wrapping up during the afternoon.                               │ BOU WATCHES/WARNINGS/ADVISORIES ─────────────────────────────── │ Overall, with favorable QG ascent should continue to see
+                                                                 │ Winter Weather Advisory from noon Wednesday to 6 AM MDT         │ showers/isold tstms over the higher terrain thru the aftn with
+ Skies clear out around sunset Thursday night as a surface       │ Thursday for COZ031-033-034.                                    │ snow levels down to 9000 ft by late aftn. Across nern CO,
+ settles over Colorado. This will bring the coldest night so far │                                                                 │ should see showers thru the aftn, especially along the I-25
+ this fall. Many places will see a frost or freeze Thursday      │ DISCUSSION...BM                                                 │ Corridor with a chc across the plains. Highs on Wed, will only
+ night and Friday morning. Overnight lows are on track to be in  │ AVIATION...20                                                   │ be in the mid 40's to lower 50's over nern CO.
+ the upper 20s to mid 30s over northeast Colorado. Typical low   │                                                                 │
+ lying areas/cold spots are expected to fall into the mid to     │                                                                 │ By late Wed night into Thu, additional precipitation will
+ lower 20s.                                                      │                                                                 │ …
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+     c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · p Pause  │  e Favs · D Dashboard · Esc Back · ? Help · q Quit

@@ -1,0 +1,379 @@
+"""Unit tests for the fixture client and the specific bugs fixed alongside the harness."""
+
+from __future__ import annotations
+
+import datetime as dt
+import json
+import os
+import time
+from typing import Any, Dict, List, Optional
+
+import pytest
+
+from harness.locations import HTTP_FIXTURES_DIR
+
+
+# ---------------------------------------------------------------------------
+# FIXTURE mode
+# ---------------------------------------------------------------------------
+
+class _FakeResponse:
+    def __init__(self, content: bytes, content_type: str, status: int = 200) -> None:
+        self.content = content
+        self.status_code = status
+        self.headers = {"Content-Type": content_type}
+
+
+class _FakeSession:
+    headers = {"User-Agent": "test"}
+
+    def __init__(self, responses: Dict[str, _FakeResponse]) -> None:
+        self.responses = responses
+        self.calls: List[str] = []
+
+    def get(self, url: str, params: Optional[Dict[str, Any]] = None, **_: Any) -> _FakeResponse:
+        from nws_weather_tui.api.fixtures import canonical_url
+
+        key = canonical_url(url, params)
+        self.calls.append(key)
+        return self.responses[key]
+
+
+def test_canonical_url_ignores_param_order() -> None:
+    from nws_weather_tui.api.fixtures import canonical_url
+
+    a = canonical_url("https://x/q", {"b": 2, "a": "x y"})
+    b = canonical_url("https://x/q", {"a": "x y", "b": 2})
+    assert a == b == "https://x/q?a=x+y&b=2"
+    assert canonical_url("https://x/q?z=1", {"a": 1}) == "https://x/q?z=1&a=1"
+
+
+def test_record_then_replay_round_trip(tmp_path: Any) -> None:
+    import requests
+
+    from nws_weather_tui.api.fixtures import FixtureSession
+
+    png = b"\x89PNG\r\n\x1a\n" + bytes(range(256))
+    inner = _FakeSession({
+        "https://x/a.json": _FakeResponse(b'{"k": [1, 2]}', "application/geo+json"),
+        "https://x/b.png": _FakeResponse(png, "image/png"),
+        "https://x/c?f=1": _FakeResponse(b"<Name>x</Name>", "text/xml", status=404),
+    })
+    rec = FixtureSession(str(tmp_path), "record", inner=inner)
+    rec.get("https://x/a.json")
+    rec.get("https://x/b.png")
+    rec.get("https://x/c", params={"f": 1})
+    rec.get("https://x/a.json")  # already recorded: served from disk
+    assert inner.calls.count("https://x/a.json") == 1
+
+    rep = FixtureSession(str(tmp_path), "replay")
+    assert rep.get("https://x/a.json").json() == {"k": [1, 2]}
+    assert rep.get("https://x/b.png").content == png
+    r = rep.get("https://x/c", params={"f": 1})
+    assert r.status_code == 404 and not r.ok and r.text == "<Name>x</Name>"
+    with pytest.raises(requests.HTTPError):
+        r.raise_for_status()
+
+
+def test_replay_miss_fails_fast_as_offline(tmp_path: Any) -> None:
+    """A missing recording behaves like being offline, without retry sleeps."""
+    import requests
+
+    from nws_weather_tui.api.client import NWSClient
+    from nws_weather_tui.api.fixtures import FixtureMissError
+    from nws_weather_tui.constants import DEFAULT_CONFIG
+
+    client = NWSClient("ua", 5, dict(DEFAULT_CONFIG["cache_ttls"]),
+                       fixture_dir=str(tmp_path), fixture_mode="replay")
+    start = time.monotonic()
+    with pytest.raises(requests.ConnectionError) as exc:
+        client.points(39.7392, -104.9903)
+    assert isinstance(exc.value, FixtureMissError)
+    assert time.monotonic() - start < 0.5  # _get_json's 0.6 s+ backoff skipped
+    assert client.fixtures is not None and len(client.fixtures.misses) == 1
+
+
+def test_fixture_mode_from_environment(monkeypatch: Any) -> None:
+    from nws_weather_tui.api.client import NWSClient
+    from nws_weather_tui.constants import DEFAULT_CONFIG
+
+    monkeypatch.setenv("NWS_TUI_FIXTURE_DIR", HTTP_FIXTURES_DIR)
+    monkeypatch.delenv("NWS_TUI_FIXTURE_MODE", raising=False)
+    client = NWSClient("ua", 5, dict(DEFAULT_CONFIG["cache_ttls"]))
+    assert client.fixtures is not None and client.fixtures.mode == "replay"
+    data = client.points(39.7392, -104.9903)
+    assert data["properties"]["cwa"] == "BOU"
+
+    monkeypatch.delenv("NWS_TUI_FIXTURE_DIR")
+    assert NWSClient("ua", 5, dict(DEFAULT_CONFIG["cache_ttls"])).fixtures is None
+
+
+# ---------------------------------------------------------------------------
+# Text products: HWO zone segments and inline section headers
+# ---------------------------------------------------------------------------
+
+def test_ugc_zone_expansion() -> None:
+    from nws_weather_tui.text_product import ugc_zones
+
+    header = "INZ050-058-073>075-KYZ089>091-OHZ060-\n088-140800-"
+    assert ugc_zones(header) == {
+        "INZ050", "INZ058", "INZ073", "INZ074", "INZ075",
+        "KYZ089", "KYZ090", "KYZ091", "OHZ060", "OHZ088",
+    }
+
+
+def _iln_hwo() -> str:
+    for name in sorted(os.listdir(HTTP_FIXTURES_DIR)):
+        with open(os.path.join(HTTP_FIXTURES_DIR, name), encoding="utf-8") as f:
+            rec = json.load(f)
+        body = rec.get("json") or {}
+        if body.get("productCode") == "HWO" and "HWOILN" in body.get("productText", ""):
+            return body["productText"]
+    pytest.skip("no ILN HWO in this recording")
+    return ""
+
+
+def test_hwo_shows_only_the_segment_for_the_point() -> None:
+    from nws_weather_tui.text_product import parse_sections, segment_for_zones
+
+    raw = _iln_hwo()
+    if raw.count("$$") < 2:
+        pytest.skip("this recording's ILN HWO has a single segment")
+    columbus = segment_for_zones(raw, ["OHZ055", "OHC049"])  # Franklin County, OH
+    assert "OHZ" not in columbus  # UGC header lines removed
+    titles = [t for t, _ in parse_sections(columbus)]
+    assert titles[:2] == ["DAY ONE", "DAYS TWO THROUGH SEVEN"]
+    assert titles.count("SPOTTER INFORMATION STATEMENT") == 1
+    # A zone in no segment: everything is kept, still without UGC lines.
+    everywhere = segment_for_zones(raw, ["ZZZ999"])
+    assert "OHZ" not in everywhere and everywhere.count(".DAY ONE...") == raw.count(".DAY ONE...")
+
+
+def test_inline_section_headers_keep_their_text() -> None:
+    from nws_weather_tui.text_product import parse_sections
+
+    raw = (
+        "000\nFLUS43 KBOU 131000\nHWOBOU\n\n"
+        ".DAY ONE...Today and tonight.\n\nNo hazardous weather is expected.\n\n"
+        ".DAYS TWO THROUGH SEVEN...Wednesday through Monday.\n\nSnow Thursday.\n\n"
+        ".SPOTTER INFORMATION STATEMENT...\n\nSpotter activation is not expected.\n\n$$\n"
+    )
+    assert parse_sections(raw) == [
+        ("DAY ONE", "Today and tonight.\n\nNo hazardous weather is expected."),
+        ("DAYS TWO THROUGH SEVEN", "Wednesday through Monday.\n\nSnow Thursday."),
+        ("SPOTTER INFORMATION STATEMENT", "Spotter activation is not expected."),
+    ]
+
+
+def test_single_segment_product_unchanged() -> None:
+    from nws_weather_tui.text_product import segment_for_zones
+
+    raw = "AFD\n.SYNOPSIS...\nHigh pressure.\n$$\n"
+    assert segment_for_zones(raw, ["OHZ055"]) == raw
+
+
+# ---------------------------------------------------------------------------
+# Alerts: the hazard's window, not the message expiry
+# ---------------------------------------------------------------------------
+
+def _alert(**kw: Any) -> Any:
+    from nws_weather_tui.models import AlertItem
+
+    base = dict(event="Red Flag Warning", severity="Severe", urgency="Expected",
+                certainty="Likely", headline="h", sent=None, effective=None,
+                expires=None, description="", instruction="")
+    base.update(kw)
+    return AlertItem(**base)
+
+
+def test_alert_until_prefers_ends() -> None:
+    utc = dt.timezone.utc
+    expires = dt.datetime(2026, 10, 14, 22, tzinfo=utc)
+    ends = dt.datetime(2026, 10, 17, 5, tzinfo=utc)
+    assert _alert(expires=expires, ends=ends).until == ends
+    assert _alert(expires=expires).until == expires
+
+
+def test_extract_alerts_reads_onset_and_ends() -> None:
+    from nws_weather_tui.models import extract_alerts
+
+    alerts = extract_alerts({"features": [{"properties": {
+        "event": "Freeze Warning", "severity": "Severe",
+        "expires": "2026-10-13T20:30:00-06:00", "ends": "2026-10-15T08:00:00-06:00",
+        "onset": "2026-10-14T00:00:00-06:00",
+    }}]})
+    assert alerts[0].until.isoformat() == "2026-10-15T08:00:00-06:00"
+    assert alerts[0].onset.isoformat() == "2026-10-14T00:00:00-06:00"
+
+
+def test_alert_window_text(monkeypatch: Any) -> None:
+    import freezegun
+
+    from nws_weather_tui.views.alerts import alert_window
+
+    monkeypatch.setenv("TZ", "UTC")
+    time.tzset()
+    try:
+        a = _alert(sent=dt.datetime(2026, 10, 13, 21, 38, tzinfo=dt.timezone.utc),
+                   onset=dt.datetime(2026, 10, 15, 13, tzinfo=dt.timezone.utc),
+                   ends=dt.datetime(2026, 10, 17, 5, tzinfo=dt.timezone.utc))
+        with freezegun.freeze_time("2026-10-13T22:00:00Z"):
+            assert alert_window(a, False) == (
+                "From Thu Oct 15, 1:00pm until Sat Oct 17, 5:00am · Sent Tue Oct 13, 9:38pm")
+        with freezegun.freeze_time("2026-10-16T00:00:00Z"):  # already under way
+            assert alert_window(a, False).startswith("Until Sat Oct 17, 5:00am")
+    finally:
+        monkeypatch.delenv("TZ")
+        time.tzset()
+
+
+# ---------------------------------------------------------------------------
+# Radar
+# ---------------------------------------------------------------------------
+
+def test_radar_age_tag() -> None:
+    from nws_weather_tui.views.radar import radar_age_tag
+
+    assert radar_age_tag(5 * 60) == ""
+    assert radar_age_tag(25 * 60) == "  (25m old)"
+    assert radar_age_tag(3 * 3600 + 43 * 60) == "  (3h 43m old)"
+
+
+def _extent(start_ms: int, end_ms: int) -> _FakeResponse:
+    body = {"timeInfo": {"timeExtent": [start_ms, end_ms]}}
+    return _FakeResponse(json.dumps(body).encode(), "application/json")
+
+
+class _SequenceSession(_FakeSession):
+    """Answers the MRMS metadata URL with each queued response in turn."""
+
+    def __init__(self, answers: List[_FakeResponse]) -> None:
+        super().__init__({})
+        self.answers = answers
+
+    def get(self, url: str, params: Optional[Dict[str, Any]] = None, **_: Any) -> Any:
+        self.calls.append(url)
+        r = self.answers.pop(0)
+        r.json = lambda r=r: json.loads(r.content)  # type: ignore[attr-defined]
+        r.raise_for_status = lambda: None  # type: ignore[attr-defined]
+        return r
+
+
+def test_mrms_stale_extent_is_asked_again() -> None:
+    from nws_weather_tui.api.cache import TTLCache
+    from nws_weather_tui.radar.client import RadarFetcher
+
+    now_ms = int(time.time() * 1000)
+    stale = _extent(now_ms - 6 * 3600_000, now_ms - 4 * 3600_000)
+    fresh = _extent(now_ms - 2 * 3600_000, now_ms - 3 * 60_000)
+    session = _SequenceSession([stale, fresh, stale])
+    fetcher = RadarFetcher(session, 5, TTLCache(), {})
+    assert fetcher._mrms_time_extent()[1] == now_ms - 3 * 60_000
+    assert len(session.calls) == 2  # stopped once it had a fresh answer
+    assert fetcher._mrms_latest_time() == now_ms - 3 * 60_000  # cached, no new call
+    assert len(session.calls) == 2
+
+
+def test_mrms_gives_up_after_three_stale_answers() -> None:
+    from nws_weather_tui.api.cache import TTLCache
+    from nws_weather_tui.radar.client import RadarFetcher
+
+    now_ms = int(time.time() * 1000)
+    answers = [_extent(0, now_ms - h * 3600_000) for h in (5, 4, 6)]
+    session = _SequenceSession(answers)
+    assert RadarFetcher(session, 5, TTLCache(), {})._mrms_time_extent()[1] == now_ms - 4 * 3600_000
+    assert len(session.calls) == 3
+
+
+class _RadarApp:
+    """The attributes maybe_refresh_radar reads."""
+
+    def __init__(self) -> None:
+        self.show_radar_map = True
+        self._bg_radar_running = False
+        self.cfg = {"cache_ttls": {"radar": 300}}
+        self._radar_last = time.time()
+        self._radar_cells: List[Any] = []
+        self._radar_ascii: List[str] = []
+        self._radar_src_cols, self._radar_src_rows = 80, 20
+        self._radar_bbox_state = "CO"
+        self.state_code = "CO"
+        self._radar_err: Optional[str] = "all radar sources failed"
+        # What starting a fetch reads.
+        self.lat, self.lon = 39.74, -104.99
+        self.radar_station = "KFTG"
+        self.alerts: List[Any] = []
+        self._radar_has_256color = True
+        self._radar_anim_playing = False
+        self._bg_generation = 0
+        self.client = type("C", (), {"state_bbox": lambda _s, _c: (-109.1, 37.0, -102.0, 41.0)})()
+
+
+def test_failed_radar_fetch_backs_off(monkeypatch: Any) -> None:
+    """Before: every redraw after a failure started another full fetch."""
+    from nws_weather_tui.radar import state
+
+    started: List[Any] = []
+
+    class Thread:
+        def __init__(self, target: Any, args: Any, daemon: bool) -> None:
+            pass
+
+        def start(self) -> None:
+            started.append(1)
+
+    monkeypatch.setattr(state.threading, "Thread", Thread)
+    app = _RadarApp()
+    for _ in range(5):  # five redraws in quick succession
+        state.maybe_refresh_radar(app, 80, 20)  # type: ignore[arg-type]
+    assert started == []
+    app._radar_last -= state.RADAR_RETRY_S + 1
+    state.maybe_refresh_radar(app, 80, 20)  # type: ignore[arg-type]
+    assert started == [1] and app._bg_radar_running
+
+
+def test_line_raster_is_four_connected() -> None:
+    from nws_weather_tui.radar.overlays import _draw_segment
+
+    grid = [[" "] * 8 for _ in range(8)]
+    _draw_segment(grid, 0, 0, 7, 5, "#")
+    cells = {(x, y) for y, row in enumerate(grid) for x, ch in enumerate(row) if ch == "#"}
+    assert (0, 0) in cells and (7, 5) in cells
+    for x, y in cells - {(7, 5)}:
+        assert {(x + 1, y), (x, y + 1)} & cells, f"diagonal-only step after {(x, y)}"
+
+
+def test_city_labels_never_touch() -> None:
+    from nws_weather_tui.radar.overlays import city_overlay_and_hits_for_bbox
+
+    for cols, rows in ((40, 6), (80, 12), (160, 40)):
+        lines, hits = city_overlay_and_hits_for_bbox(
+            cols, rows, (-125.0, 24.0, -66.0, 50.0), max_labels=60)
+        for line in lines:
+            for word in line.split():
+                assert word.count("@") == 1 and len(word.strip("@")) in (3, 4), (cols, line)
+
+
+# ---------------------------------------------------------------------------
+# Dashboard
+# ---------------------------------------------------------------------------
+
+def test_dashboard_missing_wind_is_not_calm(monkeypatch: Any) -> None:
+    import curses
+
+    from nws_weather_tui.models import CurrentConditions
+    from nws_weather_tui.views import dashboard
+
+    monkeypatch.setattr(curses, "color_pair", lambda n: n << 8)
+
+    class App:
+        units = "us"
+
+    def row(wind: Optional[float]) -> str:
+        c = CurrentConditions("KCMH", None, 20.0, wind, None, None, None, None, None,
+                              "Clear", "clear")
+        return dashboard._row(App(), {"current": c, "ts": time.time()})["wind"][0]  # type: ignore[arg-type]
+
+    assert row(None) == "—"
+    assert row(0.0) == "calm"
+    assert row(4.47) == "10 mph"

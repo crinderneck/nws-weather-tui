@@ -1,0 +1,144 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": [
+   "https://geojson.org/geojson-ld/geojson-context.jsonld",
+   {
+    "@version": "1.1",
+    "@vocab": "https://api.weather.gov/ontology#",
+    "bearing": {
+     "@type": "s:QuantitativeValue"
+    },
+    "city": "s:addressLocality",
+    "county": {
+     "@type": "@id"
+    },
+    "distance": {
+     "@id": "s:Distance",
+     "@type": "s:QuantitativeValue"
+    },
+    "forecastGridData": {
+     "@type": "@id"
+    },
+    "forecastOffice": {
+     "@type": "@id"
+    },
+    "geo": "http://www.opengis.net/ont/geosparql#",
+    "geometry": {
+     "@id": "s:GeoCoordinates",
+     "@type": "geo:wktLiteral"
+    },
+    "publicZone": {
+     "@type": "@id"
+    },
+    "s": "https://schema.org/",
+    "state": "s:addressRegion",
+    "unit": "http://codes.wmo.int/common/unit/",
+    "unitCode": {
+     "@id": "s:unitCode",
+     "@type": "@id"
+    },
+    "value": {
+     "@id": "s:value"
+    },
+    "wx": "https://api.weather.gov/ontology#"
+   }
+  ],
+  "geometry": {
+   "coordinates": [
+    -119.21,
+    34.27
+   ],
+   "type": "Point"
+  },
+  "id": "https://api.weather.gov/stations/VTUC1/observations/2026-10-13T21:30:00+00:00",
+  "properties": {
+   "@id": "https://api.weather.gov/stations/VTUC1/observations/2026-10-13T21:30:00+00:00",
+   "@type": "wx:ObservationStation",
+   "barometricPressure": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:Pa",
+    "value": null
+   },
+   "cloudLayers": [],
+   "dewpoint": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": 8.55
+   },
+   "elevation": {
+    "unitCode": "wmoUnit:m",
+    "value": 72.82
+   },
+   "heatIndex": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": 20.665056364171665
+   },
+   "icon": null,
+   "maxTemperatureLast24Hours": {
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "minTemperatureLast24Hours": {
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "precipitationLast3Hours": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:mm",
+    "value": null
+   },
+   "presentWeather": [],
+   "rawMessage": "",
+   "relativeHumidity": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:percent",
+    "value": 43.908541606564
+   },
+   "seaLevelPressure": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:Pa",
+    "value": null
+   },
+   "station": "https://api.weather.gov/stations/VTUC1",
+   "stationId": "VTUC1",
+   "stationName": "Ventura County Government Center",
+   "temperature": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": 21.33
+   },
+   "textDescription": "",
+   "timestamp": "2026-10-13T21:30:00+00:00",
+   "visibility": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:m",
+    "value": null
+   },
+   "windChill": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "windDirection": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degree_(angle)",
+    "value": 217
+   },
+   "windGust": {
+    "qualityControl": "S",
+    "unitCode": "wmoUnit:km_h-1",
+    "value": 25.74
+   },
+   "windSpeed": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:km_h-1",
+    "value": 15.624
+   }
+  },
+  "type": "Feature"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/stations/VTUC1/observations/latest"
+}

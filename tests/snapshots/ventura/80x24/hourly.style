@@ -1,0 +1,43 @@
+  0: 1-29 fg=cyan bold
+  0: 44-78 fg=magenta
+  3: 1-14 bold
+  5: 2-7 fg=green
+  6: 2-7 fg=brown bold
+  7: 2-7 fg=brown
+ 10: 14-16 bold
+ 10: 25-27 bold
+ 10: 33-35 bold
+ 10: 41-43 bold
+ 10: 49-51 bold
+ 10: 57-59 bold
+ 10: 65-67 bold
+ 11: 14-14 fg=brown
+ 11: 19-22 fg=brown
+ 11: 27-30 fg=brown
+ 11: 35-38 fg=brown
+ 11: 43-46 fg=brown
+ 11: 51-54 fg=brown
+ 11: 59-62 fg=brown
+ 12: 9-15 fg=brown
+ 12: 51-61 fg=blue bold
+ 12: 62-69 fg=magenta bold
+ 14: 2-5 bold
+ 14: 14-19 bold
+ 14: 21-26 bold
+ 14: 28-31 bold
+ 14: 42-48 bold
+ 14: 50-57 bold
+ 15: 1-76 fg=cyan bold
+ 16: 2-8 bold
+ 16: 14-19 fg=green
+ 17: 14-19 fg=green
+ 18: 14-19 fg=green
+ 19: 14-19 fg=green
+ 20: 14-19 fg=green
+ 23: 1-1 fg=cyan bold
+ 23: 13-13 fg=cyan bold
+ 23: 26-26 fg=cyan bold
+ 23: 37-37 fg=cyan bold
+ 23: 50-50 fg=cyan bold
+ 23: 63-63 fg=cyan bold
+ 23: 72-72 fg=cyan bold

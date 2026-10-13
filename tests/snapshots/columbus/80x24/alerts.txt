@@ -1,0 +1,24 @@
+ Columbus, OH — NWS Weather TUI             [ALERTS] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────
+
+ ✓ No active alerts for Columbus, OH
+ Checked 5:59pm · refreshes every 5 min
+
+ Nothing active anywhere in OH either.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+───────────────────────────────────────────────────────────────────────────────
+ c Current · f Forecast · h Hourly · a Alerts  │  l Locate  │  ? Help · q Quit

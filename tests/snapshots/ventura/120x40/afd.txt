@@ -1,0 +1,40 @@
+ Ventura, CA — NWS Weather TUI                           2:59pm                 [DISCUSSION] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Area Forecast Discussion — LOX   Issued Tue Oct 13, 2:07pm
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+ SYNOPSIS ──────────────────────────────────────────────── │ roadways.
+ 13/206 PM.                                                │
+                                                           │ In the event of a nearby wildfire, smoke may increase
+ A Santa Ana wind pattern will create much warmer          │ heat and physical stress. If smoke impacts your area; 1)
+ temperatures this week as well as gusty northeast winds   │ Have a cooling plan in place as smoke could limit your
+ at times, strongest Thursday and Friday. Another          │ ability to cool your home through open windows and 2) If
+ significant cool down is likely into next week.           │ you have air conditioning, set on air recirculation
+                                                           │ within the home to avoid smoke exposure. Local officials
+ SHORT TERM (TDY-FRI) ──────────────────────────────────── │ may have additional guidance.
+ 13/206 PM.                                                │
+                                                           │ Forecast details: The forecast through this weekend
+ HIGH CONFIDENCE in a MODERATE TO STRONG SANTA ANA event   │ remains largely unchanged. A low pressure system is
+ peaking this Thursday and Friday with damaging wind,      │ moving slowly through the Great Basin through Wednesday.
+ power outages and large fast moving fires possible in the │ That will set the stage for a developing Santa Ana wind
+ region. HIGH WIND WATCHES, Wind Advisories and Red Flag   │ event across portions of southern California this week as
+ Warnings cover the typical Santa Ana Wind Corridor in Los │ high pressure over the Great Basin forces winds up and
+ Angeles to Ventura County for Thursday and Friday. A Fire │ over the mountains and down into the valleys and coastal
+ Weather Watch is also in effect Friday for the Santa      │ areas. The rapid acceleration of the air into
+ Barbara and San Luis Obispo interior mountains. A Heat    │ increasingly higher pressure at lower elevations will
+ Advisory is also in effect Thursday through Saturday for  │ force the air to heat up significantly (per the gas law).
+ Coastal areas with highs up to 95 degrees. See            │ Will start to see this process as early as today as the
+ weather.gov/lox to view individual product details.       │ upper low advances to the southeast, allowing the
+                                                           │ transport of air from the north to begin. Latest models
+ Some actions to consider with the upcoming wind/heat/fire │ show just a very light north-northeast wind developing
+ weather hazards:                                          │ over the mountains today and tonight, then increasing in
+                                                           │ speeds each day through Friday, by which time winds aloft
+ Have a plan in place in the case of a power outage,       │ will be around 40-50 mph. In response, temperatures
+ especially if a wind or fire weather product is in effect │ across the coast and valleys will warm by roughly 10
+ in your area.                                             │ degrees each day, peaking Friday with highs in the upper
+                                                           │ 80s to mid 90s in most areas. Mountains and deserts will
+ Secure loose outdoor items and be prepare for dangerous   │ warm as well but by much lower amounts.
+ cross winds when driving, especially on elevated          │
+ Page 1/4 · j/k ↑↓ turn page · continued →
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion  │  l Locate · r Refresh  │  ? Help · q Quit

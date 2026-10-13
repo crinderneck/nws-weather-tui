@@ -1,0 +1,19 @@
+{
+ "content_type": "application/ld+json",
+ "json": {
+  "@context": {
+   "@version": "1.1",
+   "@vocab": "https://api.weather.gov/ontology#"
+  },
+  "@id": "https://api.weather.gov/products/a8808ea0-5f74-4fc7-a6a6-85e29bf9864b",
+  "id": "a8808ea0-5f74-4fc7-a6a6-85e29bf9864b",
+  "issuanceTime": "2026-10-13T07:56:00+00:00",
+  "issuingOffice": "KILN",
+  "productCode": "HWO",
+  "productName": "Hazardous Weather Outlook",
+  "productText": "\n000\nFLUS41 KILN 130756\nHWOILN\n\nHazardous Weather Outlook\nNational Weather Service Wilmington OH\n356 AM EDT Tue Oct 13 2026\n\nINZ050-058-059-066-073>075-080-KYZ089>100-OHZ060>065-070>074-077>082-\n088-140800-\nWayne-Fayette-Union-Franklin-Ripley-Dearborn-Ohio-Switzerland-\nCarroll-Gallatin-Boone-Kenton-Campbell-Owen-Grant-Pendleton-Bracken-\nRobertson-Mason-Lewis-Preble-Montgomery-Greene-Pickaway-Fairfield-\nButler-Warren-Clinton-Ross-Hocking-Hamilton-Clermont-Brown-Highland-\nAdams-Pike-Scioto-\n356 AM EDT Tue Oct 13 2026\n\nThis Hazardous Weather Outlook is for east central Indiana, \nsoutheast Indiana, northeast Kentucky, northern Kentucky, central \nOhio, south central Ohio, southwest Ohio and west central Ohio.\n\n.DAY ONE...Today and tonight.\n\nThere is a low probability for widespread hazardous weather.\n\n.DAYS TWO THROUGH SEVEN...Wednesday through Monday.\n\nThere is an isolated potential for severe weather Wednesday \nafternoon into Wednesday evening with damaging winds and hail as\npotential threats. \n\nThe severe threat will transition over to a heavy rain threat \novernight Wednesday night into early Thursday morning, leading to the\npotential for some flooding.\n\nThere is an additional chance for isolated severe storms Thursday \nafternoon into Thursday night with damaging winds the primary threat.\n \nGusty winds upwards of 40 mph will be possible on Friday.\n\nThere will be the potential for frost this weekend.\n\n.SPOTTER INFORMATION STATEMENT...\n\nSpotter activation may be needed Wednesday and Thursday.\n\n$$\n\nOHZ026-034-035-042>046-051>056-140800-\nHardin-Mercer-Auglaize-Darke-Shelby-Logan-Union-Delaware-Miami-\nChampaign-Clark-Madison-Franklin-Licking-\n356 AM EDT Tue Oct 13 2026\n\nThis Hazardous Weather Outlook is for central Ohio and west central \nOhio.\n\n.DAY ONE...Today and tonight.\n\nThere is a low probability for widespread hazardous weather.\n\n.DAYS TWO THROUGH SEVEN...Wednesday through Monday.\n\nThere is a chance for isolated severe storms Thursday afternoon into\nThursday night with damaging winds the primary threat.\n \nGusty winds upwards of 40 mph will be possible on Friday.\n\nThere will be the potential for frost this weekend.\n\n.SPOTTER INFORMATION STATEMENT...\n\nSpotter activation may be needed on Thursday.\n\n$$\n",
+  "wmoCollectiveId": "FLUS41"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/products/a8808ea0-5f74-4fc7-a6a6-85e29bf9864b"
+}

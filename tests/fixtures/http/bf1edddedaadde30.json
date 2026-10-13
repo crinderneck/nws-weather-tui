@@ -1,0 +1,117 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": [
+   "https://geojson.org/geojson-ld/geojson-context.jsonld",
+   {
+    "@version": "1.1",
+    "@vocab": "https://api.weather.gov/ontology#",
+    "bearing": {
+     "@type": "s:QuantitativeValue"
+    },
+    "city": "s:addressLocality",
+    "county": {
+     "@type": "@id"
+    },
+    "distance": {
+     "@id": "s:Distance",
+     "@type": "s:QuantitativeValue"
+    },
+    "forecastGridData": {
+     "@type": "@id"
+    },
+    "forecastOffice": {
+     "@type": "@id"
+    },
+    "geo": "http://www.opengis.net/ont/geosparql#",
+    "geometry": {
+     "@id": "s:GeoCoordinates",
+     "@type": "geo:wktLiteral"
+    },
+    "publicZone": {
+     "@type": "@id"
+    },
+    "s": "https://schema.org/",
+    "state": "s:addressRegion",
+    "unit": "http://codes.wmo.int/common/unit/",
+    "unitCode": {
+     "@id": "s:unitCode",
+     "@type": "@id"
+    },
+    "value": {
+     "@id": "s:value"
+    },
+    "wx": "https://api.weather.gov/ontology#"
+   }
+  ],
+  "geometry": {
+   "coordinates": [
+    -104.9903,
+    39.7392
+   ],
+   "type": "Point"
+  },
+  "id": "https://api.weather.gov/points/39.7392,-104.9903",
+  "properties": {
+   "@id": "https://api.weather.gov/points/39.7392,-104.9903",
+   "@type": "wx:Point",
+   "astronomicalData": {
+    "astronomicalTwilightBegin": "2026-10-12T05:37:54-06:00",
+    "astronomicalTwilightEnd": "2026-10-12T19:54:48-06:00",
+    "civilTwilightBegin": "2026-10-12T06:40:25-06:00",
+    "civilTwilightEnd": "2026-10-12T18:52:18-06:00",
+    "nauticalTwilightBegin": "2026-10-12T06:09:10-06:00",
+    "nauticalTwilightEnd": "2026-10-12T19:23:33-06:00",
+    "sunrise": "2026-10-12T07:07:24-06:00",
+    "sunset": "2026-10-12T18:25:18-06:00",
+    "transit": "2026-10-12T12:46:21-06:00"
+   },
+   "county": "https://api.weather.gov/zones/county/COC031",
+   "cwa": "BOU",
+   "fireWeatherZone": "https://api.weather.gov/zones/fire/COZ240",
+   "forecast": "https://api.weather.gov/gridpoints/BOU/63,62/forecast",
+   "forecastGridData": "https://api.weather.gov/gridpoints/BOU/63,62",
+   "forecastHourly": "https://api.weather.gov/gridpoints/BOU/63,62/forecast/hourly",
+   "forecastOffice": "https://api.weather.gov/offices/BOU",
+   "forecastZone": "https://api.weather.gov/zones/forecast/COZ040",
+   "gridId": "BOU",
+   "gridX": 63,
+   "gridY": 62,
+   "nwr": {
+    "areaBroadcast": "https://api.weather.gov/radio/KEC76/broadcast",
+    "pointBroadcast": "https://api.weather.gov/points/39.7392,-104.9903/radio",
+    "sameCode": "008031",
+    "transmitter": "KEC76"
+   },
+   "observationStations": "https://api.weather.gov/gridpoints/BOU/63,62/stations",
+   "radarStation": "KFTG",
+   "relativeLocation": {
+    "geometry": {
+     "coordinates": [
+      -104.8811054,
+      39.7618502
+     ],
+     "type": "Point"
+    },
+    "properties": {
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 0
+     },
+     "city": "Denver",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 0
+     },
+     "state": "CO"
+    },
+    "type": "Feature"
+   },
+   "timeZone": "America/Denver",
+   "type": "land"
+  },
+  "type": "Feature"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/points/39.7392,-104.9903"
+}

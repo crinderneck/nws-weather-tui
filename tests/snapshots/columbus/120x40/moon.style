@@ -1,0 +1,97 @@
+  0: 1-30 fg=cyan bold
+  0: 57-62 bold
+  0: 86-118 fg=magenta
+  3: 25-39 fg=4e4e4e
+  3: 40-40 fg=dadada bg=4e4e4e
+  3: 41-42 fg=4e4e4e
+  3: 43-45 fg=dadada
+  4: 20-45 fg=4e4e4e
+  4: 46-46 fg=dadada bg=4e4e4e
+  4: 47-50 fg=dadada
+  5: 17-48 fg=4e4e4e
+  5: 49-49 fg=dadada bg=4e4e4e
+  5: 50-53 fg=dadada
+  6: 14-50 fg=4e4e4e
+  6: 51-51 fg=dadada bg=4e4e4e
+  6: 52-56 fg=dadada
+  7: 12-52 fg=4e4e4e
+  7: 53-53 fg=dadada bg=4e4e4e
+  7: 54-58 fg=dadada
+  8: 10-54 fg=4e4e4e
+  8: 55-60 fg=dadada
+  9: 8-55 fg=4e4e4e
+  9: 56-56 fg=dadada bg=4e4e4e
+  9: 57-62 fg=dadada
+ 10: 7-56 fg=4e4e4e
+ 10: 57-57 fg=dadada bg=4e4e4e
+ 10: 58-63 fg=dadada
+ 11: 6-57 fg=4e4e4e
+ 11: 58-58 fg=dadada bg=4e4e4e
+ 11: 59-64 fg=dadada
+ 12: 5-58 fg=4e4e4e
+ 12: 59-65 fg=dadada
+ 13: 4-59 fg=4e4e4e
+ 13: 60-66 fg=dadada
+ 13: 75-89 fg=white bold
+ 14: 3-59 fg=4e4e4e
+ 14: 60-67 fg=dadada
+ 15: 3-60 fg=4e4e4e
+ 15: 61-67 fg=dadada
+ 16: 2-60 fg=4e4e4e
+ 16: 61-68 fg=dadada
+ 17: 2-60 fg=4e4e4e
+ 17: 61-68 fg=dadada
+ 18: 2-60 fg=4e4e4e
+ 18: 61-68 fg=dadada
+ 19: 2-60 fg=4e4e4e
+ 19: 61-68 fg=dadada
+ 20: 2-60 fg=4e4e4e
+ 20: 61-68 fg=dadada
+ 20: 75-82 fg=cyan bold
+ 21: 2-60 fg=4e4e4e
+ 21: 61-68 fg=dadada
+ 22: 3-60 fg=4e4e4e
+ 22: 61-67 fg=dadada
+ 23: 3-59 fg=4e4e4e
+ 23: 60-67 fg=dadada
+ 24: 4-59 fg=4e4e4e
+ 24: 60-66 fg=dadada
+ 25: 5-58 fg=4e4e4e
+ 25: 59-65 fg=dadada
+ 26: 6-57 fg=4e4e4e
+ 26: 58-58 fg=dadada bg=4e4e4e
+ 26: 59-64 fg=dadada
+ 27: 7-56 fg=4e4e4e
+ 27: 57-57 fg=dadada bg=4e4e4e
+ 27: 58-63 fg=dadada
+ 28: 8-55 fg=4e4e4e
+ 28: 56-56 fg=dadada bg=4e4e4e
+ 28: 57-62 fg=dadada
+ 29: 10-54 fg=4e4e4e
+ 29: 55-60 fg=dadada
+ 30: 12-52 fg=4e4e4e
+ 30: 53-53 fg=dadada bg=4e4e4e
+ 30: 54-58 fg=dadada
+ 31: 14-50 fg=4e4e4e
+ 31: 51-51 fg=dadada bg=4e4e4e
+ 31: 52-56 fg=dadada
+ 32: 17-48 fg=4e4e4e
+ 32: 49-49 fg=dadada bg=4e4e4e
+ 32: 50-53 fg=dadada
+ 33: 20-45 fg=4e4e4e
+ 33: 46-46 fg=dadada bg=4e4e4e
+ 33: 47-50 fg=dadada
+ 34: 25-39 fg=4e4e4e
+ 34: 40-40 fg=dadada bg=4e4e4e
+ 34: 41-42 fg=4e4e4e
+ 34: 43-45 fg=dadada
+ 39: 3-3 fg=cyan bold
+ 39: 15-15 fg=cyan bold
+ 39: 28-28 fg=cyan bold
+ 39: 39-39 fg=cyan bold
+ 39: 50-50 fg=cyan bold
+ 39: 59-59 fg=cyan bold
+ 39: 76-76 fg=cyan bold
+ 39: 87-87 fg=cyan bold
+ 39: 101-101 fg=cyan bold
+ 39: 110-110 fg=cyan bold

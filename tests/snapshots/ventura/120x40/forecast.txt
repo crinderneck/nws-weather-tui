@@ -1,0 +1,40 @@
+ Ventura, CA — NWS Weather TUI                           2:59pm                   [FORECAST] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+      Today Oct 13 │  Wed · Oct 14 │  Thu · Oct 15 │  Fri · Oct 16 │  Sat · Oct 17 │  Sun · Oct 18 │  Mon · Oct 19
+       69° / 57°   │   73° / 60°   │   82° / 64°   │   86° / 67°   │   83° / 63°   │   77° / 61°   │   73° / 55°
+                   │               │               │               │               │               │
+         \   /     │     \   /     │     \   /     │     \   /     │     \   /     │     \   /     │     \   /
+          .-.      │      .-.      │      .-.      │      .-.      │      .-.      │      .-.      │      .-.
+       ― (   ) ―   │   ― (   ) ―   │   ― (   ) ―   │   ― (   ) ―   │   ― (   ) ―   │   ― (   ) ―   │   ― (   ) ―
+          `-’      │      `-’      │      `-’      │      `-’      │      `-’      │      `-’      │      `-’
+         /   \     │     /   \     │     /   \     │     /   \     │     /   \     │     /   \     │     /   \
+         Sunny     │     Sunny     │     Sunny     │     Sunny     │     Sunny     │     Sunny     │     Sunny
+                   │               │               │               │               │               │
+          Dry      │      Dry      │      Dry      │      Dry      │      Dry      │      Dry      │      Dry
+       W 10 mph    │ NNW 5–10 mph  │  NNE 10 mph   │ NE 15–25 mph  │  WNW 10 mph   │  SW 5–10 mph  │ WSW 0–10 mph
+                   │               │               │               │               │               │
+                   │               │               │               │               │               │
+     Day           │ Day           │ Day           │ Day           │ Day           │ Day           │ Day
+     Sunny, with a │ Sunny, with a │ Sunny, with a │ Sunny, with a │ Sunny, with a │ Sunny, with a │ Sunny, with a
+     high near 69. │ high near 73. │ high near 82. │ high near 86. │ high near 83. │ high near 77. │ high near 73.
+     West wind     │ North         │ North         │               │               │               │
+     around 10     │ northwest     │ northeast     │ Night         │ Night         │ Night         │ Night
+     mph.          │ wind 5 to 10  │ wind around   │ Mostly clear, │ Mostly clear, │ Mostly clear, │ Mostly clear,
+                   │ mph.          │ 10 mph.       │ with a low    │ with a low    │ with a low    │ with a low
+     Night         │               │               │ around 67.    │ around 63.    │ around 61.    │ around 55.
+     Mostly clear, │ Night         │ Night         │               │               │               │
+     with a low    │ Mostly clear, │ Mostly clear, │               │               │               │
+     around 57.    │ with a low    │ with a low    │               │               │               │
+     North wind 5  │ around 60.    │ around 64.    │               │               │               │
+     to 10 mph.    │ North wind 5  │               │               │               │               │
+                   │ to 10 mph.    │               │               │               │               │
+                   │               │               │               │               │               │
+                   │               │               │               │               │               │
+                   │               │               │               │               │               │
+                   │               │               │               │               │               │
+                   │               │               │               │               │               │
+                   │               │               │               │               │               │
+                   │               │               │               │               │               │
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion  │  l Locate · r Refresh  │  ? Help · q Quit

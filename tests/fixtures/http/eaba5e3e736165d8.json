@@ -1,0 +1,6 @@
+{
+ "content_type": "text/plain;charset=utf-8",
+ "status": 200,
+ "text": "{\n \"extent\": {\n  \"xmin\": -84.820202744500307,\n  \"ymin\": 38.403220965748176,\n  \"xmax\": -80.518703186896033,\n  \"ymax\": 41.977615959801703,\n  \"spatialReference\": {\n   \"wkid\": 4326,\n   \"latestWkid\": 4326\n  }\n }\n}",
+ "url": "https://mapservices.weather.noaa.gov/static/rest/services/nws_reference_maps/nws_reference_map/MapServer/3/query?f=pjson&outSR=4326&returnExtentOnly=true&where=STATE%3D%27OH%27"
+}

@@ -1,0 +1,40 @@
+ Denver, CO — NWS Weather TUI                            3:59pm                    [OUTLOOK] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ No Hazardous Weather Outlook from BOU right now
+ Checked 3:59pm
+
+ Offices issue an outlook when there's hazardous weather to flag in the coming week, so
+ none usually means nothing notable is expected. Press d for the forecaster's current
+ discussion, or a for alerts.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion  │  l Locate · r Refresh  │  ? Help · q Quit

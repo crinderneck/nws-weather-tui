@@ -1,0 +1,48 @@
+{
+ "content_type": "application/json; charset=utf-8",
+ "json": {
+  "current": {
+   "interval": 900,
+   "time": "2026-10-13T14:45",
+   "uv_index": 4.7
+  },
+  "current_units": {
+   "interval": "seconds",
+   "time": "iso8601",
+   "uv_index": ""
+  },
+  "daily": {
+   "time": [
+    "2026-10-13",
+    "2026-10-14",
+    "2026-10-15",
+    "2026-10-16",
+    "2026-10-17",
+    "2026-10-18",
+    "2026-10-19"
+   ],
+   "uv_index_max": [
+    5.9,
+    5.9,
+    5.85,
+    5.8,
+    5.75,
+    5.7,
+    5.6
+   ]
+  },
+  "daily_units": {
+   "time": "iso8601",
+   "uv_index_max": ""
+  },
+  "elevation": 14.0,
+  "generationtime_ms": 0.049591064453125,
+  "latitude": 34.268276,
+  "longitude": -119.29552,
+  "timezone": "America/Los_Angeles",
+  "timezone_abbreviation": "GMT-7",
+  "utc_offset_seconds": -25200
+ },
+ "status": 200,
+ "url": "https://api.open-meteo.com/v1/forecast?latitude=34.2805&longitude=-119.2945&current=uv_index&daily=uv_index_max&timezone=auto"
+}

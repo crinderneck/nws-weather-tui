@@ -1,0 +1,60 @@
+ Ventura, CA — NWS Weather TUI                                                                   2:59pm                                                           [FORECAST] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+         Today · Oct 13      │        Wed · Oct 14       │        Thu · Oct 15       │        Fri · Oct 16       │        Sat · Oct 17       │        Sun · Oct 18       │        Mon · Oct 19
+           69° / 57°         │         73° / 60°         │         82° / 64°         │         86° / 67°         │         83° / 63°         │         77° / 61°         │         73° / 55°
+                             │                           │                           │                           │                           │                           │
+             \   /           │           \   /           │           \   /           │           \   /           │           \   /           │           \   /           │           \   /
+              .-.            │            .-.            │            .-.            │            .-.            │            .-.            │            .-.            │            .-.
+           ― (   ) ―         │         ― (   ) ―         │         ― (   ) ―         │         ― (   ) ―         │         ― (   ) ―         │         ― (   ) ―         │         ― (   ) ―
+              `-’            │            `-’            │            `-’            │            `-’            │            `-’            │            `-’            │            `-’
+             /   \           │           /   \           │           /   \           │           /   \           │           /   \           │           /   \           │           /   \
+             Sunny           │           Sunny           │           Sunny           │           Sunny           │           Sunny           │           Sunny           │           Sunny
+                             │                           │                           │                           │                           │                           │
+              Dry            │            Dry            │            Dry            │            Dry            │            Dry            │            Dry            │            Dry
+           W 10 mph          │      NNW 5 to 10 mph      │        NNE 10 mph         │      NE 15 to 25 mph      │        WNW 10 mph         │      SW 5 to 10 mph       │      WSW 0 to 10 mph
+       ↑7:01am  ↓6:24pm      │     ↑7:02am  ↓6:23pm      │     ↑7:02am  ↓6:22pm      │     ↑7:03am  ↓6:21pm      │     ↑7:04am  ↓6:19pm      │     ↑7:05am  ↓6:18pm      │     ↑7:06am  ↓6:17pm
+                             │                           │                           │                           │                           │                           │
+     Day                     │   Day                     │   Day                     │   Day                     │   Day                     │   Day                     │   Day
+     Sunny, with a high      │   Sunny, with a high      │   Sunny, with a high      │   Sunny, with a high      │   Sunny, with a high      │   Sunny, with a high      │   Sunny, with a high
+     near 69. West wind      │   near 73. North          │   near 82. North          │   near 86.                │   near 83.                │   near 77.                │   near 73.
+     around 10 mph.          │   northwest wind 5 to     │   northeast wind around   │                           │                           │                           │
+                             │   10 mph.                 │   10 mph.                 │   Night                   │   Night                   │   Night                   │   Night
+     Night                   │                           │                           │   Mostly clear, with a    │   Mostly clear, with a    │   Mostly clear, with a    │   Mostly clear, with a
+     Mostly clear, with a    │   Night                   │   Night                   │   low around 67.          │   low around 63.          │   low around 61.          │   low around 55.
+     low around 57. North    │   Mostly clear, with a    │   Mostly clear, with a    │                           │                           │                           │
+     wind 5 to 10 mph.       │   low around 60. North    │   low around 64.          │                           │                           │                           │
+                             │   wind 5 to 10 mph.       │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+                             │                           │                           │                           │                           │                           │
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+     c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · p Pause  │  e Favs · D Dashboard · Esc Back · ? Help · q Quit

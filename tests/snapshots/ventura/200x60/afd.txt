@@ -1,0 +1,60 @@
+ Ventura, CA — NWS Weather TUI                                                                   2:59pm                                                         [DISCUSSION] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Area Forecast Discussion — LOX   Issued Tue Oct 13, 2:07pm
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+ SYNOPSIS ────────────────────────────────────────────────────── │ time winds aloft will be around 40-50 mph. In response,         │ confidence in winds and seas remaining below SCA levels for
+ 13/206 PM.                                                      │ temperatures across the coast and valleys will warm by roughly  │ most of the waters. The only exception is there is a 20-30%
+                                                                 │ 10 degrees each day, peaking Friday with highs in the upper 80s │ chance of E-NE SCA level wind gusts across the outer waters
+ A Santa Ana wind pattern will create much warmer temperatures   │ to mid 90s in most areas. Mountains and deserts will warm as    │ south of the Channel Islands and west to northwest of San
+ this week as well as gusty northeast winds at times, strongest  │ well but by much lower amounts.                                 │ Nicholas Island due to Santa Ana winds during the late night
+ Thursday and Friday. Another significant cool down is likely    │                                                                 │ through morning hours Thursday through Saturday. The highest
+ into next week.                                                 │ The Santa Ana winds will be strongest for most areas Friday but │ chances are on Friday.
+                                                                 │ Thursday likely a close second within the Santa Wind Corridor   │
+ SHORT TERM (TDY-FRI) ────────────────────────────────────────── │ of Los Angeles to Ventura Counties. We could see wind gusts     │ For the Inner Waters north of Point Sal, moderate to high
+ 13/206 PM.                                                      │ into the 60s and 70s in the most favored exposed areas of the   │ confidence in current forecast. Through Wednesday, there is a
+                                                                 │ San Gabriel Mountains. Widespread peak gusts of 35-55 mph are   │ 30% chance of SCA level winds in the afternoon and evening
+ HIGH CONFIDENCE in a MODERATE TO STRONG SANTA ANA event peaking │ expected within the Wind Advisory. Gusty east winds of 30-40    │ hours. Otherwise expect conds to remain below SCA levels.
+ this Thursday and Friday with damaging wind, power outages and  │ mph may expand into interior Santa Barbara and San Luis Obispo  │
+ large fast moving fires possible in the region. HIGH WIND       │ mountains into Friday and is covered by the Fire Weather Watch. │ For the Inner Waters south of Point Conception, moderate
+ WATCHES, Wind Advisories and Red Flag Warnings cover the        │                                                                 │ confidence in current forecast. Through Wednesday, high
+ typical Santa Ana Wind Corridor in Los Angeles to Ventura       │ LONG TERM (SAT-TUE) ─────────────────────────────────────────── │ confidence in winds and seas remaining below SCA levels for
+ County for Thursday and Friday. A Fire Weather Watch is also in │ 13/206 PM.                                                      │ most area, but the only exception is the western half of the
+ effect Friday for the Santa Barbara and San Luis Obispo         │                                                                 │ Santa Barbara Channel where there is a 50% chance of SCA level
+ interior mountains. A Heat Advisory is also in effect Thursday  │ One more day of gusty Santa Ana winds are possible (30-40       │ winds this afternoon and evening. Thursday through Saturday,
+ through Saturday for Coastal areas with highs up to 95 degrees. │ percent chance of reaching advisory levels) into Saturday,      │ there is a 40-60% chance of SCA level northeast winds from
+ See weather.gov/lox to view individual product details.         │ taking on a more easterly orientation.                          │ Ventura south to Santa Monica and out past Anacapa Island and
+                                                                 │                                                                 │ possibly from the Orange County Coast out to Catalina Island,
+ Some actions to consider with the upcoming wind/heat/fire       │ Temperatures are expected to remain well above normal through   │ strongest during the late night into early afternoon hours.
+ weather hazards:                                                │ Sunday, but rapidly cool into early next week. And looking out  │
+                                                                 │ a little further there is fairly high agreement in the models   │ Long period swells from the west and the south are affecting
+ Have a plan in place in the case of a power outage, especially  │ that another cold upper low will move into the area the middle  │ the coastal waters, and can create a confused sea state. This
+ if a wind or fire weather product is in effect in your area.    │ of next week, for another big swing into temperatures and       │ can make boating more challenging and dangerous, especially for
+                                                                 │ weather conditions. It looks like mainly a dry system at this   │ small vessels.
+ Secure loose outdoor items and be prepare for dangerous cross   │ point, but there is a 30-40 percent chance that it tracks just  │
+ winds when driving, especially on elevated roadways.            │ enough offshore to support some shower activity. The much       │ BEACHES ───────────────────────────────────────────────────────
+                                                                 │ cooler weather will arrive on gusty northwest to west winds     │ 13/105 PM.
+ In the event of a nearby wildfire, smoke may increase heat and  │ focused in the Tuesday/Wednesday window.                        │
+ physical stress. If smoke impacts your area; 1) Have a cooling  │                                                                 │ While the peak timing for the most impactful coastal flooding
+ plan in place as smoke could limit your ability to cool your    │ AVIATION ────────────────────────────────────────────────────── │ has passed, there is still a threat of minor coastal flooding,
+ home through open windows and 2) If you have air conditioning,  │ 13/1804Z.                                                       │ mainly minor tidal overflow, into Thursday afternoon due to
+ set on air recirculation within the home to avoid smoke         │                                                                 │ continued high tides and elevated surf. The highest tides will
+ exposure. Local officials may have additional guidance.         │ At 1736Z at KLAX, there was no marine layer nor inversion.      │ occur during the mornings and range from 6.5 to 7.0 feet, with
+                                                                 │                                                                 │ secondary high tides during the evening (around 5 feet). As for
+ Forecast details: The forecast through this weekend remains     │ High confidence in TAFs.                                        │ elevated surf, a long period southerly swell and long period
+ largely unchanged. A low pressure system is moving slowly       │                                                                 │ westerly swell will impact the coastal waters the next several
+ through the Great Basin through Wednesday. That will set the    │ KLAX...High confidence in TAF. Any E wind component expected to │ days.
+ stage for a developing Santa Ana wind event across portions of  │ remain below 7 kt.                                              │
+ southern California this week as high pressure over the Great   │                                                                 │ A Beach Hazards Statement is in effect into Thursday afternoon
+ Basin forces winds up and over the mountains and down into the  │ KBUR...High confidence in TAF.                                  │ for the LA/Ventura County Beaches.
+ valleys and coastal areas. The rapid acceleration of the air    │                                                                 │
+ into increasingly higher pressure at lower elevations will      │ MARINE ──────────────────────────────────────────────────────── │ Please continue to monitor the forecast and refer to the
+ force the air to heat up significantly (per the gas law). Will  │ 13/107 PM.                                                      │ Coastal Hazard Product (CFWLOX) for more information.
+ start to see this process as early as today as the upper low    │                                                                 │
+ advances to the southeast, allowing the transport of air from   │ For the Outer Waters, moderate to high confidence in current    │ FIRE WEATHER ──────────────────────────────────────────────────
+ the north to begin. Latest models show just a very light north- │ forecast. For the afternoon and evening periods through         │ 13/1019 AM.
+ northeast wind developing over the mountains today and tonight, │ Wednesday, there is a 40-60% chance of SCA level winds around   │
+ then increasing in speeds each day through Friday, by which     │ Point Conception. For Thursday through Saturday, high           │ Offshore flow will steadily increase each day through Thursday
+ Page 1/2 · j/k ↑↓ turn page · continued →
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+     c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · p Pause  │  e Favs · D Dashboard · Esc Back · ? Help · q Quit

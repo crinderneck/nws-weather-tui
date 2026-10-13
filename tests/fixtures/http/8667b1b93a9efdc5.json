@@ -1,0 +1,117 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": [
+   "https://geojson.org/geojson-ld/geojson-context.jsonld",
+   {
+    "@version": "1.1",
+    "@vocab": "https://api.weather.gov/ontology#",
+    "bearing": {
+     "@type": "s:QuantitativeValue"
+    },
+    "city": "s:addressLocality",
+    "county": {
+     "@type": "@id"
+    },
+    "distance": {
+     "@id": "s:Distance",
+     "@type": "s:QuantitativeValue"
+    },
+    "forecastGridData": {
+     "@type": "@id"
+    },
+    "forecastOffice": {
+     "@type": "@id"
+    },
+    "geo": "http://www.opengis.net/ont/geosparql#",
+    "geometry": {
+     "@id": "s:GeoCoordinates",
+     "@type": "geo:wktLiteral"
+    },
+    "publicZone": {
+     "@type": "@id"
+    },
+    "s": "https://schema.org/",
+    "state": "s:addressRegion",
+    "unit": "http://codes.wmo.int/common/unit/",
+    "unitCode": {
+     "@id": "s:unitCode",
+     "@type": "@id"
+    },
+    "value": {
+     "@id": "s:value"
+    },
+    "wx": "https://api.weather.gov/ontology#"
+   }
+  ],
+  "geometry": {
+   "coordinates": [
+    -82.9988,
+    39.9612
+   ],
+   "type": "Point"
+  },
+  "id": "https://api.weather.gov/points/39.9612,-82.9988",
+  "properties": {
+   "@id": "https://api.weather.gov/points/39.9612,-82.9988",
+   "@type": "wx:Point",
+   "astronomicalData": {
+    "astronomicalTwilightBegin": "2026-10-13T06:10:47-04:00",
+    "astronomicalTwilightEnd": "2026-10-13T20:25:33-04:00",
+    "civilTwilightBegin": "2026-10-13T07:13:29-04:00",
+    "civilTwilightEnd": "2026-10-13T19:22:50-04:00",
+    "nauticalTwilightBegin": "2026-10-13T06:42:07-04:00",
+    "nauticalTwilightEnd": "2026-10-13T19:54:12-04:00",
+    "sunrise": "2026-10-13T07:40:36-04:00",
+    "sunset": "2026-10-13T18:55:44-04:00",
+    "transit": "2026-10-13T13:18:10-04:00"
+   },
+   "county": "https://api.weather.gov/zones/county/OHC049",
+   "cwa": "ILN",
+   "fireWeatherZone": "https://api.weather.gov/zones/fire/OHZ055",
+   "forecast": "https://api.weather.gov/gridpoints/ILN/85,81/forecast",
+   "forecastGridData": "https://api.weather.gov/gridpoints/ILN/85,81",
+   "forecastHourly": "https://api.weather.gov/gridpoints/ILN/85,81/forecast/hourly",
+   "forecastOffice": "https://api.weather.gov/offices/ILN",
+   "forecastZone": "https://api.weather.gov/zones/forecast/OHZ055",
+   "gridId": "ILN",
+   "gridX": 85,
+   "gridY": 81,
+   "nwr": {
+    "areaBroadcast": "https://api.weather.gov/radio/KIG86/broadcast",
+    "pointBroadcast": "https://api.weather.gov/points/39.9612,-82.9988/radio",
+    "sameCode": "039049",
+    "transmitter": "KIG86"
+   },
+   "observationStations": "https://api.weather.gov/gridpoints/ILN/85,81/stations",
+   "radarStation": "KILN",
+   "relativeLocation": {
+    "geometry": {
+     "coordinates": [
+      -82.985594,
+      39.9855308
+     ],
+     "type": "Point"
+    },
+    "properties": {
+     "bearing": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 0
+     },
+     "city": "Columbus",
+     "distance": {
+      "unitCode": "wmoUnit:m",
+      "value": 0
+     },
+     "state": "OH"
+    },
+    "type": "Feature"
+   },
+   "timeZone": "America/New_York",
+   "type": "land"
+  },
+  "type": "Feature"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/points/39.9612,-82.9988"
+}

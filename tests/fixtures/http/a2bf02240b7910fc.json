@@ -1,0 +1,48 @@
+{
+ "content_type": "application/json; charset=utf-8",
+ "json": {
+  "current": {
+   "interval": 900,
+   "time": "2026-10-13T15:45",
+   "uv_index": 3.15
+  },
+  "current_units": {
+   "interval": "seconds",
+   "time": "iso8601",
+   "uv_index": ""
+  },
+  "daily": {
+   "time": [
+    "2026-10-13",
+    "2026-10-14",
+    "2026-10-15",
+    "2026-10-16",
+    "2026-10-17",
+    "2026-10-18",
+    "2026-10-19"
+   ],
+   "uv_index_max": [
+    5.35,
+    0.45,
+    2.2,
+    5.3,
+    5.3,
+    4.9,
+    4.95
+   ]
+  },
+  "daily_units": {
+   "time": "iso8601",
+   "uv_index_max": ""
+  },
+  "elevation": 1599.0,
+  "generationtime_ms": 0.045418739318847656,
+  "latitude": 39.746895,
+  "longitude": -104.987076,
+  "timezone": "America/Denver",
+  "timezone_abbreviation": "GMT-6",
+  "utc_offset_seconds": -21600
+ },
+ "status": 200,
+ "url": "https://api.open-meteo.com/v1/forecast?latitude=39.7392&longitude=-104.9903&current=uv_index&daily=uv_index_max&timezone=auto"
+}

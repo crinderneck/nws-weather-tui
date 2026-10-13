@@ -1,0 +1,40 @@
+ Denver, CO — NWS Weather TUI                            3:59pm                       [HELP] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Views ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ c         Current conditions, radar and today's forecast
+ f         Forecast — a column per day; ←/→ scroll when they don't all fit
+ h         Hourly — highlights, condition ribbon, a column per day on wide screens
+ a         Active alerts for this location
+ m         Moon phase, rise/set and upcoming phases
+ d         Area Forecast Discussion — forecaster narrative in columns
+ H         Hazardous Weather Outlook — the office's 7-day heads-up
+ D         Favorites dashboard — every favorite at a glance
+ ?         This help
+
+ Navigation ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+ j / k     Scroll down / up (turns the page on Discussion)
+ ↓ / ↑     Same as j / k
+ PgDn/PgUp Scroll by 10 lines
+ G         Jump to the end
+ Esc       Back to current conditions
+
+ Actions ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ l         Search location (city/state, ZIP, or lat,lon)
+ r         Refresh now
+ u         Toggle US / SI units
+ t         Toggle 12h / 24h clock
+ p         Pause / resume auto-refresh
+ F         Save / remove the current location as a favorite
+ n / b     Next / previous favorite
+ e         Open the favorites editor
+ q         Quit
+
+ Favorites editor (e) ────────────────────────────────────────────────────────────────────────────────────────────────
+ j / k     Move the cursor
+ J / K     Move the selected favorite up / down
+ Enter     Jump to the selected favorite
+ a         Add a favorite (search by city/ZIP)
+ lines 1–34 of 61 · j/k ↑↓ scroll
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion  │  l Locate · r Refresh  │  ? Help · q Quit

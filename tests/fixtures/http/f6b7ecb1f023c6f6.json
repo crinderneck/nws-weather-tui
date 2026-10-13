@@ -1,0 +1,40 @@
+{
+ "content_type": "application/json; charset=utf-8",
+ "json": {
+  "current": {
+   "interval": 3600,
+   "pm10": 4.5,
+   "pm2_5": 4.0,
+   "time": "2026-10-13T21:00",
+   "us_aqi": 31,
+   "us_aqi_co": 1,
+   "us_aqi_no2": 2,
+   "us_aqi_ozone": 17,
+   "us_aqi_pm10": 6,
+   "us_aqi_pm2_5": 31,
+   "us_aqi_so2": 0
+  },
+  "current_units": {
+   "interval": "seconds",
+   "pm10": "\u03bcg/m\u00b3",
+   "pm2_5": "\u03bcg/m\u00b3",
+   "time": "iso8601",
+   "us_aqi": "USAQI",
+   "us_aqi_co": "USAQI",
+   "us_aqi_no2": "USAQI",
+   "us_aqi_ozone": "USAQI",
+   "us_aqi_pm10": "USAQI",
+   "us_aqi_pm2_5": "USAQI",
+   "us_aqi_so2": "USAQI"
+  },
+  "elevation": 1599.0,
+  "generationtime_ms": 0.4521608352661133,
+  "latitude": 39.699997,
+  "longitude": -105.0,
+  "timezone": "GMT",
+  "timezone_abbreviation": "GMT",
+  "utc_offset_seconds": 0
+ },
+ "status": 200,
+ "url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=39.7392&longitude=-104.9903&current=us_aqi,pm2_5,pm10,us_aqi_pm2_5,us_aqi_pm10,us_aqi_ozone,us_aqi_no2,us_aqi_so2,us_aqi_co"
+}

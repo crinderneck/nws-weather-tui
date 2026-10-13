@@ -1,0 +1,24 @@
+ Columbus, OH — NWS Weather TUI         [DISCUSSION] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────
+
+ Area Forecast Discussion — ILN   Issued Tue Oct 13, 2:03pm
+ ═════════════════════════════════════════════════════════════════════════════
+ WHAT HAS CHANGED ────────────────────────────────────────────────────────────
+ No significant changes.
+
+ KEY MESSAGES ────────────────────────────────────────────────────────────────
+ 1) An active weather pattern is expected from Wednesday through Friday, which
+ will bring the potential for strong storms, heavy rainfall, and gusty winds.
+
+ 2) Cooler weather and frost possible this weekend.
+
+ DISCUSSION ──────────────────────────────────────────────────────────────────
+ Key Message 1)
+
+ A more active weather pattern will develop Wednesday and continue into
+ Friday. Mid level ridging currently in place across the region will begin to
+ break down tonight into Wednesday as some mid level energy moves out of the
+ mid Mississippi Valley and into the Ohio Valley. This will allow for a weak
+ Scroll: 1/74 (j/k ↑↓)
+───────────────────────────────────────────────────────────────────────────────
+ c Current · f Forecast · h Hourly · a Alerts  │  l Locate  │  ? Help · q Quit

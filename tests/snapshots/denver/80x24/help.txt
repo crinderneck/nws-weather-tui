@@ -1,0 +1,24 @@
+ Denver, CO — NWS Weather TUI        3:59pm   [HELP] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────
+
+ Views ───────────────────────────────────────────────────────────────────────
+ c         Current conditions, radar and today's forecast
+ f         Forecast — a column per day; ←/→ scroll when they don't all fit
+ h         Hourly — highlights, condition ribbon, a column per day on wide
+           screens
+ a         Active alerts for this location
+ m         Moon phase, rise/set and upcoming phases
+ d         Area Forecast Discussion — forecaster narrative in columns
+ H         Hazardous Weather Outlook — the office's 7-day heads-up
+ D         Favorites dashboard — every favorite at a glance
+ ?         This help
+
+ Navigation ──────────────────────────────────────────────────────────────────
+ j / k     Scroll down / up (turns the page on Discussion)
+ ↓ / ↑     Same as j / k
+ PgDn/PgUp Scroll by 10 lines
+ G         Jump to the end
+ Esc       Back to current conditions
+ lines 1–18 of 63 · j/k ↑↓ scroll
+───────────────────────────────────────────────────────────────────────────────
+ c Current · f Forecast · h Hourly · a Alerts  │  l Locate  │  ? Help · q Quit

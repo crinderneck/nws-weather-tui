@@ -1,0 +1,383 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": [
+   "https://geojson.org/geojson-ld/geojson-context.jsonld",
+   {
+    "@version": "1.1",
+    "@vocab": "https://api.weather.gov/ontology#",
+    "wx": "https://api.weather.gov/ontology#"
+   }
+  ],
+  "features": [
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.f3181b0e8a5a2c3b042e0aa663aaaa8d1a5d37a4.002.1",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.f3181b0e8a5a2c3b042e0aa663aaaa8d1a5d37a4.002.1",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/fire/CAZ088",
+      "https://api.weather.gov/zones/fire/CAZ354",
+      "https://api.weather.gov/zones/fire/CAZ355",
+      "https://api.weather.gov/zones/fire/CAZ358",
+      "https://api.weather.gov/zones/fire/CAZ362",
+      "https://api.weather.gov/zones/fire/CAZ371",
+      "https://api.weather.gov/zones/fire/CAZ372",
+      "https://api.weather.gov/zones/fire/CAZ373",
+      "https://api.weather.gov/zones/fire/CAZ374",
+      "https://api.weather.gov/zones/fire/CAZ548"
+     ],
+     "areaDesc": "Ventura County Beaches; Ventura County Inland Coast; Central Ventura County Valleys; Malibu Coast; Calabasas and Agoura Hills; Western San Fernando Valley; Eastern San Fernando Valley; Southeastern Ventura County Valleys; Los Angeles County San Gabriel Valley",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "***CORRECTED HEADLINE FOR SANTA BARBARA AND SAN LUIS OBISPO\nCOUNTIES***\n\n...HIGH RISK FOR EXTREME FIRE BEHAVIOR WITH ANY NEW FIRE STARTS\nTHURSDAY THROUGH FRIDAY DUE TO MODERATE TO LOCALLY STRONG SANTA\nANA WINDS AND LOW RELATIVE HUMIDITY...\n\n.Moderate to locally strong Santa Ana winds will quickly develop\non Thursday, peak Thursday afternoon through Friday afternoon,\nthen weaken through the weekend. Meanwhile, dry air will settle\nover the region and dry out any helpful effects of the recent\nrains. The previous Fire Weather Watches were upgraded to Red\nFlag Warnings. Some of the windiest areas may see Red Flag\nconditions linger into Saturday. As the winds expand Thursday\nNight into Friday, Red Flag conditions may form over the interior\nmountains of Santa Barbara and San Luis Obispo Counties on\nFriday, where a Fire Weather Watch is now in effect.\n\n* AFFECTED AREA...Most valleys and coasts of Los Angeles and\nVentura Counties.\n\n* TIMING...From 6 AM Thursday to 10 PM PDT Friday.\n\n* WINDS...Northeast to east 20 to 30 mph with gusts of 40 to 50\nmph. Isolated gusts of 50 to 60 mph possible in the hills.\n\n* RELATIVE HUMIDITY...Minimums of 5 to 15 percent common.\n\n* IMPACTS...If fire ignition occurs, conditions are favorable\nfor extreme fire behavior which would threaten life and\nproperty.",
+     "effective": "2026-10-13T14:38:00-07:00",
+     "ends": "2026-10-16T22:00:00-07:00",
+     "event": "Red Flag Warning",
+     "eventCode": {
+      "NationalWeatherService": [
+       "FWW"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-14T15:00:00-07:00",
+     "geocode": {
+      "SAME": [
+       "006111",
+       "006037"
+      ],
+      "UGC": [
+       "CAZ088",
+       "CAZ354",
+       "CAZ355",
+       "CAZ358",
+       "CAZ362",
+       "CAZ371",
+       "CAZ372",
+       "CAZ373",
+       "CAZ374",
+       "CAZ548"
+      ]
+     },
+     "headline": "Red Flag Warning issued October 13 at 2:38PM PDT until October 16 at 10:00PM PDT by NWS Los Angeles/Oxnard CA",
+     "id": "urn:oid:2.49.0.1.840.0.f3181b0e8a5a2c3b042e0aa663aaaa8d1a5d37a4.002.1",
+     "instruction": "A Red Flag Warning means that critical fire weather conditions\nare either occurring now, or will shortly. Use extreme caution\nwith anything that can spark a wildfire. Residents near wildland\ninterfaces should be prepared to evacuate if a wildfire breaks\nout. See readyforwildfire.org and wildfirerisk.org for\ninformation.",
+     "language": "en-US",
+     "messageType": "Update",
+     "note": null,
+     "onset": "2026-10-15T06:00:00-07:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "RFWLOX"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "RED FLAG WARNING REMAINS IN EFFECT FROM 6 AM THURSDAY TO 10 PM PDT FRIDAY FOR WIND AND LOW RELATIVE HUMIDITY FOR MOST VALLEYS AND COASTS OF LOS ANGELES AND VENTURA COUNTIES"
+      ],
+      "VTEC": [
+       "/O.CON.KLOX.FW.W.0005.261015T1300Z-261017T0500Z/"
+      ],
+      "WMOidentifier": [
+       "WWUS86 KLOX 132138 AAB"
+      ],
+      "eventEndingTime": [
+       "2026-10-16T22:00:00-07:00"
+      ]
+     },
+     "references": [
+      {
+       "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.d7644b38a9cd245f0a9eb34d57b97a36b3983615.002.2",
+       "identifier": "urn:oid:2.49.0.1.840.0.d7644b38a9cd245f0a9eb34d57b97a36b3983615.002.2",
+       "sender": "w-nws.webmaster@noaa.gov",
+       "sent": "2026-10-13T13:43:00-07:00"
+      },
+      {
+       "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.5756e1dea16eee6767839fdb95f031f35e142dbf.002.1",
+       "identifier": "urn:oid:2.49.0.1.840.0.5756e1dea16eee6767839fdb95f031f35e142dbf.002.1",
+       "sender": "w-nws.webmaster@noaa.gov",
+       "sent": "2026-10-13T13:49:00-07:00"
+      }
+     ],
+     "response": "Prepare",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Los Angeles/Oxnard CA",
+     "sent": "2026-10-13T14:38:00-07:00",
+     "severity": "Severe",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.28f7c717e113b2f93a42fa7737e76322f3fbe8cf.001.1",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.28f7c717e113b2f93a42fa7737e76322f3fbe8cf.001.1",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/forecast/CAZ354"
+     ],
+     "areaDesc": "Ventura County Beaches",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "* WHAT...Minor tidal overflow during times of high tides,\ndangerous rip currents, and elevated surf.\n\n* WHERE...Ventura County Beaches.\n\n* WHEN...For the Beach Hazards Statement, through Thursday\nafternoon. For the Coastal Flood Advisory, until 2 PM PDT this\nafternoon.\n\n* IMPACTS...Minor flooding of sea water is likely around high\ntide at low-lying beach and harbor areas that is uncommon with\nnormal tidal ranges. Enhanced beach erosion is possible. The\nrisk for significant damage is very low. There is an increased\nrisk of ocean drowning. Rip currents can pull swimmers and\nsurfers out to sea. Waves can wash people off beaches and rocks,\nand capsize small boats nearshore.\n\n* ADDITIONAL DETAILS...Minor tidal overflow during morning high\ntides of 6.5 to 7.0 feet.",
+     "effective": "2026-10-13T13:27:00-07:00",
+     "ends": "2026-10-15T14:00:00-07:00",
+     "event": "Beach Hazards Statement",
+     "eventCode": {
+      "NationalWeatherService": [
+       "BHS"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-13T21:30:00-07:00",
+     "geocode": {
+      "SAME": [
+       "006111"
+      ],
+      "UGC": [
+       "CAZ354"
+      ]
+     },
+     "headline": "Beach Hazards Statement issued October 13 at 1:27PM PDT until October 15 at 2:00PM PDT by NWS Los Angeles/Oxnard CA",
+     "id": "urn:oid:2.49.0.1.840.0.28f7c717e113b2f93a42fa7737e76322f3fbe8cf.001.1",
+     "instruction": "Take the necessary actions to protect flood-prone property. Do\nNOT drive around barricades or through water of unknown depth.\n\nRemain out of the water due to hazardous swimming conditions, or\nstay near occupied lifeguard towers. Rock jetties can be deadly\nin such conditions, stay off the rocks.",
+     "language": "en-US",
+     "messageType": "Update",
+     "note": null,
+     "onset": "2026-10-13T13:27:00-07:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "CFWLOX"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "BEACH HAZARDS STATEMENT NOW IN EFFECT THROUGH THURSDAY AFTERNOON... ...COASTAL FLOOD ADVISORY REMAINS IN EFFECT UNTIL 2 PM PDT THIS AFTERNOON"
+      ],
+      "VTEC": [
+       "/O.EXT.KLOX.BH.S.0021.000000T0000Z-261015T2100Z/"
+      ],
+      "WMOidentifier": [
+       "WHUS46 KLOX 132027"
+      ],
+      "eventEndingTime": [
+       "2026-10-15T14:00:00-07:00"
+      ],
+      "expiredReferences": [
+       "w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.bcfea7ad61c39a655fb8d85c1df112a489a37963.001.2,2026-10-12T20:40:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.449d6e67dc756e487002fa43b4e9d5087af1b30c.003.2,2026-10-12T20:19:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.286b9773a6bcd3d60e50b709cf2a2aeebe17db79.002.2,2026-10-12T13:04:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.5b105d7c443001cbf397ebef6cd1430206c13576.002.2,2026-10-12T09:33:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.63ec919b71348b386f9f441a8dff859581a9f79d.002.1,2026-10-11T21:02:00-07:00"
+      ]
+     },
+     "references": [
+      {
+       "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.f803fea8df469b64695c02e596e3bb39dfeb198a.001.2",
+       "identifier": "urn:oid:2.49.0.1.840.0.f803fea8df469b64695c02e596e3bb39dfeb198a.001.2",
+       "sender": "w-nws.webmaster@noaa.gov",
+       "sent": "2026-10-13T08:39:00-07:00"
+      }
+     ],
+     "response": "Avoid",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Los Angeles/Oxnard CA",
+     "sent": "2026-10-13T13:27:00-07:00",
+     "severity": "Moderate",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.8a368c9d42ef1e1b52e1e249676078ee2bb68528.001.2",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.8a368c9d42ef1e1b52e1e249676078ee2bb68528.001.2",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/forecast/CAZ354",
+      "https://api.weather.gov/zones/forecast/CAZ355",
+      "https://api.weather.gov/zones/forecast/CAZ362"
+     ],
+     "areaDesc": "Ventura County Beaches; Ventura County Inland Coast; Malibu Coast",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "* WHAT...For the Wind Advisory, northeast winds 20 to 30 mph with\ngusts of 35 to 55 mph expected. For the Heat Advisory, temperatures\nup to 95 expected.\n\n* WHERE...Malibu Coast, Ventura County Beaches, and Ventura County\nInland Coast.\n\n* WHEN...For the Wind Advisory, from 6 AM Thursday to 8 PM PDT\nFriday. For the Heat Advisory, from 10 AM Thursday to 8 PM PDT\nSaturday.\n\n* IMPACTS...Gusty winds will blow around unsecured objects. Tree\nlimbs could be blown down and a few power outages may result. Hot\ntemperatures may cause heat illnesses.",
+     "effective": "2026-10-13T11:21:00-07:00",
+     "ends": "2026-10-17T20:00:00-07:00",
+     "event": "Heat Advisory",
+     "eventCode": {
+      "NationalWeatherService": [
+       "HTY"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-17T20:00:00-07:00",
+     "geocode": {
+      "SAME": [
+       "006111",
+       "006037"
+      ],
+      "UGC": [
+       "CAZ354",
+       "CAZ355",
+       "CAZ362"
+      ]
+     },
+     "headline": "Heat Advisory issued October 13 at 11:21AM PDT until October 17 at 8:00PM PDT by NWS Los Angeles/Oxnard CA",
+     "id": "urn:oid:2.49.0.1.840.0.8a368c9d42ef1e1b52e1e249676078ee2bb68528.001.2",
+     "instruction": "Drink plenty of fluids, stay in an air-conditioned room, stay out of\nthe sun, and check up on relatives and neighbors.\n\nWinds this strong can make driving difficult, especially for high\nprofile vehicles. Use extra caution.\n\nIn the event of a nearby wildfire, smoke may increase heat and\nphysical stress. If smoke impacts your area; 1) Have a cooling plan\nin place as smoke could limit your ability to cool your home through\nopen windows and 2) If you have air conditioning, set on air\nrecirculation within the home to avoid smoke exposure. Local\nofficials may have additional guidance.",
+     "language": "en-US",
+     "messageType": "Update",
+     "note": null,
+     "onset": "2026-10-15T10:00:00-07:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "NPWLOX"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "WIND ADVISORY IN EFFECT FROM 6 AM THURSDAY TO 8 PM PDT FRIDAY... ...HEAT ADVISORY REMAINS IN EFFECT FROM 10 AM THURSDAY TO 8 PM PDT SATURDAY"
+      ],
+      "VTEC": [
+       "/O.CON.KLOX.HT.Y.0019.261015T1700Z-261018T0300Z/"
+      ],
+      "WMOidentifier": [
+       "WWUS76 KLOX 131821"
+      ],
+      "eventEndingTime": [
+       "2026-10-17T20:00:00-07:00"
+      ]
+     },
+     "references": [
+      {
+       "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.da3e3a35861c5a51e1591a1419e8436ddcd1b7f7.001.1",
+       "identifier": "urn:oid:2.49.0.1.840.0.da3e3a35861c5a51e1591a1419e8436ddcd1b7f7.001.1",
+       "sender": "w-nws.webmaster@noaa.gov",
+       "sent": "2026-10-13T10:17:00-07:00"
+      }
+     ],
+     "response": "Execute",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Los Angeles/Oxnard CA",
+     "sent": "2026-10-13T11:21:00-07:00",
+     "severity": "Moderate",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   },
+   {
+    "geometry": null,
+    "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.8a368c9d42ef1e1b52e1e249676078ee2bb68528.001.1",
+    "properties": {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.8a368c9d42ef1e1b52e1e249676078ee2bb68528.001.1",
+     "@type": "wx:Alert",
+     "affectedZones": [
+      "https://api.weather.gov/zones/forecast/CAZ354",
+      "https://api.weather.gov/zones/forecast/CAZ355",
+      "https://api.weather.gov/zones/forecast/CAZ362"
+     ],
+     "areaDesc": "Ventura County Beaches; Ventura County Inland Coast; Malibu Coast",
+     "category": "Met",
+     "certainty": "Likely",
+     "code": "IPAWSv1.0",
+     "description": "* WHAT...For the Wind Advisory, northeast winds 20 to 30 mph with\ngusts of 35 to 55 mph expected. For the Heat Advisory, temperatures\nup to 95 expected.\n\n* WHERE...Malibu Coast, Ventura County Beaches, and Ventura County\nInland Coast.\n\n* WHEN...For the Wind Advisory, from 6 AM Thursday to 8 PM PDT\nFriday. For the Heat Advisory, from 10 AM Thursday to 8 PM PDT\nSaturday.\n\n* IMPACTS...Gusty winds will blow around unsecured objects. Tree\nlimbs could be blown down and a few power outages may result. Hot\ntemperatures may cause heat illnesses.",
+     "effective": "2026-10-13T11:21:00-07:00",
+     "ends": "2026-10-16T20:00:00-07:00",
+     "event": "Wind Advisory",
+     "eventCode": {
+      "NationalWeatherService": [
+       "WIY"
+      ],
+      "SAME": [
+       "NWS"
+      ]
+     },
+     "expires": "2026-10-17T20:00:00-07:00",
+     "geocode": {
+      "SAME": [
+       "006111",
+       "006037"
+      ],
+      "UGC": [
+       "CAZ354",
+       "CAZ355",
+       "CAZ362"
+      ]
+     },
+     "headline": "Wind Advisory issued October 13 at 11:21AM PDT until October 16 at 8:00PM PDT by NWS Los Angeles/Oxnard CA",
+     "id": "urn:oid:2.49.0.1.840.0.8a368c9d42ef1e1b52e1e249676078ee2bb68528.001.1",
+     "instruction": "Drink plenty of fluids, stay in an air-conditioned room, stay out of\nthe sun, and check up on relatives and neighbors.\n\nWinds this strong can make driving difficult, especially for high\nprofile vehicles. Use extra caution.\n\nIn the event of a nearby wildfire, smoke may increase heat and\nphysical stress. If smoke impacts your area; 1) Have a cooling plan\nin place as smoke could limit your ability to cool your home through\nopen windows and 2) If you have air conditioning, set on air\nrecirculation within the home to avoid smoke exposure. Local\nofficials may have additional guidance.",
+     "language": "en-US",
+     "messageType": "Alert",
+     "note": null,
+     "onset": "2026-10-15T06:00:00-07:00",
+     "parameters": {
+      "AWIPSidentifier": [
+       "NPWLOX"
+      ],
+      "BLOCKCHANNEL": [
+       "EAS",
+       "NWEM",
+       "CMAS"
+      ],
+      "NWSheadline": [
+       "WIND ADVISORY IN EFFECT FROM 6 AM THURSDAY TO 8 PM PDT FRIDAY... ...HEAT ADVISORY REMAINS IN EFFECT FROM 10 AM THURSDAY TO 8 PM PDT SATURDAY"
+      ],
+      "VTEC": [
+       "/O.NEW.KLOX.WI.Y.0068.261015T1300Z-261017T0300Z/"
+      ],
+      "WMOidentifier": [
+       "WWUS76 KLOX 131821"
+      ],
+      "eventEndingTime": [
+       "2026-10-16T20:00:00-07:00"
+      ]
+     },
+     "references": [],
+     "response": "Execute",
+     "scope": "Public",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "senderName": "NWS Los Angeles/Oxnard CA",
+     "sent": "2026-10-13T11:21:00-07:00",
+     "severity": "Moderate",
+     "status": "Actual",
+     "urgency": "Expected",
+     "web": "http://www.weather.gov"
+    },
+    "type": "Feature"
+   }
+  ],
+  "title": "Current watches, warnings, and advisories for 34.2805 N, 119.2945 W",
+  "type": "FeatureCollection",
+  "updated": "2026-10-13T21:57:19+00:00"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/alerts/active?point=34.2805,-119.2945"
+}

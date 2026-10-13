@@ -1,0 +1,60 @@
+ Denver, CO — NWS Weather TUI                                                                    3:59pm                                                             [HOURLY] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Next 156 hours  Tue 3pm → Tue 2am
+
+  Precip  Rain likely 6pm–Thu 5pm · peak 95% at Wed 12pm · 0.75 in
+    Wind  Gusty Thu 9am–5pm · up to 35 mph at Thu 1pm
+   Feels  Up to 7° colder than the air Wed 3am–Thu 10pm (wind chill)
+     Air  Comfortable — dew point 47° or lower
+     Sky  Clearing around Fri 12am (23% cover)
+
+                      now      Wed                     Thu                     Fri                     Sat                     Sun                     Mon                     Tue
+                      ▒▒▒▓▓▓▓▓▓████████████████████████▓▓▓▓▓▓██████▓▓▓▓▓▓▒▒▒▒▒▒······▀▀▀▀▀▀▀▀▀▀▀▀············▀▀▀▀▀▀▀▀▀▀▀▀············░░░░░░▀▀▀▀▀▀░░░░░░······▀▀▀▀▀▀▀▀▀▀▀▀·········
+                                                                     ▀ sun  ░ partly  ▒ cloudy  · clear night  ▓█ precip  █ storms
+
+       │Today · Oct 13        │Tomorrow · Oct 14     │Thursday · Oct 15     │Friday · Oct 16       │Saturday · Oct 17     │Sunday · Oct 18       │Monday · Oct 19       │Tuesday · Oct 20
+       │60°/51° 58%           │50°/44° 95%           │49°/40° 72%           │62°/35°               │73°/37°               │70°/46°               │72°/44°               │53°/49°
+  12am │                      │ ☔  50°  80%▆ NE 5   │ ☔  43°  57%▅ N 6    │ ☁☾  41°       W 3    │ ☁☾  43°       SSW 3  │ ☁☾  50°       SW 5   │ ☁☾  50°       SSW 2  │ ☁☾  53°       SSW 5
+   1am │                      │ ☔  50°  80%▆ NE 6   │ ☔  44°  57%▅ N 6    │ ☁☾  40°       W 3    │ ☁☾  41°       SSW 3  │ ☁☾  49°       SW 5   │ ☁☾  48°       SW 2   │ ☁☾  51°       SSW 5
+   2am │                      │ ☔  49°  80%▆ NE 6   │ ☔  44°  57%▅ N 6    │ ☁☾  39°       WSW 2  │ ☁☾  40°       SSW 3  │ ☁☾  48°       SW 5   │ ☁☾  47°       SW 2   │ ☁☾  49°       SW 3
+   3am │                      │ ☔  49°  80%▆ NE 7   │ ☔  44°  57%▅ N 7    │ ☁☾  38°       WSW 2  │ ☁☾  39°       SSW 3  │ ☁☾  47°       SW 5   │ ☁☾  46°       SW 2   │
+   4am │                      │ ☔  47°  80%▆ NE 7   │ ☔  42°  57%▅ N 8    │ ☁☾  37°       SW 2   │ ☁☾  38°       SSW 3  │ ☁☾  46°       SW 5   │ ☁☾  45°       SW 2   │
+   5am │                      │ ☔  47°  80%▆ NE 8   │ ☔  42°  57%▅ N 9    │ ☁☾  35°       SW 2   │ ☁☾  37°       SSW 5  │ ☁☾  46°       SW 5   │ ☁☾  44°       SW 2   │
+   6am │                      │ ☔  47°  93%▇ NE 8   │ ☔  42°  72%▆ N 9    │ ☀   35°       SSW 2  │ ☀   38°       SSW 5  │ ⛅  46°       SW 5   │ ☀   44°       SW 2   │
+   7am │                      │↑☔  44°  93%▇ NE 8   │↑☔  40°  72%▆ N 10   │↑☀   36°       SSW 2  │↑☀   40°       SSW 6  │↑⛅  48°       SW 5   │↑☀   46°       SW 2   │
+   8am │                      │ ☔  47°  93%▇ NE 9   │ ☔  41°  72%▆ N 12   │ ☀   38°       S 3    │ ☀   43°       SSW 6  │ ⛅  50°       SW 6   │ ☀   49°       SSW 2  │
+   9am │                      │ ☔  47°  93%▇ NE 9   │ ☔  43°  72%▆ N 14   │ ☀   41°       S 3    │ ☀   47°       SSW 6  │ ⛅  54°       SW 6   │ ☀   53°       SSW 2  │
+  10am │                      │ ☔  48°  93%▇ NE 10  │ ☔  45°  72%▆ N 16   │ ☀   45°       S 3    │ ☀   54°       SSW 5  │ ⛅  59°       S 5    │ ☀   58°       S 2    │
+  11am │                      │ ☔  49°  93%▇ NE 10  │ ☔  47°  72%▆ N 17   │ ☀   51°       SSE 5  │ ☀   61°       S 3    │ ⛅  64°       ESE 5  │ ☀   64°       SE 3   │
+  12pm │                      │ ☔  48°  95%█ NE 9   │ ☔  48°  56%▄ N 18   │ ☀   55°       SE 5   │ ☀   67°       SSE 2  │ ⛅  68°       E 3    │ ☀   68°       ESE 3  │
+   1pm │                      │ ☔  48°  95%█ NNE 9  │ ☔  49°  56%▄ N 20   │ ☀   59°       SE 5   │ ☀   71°       SE 2   │ ⛅  70°       E 5    │ ☀   71°       ESE 3  │
+   2pm │                      │ ☔  48°  95%█ NNE 9  │ ☔  49°  56%▄ N 20   │ ☀   61°       SE 5   │ ☀   73°       E 3    │ ⛅  70°       ENE 5  │ ☀   72°       E 5    │
+   3pm │▸☔  60°  18%▁ NNE 8  │ ☔  48°  95%█ NNE 9  │ ☔  49°  56%▄ N 18   │ ☀   62°       ESE 5  │ ☀   73°       ENE 5  │ ⛅  70°       ENE 6  │ ☀   72°       E 5    │
+   4pm │ ☔  59°  18%▁ NNE 8  │ ☔  48°  95%█ N 9    │ ☔  49°  56%▄ N 16   │ ☀   62°       ESE 3  │ ☀   72°       NE 3   │ ⛅  69°       ENE 6  │ ☀   72°       E 5    │
+   5pm │ ☔  58°  18%▁ NNE 7  │ ☔  47°  95%█ N 8    │ ☔  48°  56%▄ N 14   │ ☀   60°       ESE 3  │ ☀   69°       NE 3   │ ⛅  68°       ENE 5  │ ☀   70°       E 5    │
+   6pm │↓☔  58°  58%▅ NNE 7  │↓☔  46°  93%▇ N 8    │↓☔  47°  22%▂ N 12   │↓☁☾  57°       ESE 2  │↓☁☾  65°       NNE 2  │↓☁☾  66°       ENE 3  │↓☁☾  68°       ESE 5  │
+   7pm │ ☔  54°  58%▅ NNE 6  │ ☔  45°  93%▇ N 7    │ ☔  46°  22%▂ N 9    │ ☁☾  54°       SE 2   │ ☁☾  62°       N 2    │ ☁☾  63°       E 3    │ ☁☾  65°       SE 5   │
+   8pm │ ☔  53°  58%▅ NNE 5  │ ☔  44°  93%▇ NNE 7  │ ☔  45°  22%▂ NNW 7  │ ☁☾  51°       S 3    │ ☁☾  58°       W 3    │ ☁☾  59°       SSE 2  │ ☁☾  61°       S 6    │
+   9pm │ ☔  53°  58%▅ NNE 5  │ ☔  44°  93%▇ NNE 6  │ ☔  43°  22%▂ NW 6   │ ☁☾  48°       SSW 3  │ ☁☾  55°       WSW 3  │ ☁☾  56°       S 2    │ ☁☾  58°       SSW 6  │
+  10pm │ ☔  51°  58%▅ NE 5   │ ☔  44°  93%▇ N 6    │ ☔  42°  22%▂ NW 5   │ ☁☾  46°       SSW 3  │ ☁☾  53°       WSW 3  │ ☁☾  54°       S 2    │ ☁☾  56°       SSW 6  │
+  11pm │ ☔  51°  58%▅ NE 5   │ ☔  44°  93%▇ N 6    │ ☔  42°  22%▂ WNW 3  │ ☁☾  44°       SSW 3  │ ☁☾  51°       SW 5   │ ☁☾  52°       SSW 2  │ ☁☾  54°       SSW 5  │
+ ───── ┼──────────────────────┼──────────────────────┼──────────────────────┼──────────────────────┼──────────────────────┼──────────────────────┼──────────────────────┼──────────────────────
+   sun │ 11h 14m daylight     │ 11h 12m daylight     │ 11h 09m daylight     │ 11h 07m daylight     │ 11h 04m daylight     │ 11h 02m daylight     │ 10h 59m daylight     │ 10h 57m daylight
+  feel │ feels 51°–60°        │ feels 39°–48°        │ feels 33°–43°        │ feels 35°–62°        │ feels 33°–73°        │ feels 44°–70°        │ feels 44°–72°        │ feels 48°–53°
+  wind │ gusts to 13 mph      │ gusts to 17 mph      │ gusts to 35 mph      │ gusts to 13 mph      │ gusts to 12 mph      │ gusts to 14 mph      │ gusts to 13 mph      │ gusts to 9 mph
+   wet │ 0.03 in precip       │ 0.60 in precip       │ 0.12 in precip       │ dry                  │ dry                  │ dry                  │ dry                  │ dry
+
+
+
+
+
+
+
+
+
+
+
+ ▸ now  ↑ sunrise  ↓ sunset
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+     c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · p Pause  │  e Favs · D Dashboard · Esc Back · ? Help · q Quit

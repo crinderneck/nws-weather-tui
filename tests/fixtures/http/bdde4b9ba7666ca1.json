@@ -1,0 +1,162 @@
+{
+ "content_type": "application/geo+json",
+ "json": {
+  "@context": [
+   "https://geojson.org/geojson-ld/geojson-context.jsonld",
+   {
+    "@version": "1.1",
+    "@vocab": "https://api.weather.gov/ontology#",
+    "bearing": {
+     "@type": "s:QuantitativeValue"
+    },
+    "city": "s:addressLocality",
+    "county": {
+     "@type": "@id"
+    },
+    "distance": {
+     "@id": "s:Distance",
+     "@type": "s:QuantitativeValue"
+    },
+    "forecastGridData": {
+     "@type": "@id"
+    },
+    "forecastOffice": {
+     "@type": "@id"
+    },
+    "geo": "http://www.opengis.net/ont/geosparql#",
+    "geometry": {
+     "@id": "s:GeoCoordinates",
+     "@type": "geo:wktLiteral"
+    },
+    "publicZone": {
+     "@type": "@id"
+    },
+    "s": "https://schema.org/",
+    "state": "s:addressRegion",
+    "unit": "http://codes.wmo.int/common/unit/",
+    "unitCode": {
+     "@id": "s:unitCode",
+     "@type": "@id"
+    },
+    "value": {
+     "@id": "s:value"
+    },
+    "wx": "https://api.weather.gov/ontology#"
+   }
+  ],
+  "geometry": {
+   "coordinates": [
+    -105.12,
+    39.92
+   ],
+   "type": "Point"
+  },
+  "id": "https://api.weather.gov/stations/KBJC/observations/2026-10-13T19:45:00+00:00",
+  "properties": {
+   "@id": "https://api.weather.gov/stations/KBJC/observations/2026-10-13T19:45:00+00:00",
+   "@type": "wx:ObservationStation",
+   "barometricPressure": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:Pa",
+    "value": 101590
+   },
+   "cloudLayers": [
+    {
+     "amount": "SCT",
+     "base": {
+      "unitCode": "wmoUnit:m",
+      "value": 760
+     }
+    }
+   ],
+   "dewpoint": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": 7
+   },
+   "elevation": {
+    "unitCode": "wmoUnit:m",
+    "value": 1724
+   },
+   "heatIndex": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "icon": "https://api.weather.gov/icons/land/day/sct?size=medium",
+   "maxTemperatureLast24Hours": {
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "minTemperatureLast24Hours": {
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "precipitationLast3Hours": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:mm",
+    "value": null
+   },
+   "precipitationLast6Hours": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:mm",
+    "value": null
+   },
+   "precipitationLastHour": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:mm",
+    "value": null
+   },
+   "presentWeather": [],
+   "rawMessage": "KBJC 131945Z 16005KT 10SM SCT025 17/07 A3000",
+   "relativeHumidity": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:percent",
+    "value": 51.746906785263
+   },
+   "seaLevelPressure": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:Pa",
+    "value": null
+   },
+   "station": "https://api.weather.gov/stations/KBJC",
+   "stationId": "KBJC",
+   "stationName": "Broomfield / Jeffco",
+   "temperature": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": 17
+   },
+   "textDescription": "Partly Cloudy",
+   "timestamp": "2026-10-13T19:45:00+00:00",
+   "visibility": {
+    "qualityControl": "C",
+    "unitCode": "wmoUnit:m",
+    "value": 16090
+   },
+   "windChill": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degC",
+    "value": null
+   },
+   "windDirection": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:degree_(angle)",
+    "value": 160
+   },
+   "windGust": {
+    "qualityControl": "Z",
+    "unitCode": "wmoUnit:km_h-1",
+    "value": null
+   },
+   "windSpeed": {
+    "qualityControl": "V",
+    "unitCode": "wmoUnit:km_h-1",
+    "value": 9.36
+   }
+  },
+  "type": "Feature"
+ },
+ "status": 200,
+ "url": "https://api.weather.gov/stations/KBJC/observations/latest"
+}

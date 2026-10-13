@@ -1,0 +1,48 @@
+  0: 1-29 fg=cyan bold
+  0: 37-42 bold
+  0: 46-78 fg=magenta
+  3: 9-17 fg=4e4e4e
+  3: 18-18 fg=dadada bg=4e4e4e
+  3: 19-19 fg=4e4e4e
+  3: 20-21 fg=dadada
+  3: 35-49 fg=white bold
+  4: 6-21 fg=4e4e4e
+  4: 22-22 fg=dadada bg=4e4e4e
+  4: 23-24 fg=dadada
+  5: 4-22 fg=4e4e4e
+  5: 23-23 fg=dadada bg=4e4e4e
+  5: 24-26 fg=dadada
+  6: 3-24 fg=4e4e4e
+  6: 25-27 fg=dadada
+  7: 2-24 fg=4e4e4e
+  7: 25-25 fg=dadada bg=4e4e4e
+  7: 26-28 fg=dadada
+  8: 2-25 fg=4e4e4e
+  8: 26-28 fg=dadada
+  9: 2-25 fg=4e4e4e
+  9: 26-28 fg=dadada
+ 10: 2-25 fg=4e4e4e
+ 10: 26-28 fg=dadada
+ 10: 35-42 fg=cyan bold
+ 11: 2-24 fg=4e4e4e
+ 11: 25-25 fg=dadada bg=4e4e4e
+ 11: 26-28 fg=dadada
+ 12: 3-24 fg=4e4e4e
+ 12: 25-27 fg=dadada
+ 13: 4-22 fg=4e4e4e
+ 13: 23-23 fg=dadada bg=4e4e4e
+ 13: 24-26 fg=dadada
+ 14: 6-21 fg=4e4e4e
+ 14: 22-22 fg=dadada bg=4e4e4e
+ 14: 23-24 fg=dadada
+ 15: 9-17 fg=4e4e4e
+ 15: 18-18 fg=dadada bg=4e4e4e
+ 15: 19-19 fg=4e4e4e
+ 15: 20-21 fg=dadada
+ 23: 1-1 fg=cyan bold
+ 23: 13-13 fg=cyan bold
+ 23: 26-26 fg=cyan bold
+ 23: 37-37 fg=cyan bold
+ 23: 50-50 fg=cyan bold
+ 23: 63-63 fg=cyan bold
+ 23: 72-72 fg=cyan bold

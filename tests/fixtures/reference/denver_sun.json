@@ -1,0 +1,79 @@
+{
+ "days": {
+  "2026-10-13": {
+   "sunrise": "2026-10-13T07:08",
+   "sunset": "2026-10-13T18:23"
+  },
+  "2026-10-14": {
+   "sunrise": "2026-10-14T07:09",
+   "sunset": "2026-10-14T18:21"
+  },
+  "2026-10-15": {
+   "sunrise": "2026-10-15T07:10",
+   "sunset": "2026-10-15T18:20"
+  },
+  "2026-10-16": {
+   "sunrise": "2026-10-16T07:11",
+   "sunset": "2026-10-16T18:18"
+  },
+  "2026-10-17": {
+   "sunrise": "2026-10-17T07:12",
+   "sunset": "2026-10-17T18:17"
+  },
+  "2026-10-18": {
+   "sunrise": "2026-10-18T07:13",
+   "sunset": "2026-10-18T18:16"
+  },
+  "2026-10-19": {
+   "sunrise": "2026-10-19T07:14",
+   "sunset": "2026-10-19T18:14"
+  },
+  "2026-10-20": {
+   "sunrise": "2026-10-20T07:15",
+   "sunset": "2026-10-20T18:13"
+  }
+ },
+ "dst_change": "2026-11-01",
+ "dst_days": {
+  "2026-10-31": {
+   "Begin Civil Twilight": "07:00  DT",
+   "End Civil Twilight": "18:27  DT",
+   "Rise": "07:28  DT",
+   "Set": "17:59  DT",
+   "Upper Transit": "12:44  DT"
+  },
+  "2026-11-01": {
+   "Begin Civil Twilight": "06:01  ST",
+   "End Civil Twilight": "17:26  ST",
+   "Rise": "06:29  ST",
+   "Set": "16:58  ST",
+   "Upper Transit": "11:44  ST"
+  },
+  "2026-11-02": {
+   "Begin Civil Twilight": "06:02  ST",
+   "End Civil Twilight": "17:25  ST",
+   "Rise": "06:30  ST",
+   "Set": "16:57  ST",
+   "Upper Transit": "11:44  ST"
+  }
+ },
+ "moon_today": {
+  "curphase": "Waxing Crescent",
+  "fracillum": "10%",
+  "moon": {
+   "Rise": "10:27  DT",
+   "Set": "19:45  DT",
+   "Upper Transit": "15:08  DT"
+  },
+  "sun": {
+   "Begin Civil Twilight": "06:41  DT",
+   "End Civil Twilight": "18:50  DT",
+   "Rise": "07:08  DT",
+   "Set": "18:23  DT",
+   "Upper Transit": "12:46  DT"
+  }
+ },
+ "source": "Open-Meteo daily sunrise/sunset; USNO for the DST days and the moon",
+ "timezone": "America/Denver",
+ "today": "2026-10-13"
+}

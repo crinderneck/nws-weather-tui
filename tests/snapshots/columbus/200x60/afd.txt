@@ -1,0 +1,60 @@
+ Columbus, OH — NWS Weather TUI                                                                  5:59pm                                                         [DISCUSSION] Units:US Auto:300s Fav:1/3
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ Area Forecast Discussion — ILN   Issued Tue Oct 13, 2:03pm
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+ WHAT HAS CHANGED ────────────────────────────────────────────── │ Wednesday afternoon, but as the boundary begins to stall out,   │ HAZARDOUS WEATHER OUTLOOK · issued Tue Oct 13, 3:56am ═════════
+ No significant changes.                                         │ some training storms may begin to develop, leading to some      │ DAY ONE ───────────────────────────────────────────────────────
+                                                                 │ potential flooding concerns heading into Wednesday night.       │ Today and tonight.
+ KEY MESSAGES ────────────────────────────────────────────────── │                                                                 │
+ 1) An active weather pattern is expected from Wednesday through │ Chances for showers and storms will again be possible Thursday  │ There is a low probability for widespread hazardous weather.
+ Friday, which will bring the potential for strong storms, heavy │ afternoon into Thursday evening as the frontal boundary lifts   │
+ rainfall, and gusty winds.                                      │ back to the north. Good deep layer shear will again be present  │ DAYS TWO THROUGH SEVEN ────────────────────────────────────────
+                                                                 │ so if we are able to destabilize enough, some additional strong │ Wednesday through Monday.
+ 2) Cooler weather and frost possible this weekend.              │ to severe storms would be possible Thursday.                    │
+                                                                 │                                                                 │ There is a chance for isolated severe storms Thursday afternoon
+ DISCUSSION ──────────────────────────────────────────────────── │ As the strong cold front moves southeast across the area, good  │ into Thursday night with damaging winds the primary threat.
+ Key Message 1)                                                  │ low level CAA will develop Friday morning into the afternoon.   │
+                                                                 │ In the southerly flow ahead of this, temperatures will remain   │ Gusty winds upwards of 40 mph will be possible on Friday.
+ A more active weather pattern will develop Wednesday and        │ mild Thursday night before dropping during the day on Friday as │
+ continue into Friday. Mid level ridging currently in place      │ the colder air moves in. In addition, the strong CAA will       │ There will be the potential for frost this weekend.
+ across the region will begin to break down tonight into         │ support gusty winds to around 40 mph or so during the day on    │
+ Wednesday as some mid level energy moves out of the mid         │ Friday.                                                         │ SPOTTER INFORMATION STATEMENT ─────────────────────────────────
+ Mississippi Valley and into the Ohio Valley. This will allow    │                                                                 │ Spotter activation may be needed on Thursday.
+ for a weak frontal boundary to sag slowly southeast into our    │ Key Message 2)                                                  │
+ area through the day on Wednesday. The boundary will likely     │                                                                 │ EARLIER DISCUSSION · issued Tue Oct 13, 6:07am ════════════════
+ stall out somewhere along the Ohio River Wednesday night before │ A much colder airmass will continue to settle into the area for │ WHAT HAS CHANGED ──────────────────────────────────────────────
+ beginning to lift back to the north as a warm front through the │ the weekend. Lows Friday night and Saturday night will be in    │ Changes to temperatures Wednesday through Friday. Increased
+ day on Thursday as a weak surface wave rides east along it.     │ the 30s with the potential for some frost, especially Saturday  │ wind gusts some today and Friday. Increased precipitation
+ Finally, a stronger mid level short wave will help carve out a  │ night when winds will be lighter.                               │ amounts across the south for Wednesday into Thursday.
+ sharp upper level trough across the Great Lakes region Thursday │                                                                 │
+ night into Friday, with an associated strong cold front moving  │ AVIATION /15Z TUESDAY THROUGH SATURDAY/ ─────────────────────── │ KEY MESSAGES ──────────────────────────────────────────────────
+ southeast across our area Friday morning into early afternoon.  │ Spotty light pcpn falling out of a mid layer deck may affect    │ 1) Near record temperatures today.
+                                                                 │ the central Ohio TAFs in the next hour or so. Otherwise, expect │
+ Developing moisture advection ahead of the boundary on          │ mainly clear skies overnight. Winds will likely stay up a bit   │ 2) More active weather is expected from Wednesday through
+ Wednesday will lead to increasing PWs, climbing into the 2-2.25 │ but may go light enough in the river valleys to support some    │ Friday, which will bring the potential for severe weather,
+ inch range through Wednesday afternoon and then remaining high  │ patchy fog development late tonight into early Wednesday.       │ heavy rainfall, and gusty winds.
+ along and south of the boundary into Thursday. Given the        │                                                                 │
+ increasing moisture and forcing, expect widespread showers and  │ An upper level disturbance will move into the Ohio Valley       │ 3) Cooler weather and frost possible this weekend.
+ embedded thunderstorms to develop Wednesday afternoon and       │ during the day on Wednesday. Increasing moisture ahead of this  │
+ continue into Wednesday evening with some of the precipitation  │ will lead to developing showers and thunderstorms from late     │ DISCUSSION ────────────────────────────────────────────────────
+ likely lingering through the night south of the boundary.       │ morning and into the afternoon. This could eventually lead to   │ Key Message 1)
+                                                                 │ some MVFR conditions in the tail end of the 30 hour KCVG TAF.   │
+ To the south of the boundary, temperatures will remain          │                                                                 │ Well above normal temperatures are expected today with highs in
+ unseasonably warm during the day on Wednesday with highs        │ OUTLOOK...Thunderstorms are possible again on Thursday.         │ the 80s. These values are near record values for the day. The
+ ranging from the upper 70s north to the mid 80s across our far  │     Occasional                                                  │ record value for today at CVG is 88 set in 1928, CMH is 85 set
+ south. This will allow for some MLCapes of around 1000 J/KG or  │ MVFR conditions are possible from Wednesday through Friday.     │ in 1969, and DAY is 86 set in 1897 and 1975. The current
+ so, mainly to the south of the I-70 corridor through Wednesday  │     Gusty                                                       │ forecast high temperatures are CVG 86, CMH 85, and DAY 86.
+ afternoon. With the strengthening mid level flow, deep layer    │ winds likely on Friday.                                         │
+ shear will increase through the day on Wednesday, so a few      │                                                                 │ Went with the NBM dry forecast for the daytime hours today
+ strong to severe thunderstorms will be possible Wednesday       │ ILN WATCHES/WARNINGS/ADVISORIES ─────────────────────────────── │ given dry low level air, however cannot rule out a few
+ afternoon into the evening, with damaging wind the main threat. │ OH...None.                                                      │ sprinkles.
+ The best chance for this will be across our southern areas, but │ KY...None.                                                      │
+ the overall severe threat will be contingent on how well we are │ IN...None.                                                      │ Key Message 2)
+ able to destabilize through the day.                            │                                                                 │
+                                                                 │ DISCUSSION...JGL                                                │ An active weather pattern will be in place for Wednesday
+ Locally heavy rainfall will also be possible given the high     │ AVIATION...JGL                                                  │ through Friday. First there will be the potential for an
+ PWs. Initially, storms look to be somewhat progressive          │                                                                 │ …
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+     c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · p Pause  │  e Favs · D Dashboard · Esc Back · ? Help · q Quit
