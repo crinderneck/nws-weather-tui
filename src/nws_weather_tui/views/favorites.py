@@ -48,7 +48,16 @@ def draw_favorites(app: "App", win) -> None:
             attr = curses.color_pair(2) | curses.A_BOLD if selected else 0
             safe_addstr(win, y, 2, line, attr)
 
-    hints = ("j/k move · J/K reorder · Enter jump · a add · r rename · d delete · "
-             "e/Esc exit    * = current location")
-    safe_addstr(win, rows - 1, 0, hints[: cols - 1], curses.A_DIM)
+    # Wrap the key hints at their separators rather than cut one in half.
+    hints = ["j/k move", "J/K reorder", "Enter jump", "a add", "r rename", "d delete",
+             "e/Esc exit", "* = current location"]
+    lines = [""]
+    for hint in hints:
+        joined = f"{lines[-1]} · {hint}" if lines[-1] else hint
+        if len(joined) <= cols - 1 or not lines[-1]:
+            lines[-1] = joined
+        else:
+            lines.append(hint)
+    for i, line in enumerate(lines[-2:]):
+        safe_addstr(win, rows - min(2, len(lines)) + i, 0, line[: cols - 1], curses.A_DIM)
     win.noutrefresh()

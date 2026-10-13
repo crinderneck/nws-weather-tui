@@ -83,22 +83,34 @@ def png_to_line_overlay(
 def _draw_segment(
     grid: List[List[str]], x0: int, y0: int, x1: int, y1: int, mark: str
 ) -> None:
-    """Bresenham line segment draw into a grid."""
+    """Bresenham line segment draw into a grid, 4-connected: a diagonal
+    step is split into a horizontal and a vertical one, since cells that
+    only touch at a corner read as a break in the line on a terminal."""
     dx = abs(x1 - x0)
     dy = abs(y1 - y0)
     sx = 1 if x0 < x1 else -1
     sy = 1 if y0 < y1 else -1
     err = dx - dy
+
+    def plot(x: int, y: int) -> None:
+        if 0 <= y < len(grid) and 0 <= x < len(grid[0]):
+            grid[y][x] = mark
+
     while True:
-        if 0 <= y0 < len(grid) and 0 <= x0 < len(grid[0]):
-            grid[y0][x0] = mark
+        plot(x0, y0)
         if x0 == x1 and y0 == y1:
             break
         e2 = 2 * err
-        if e2 > -dy:
+        if e2 > -dy and e2 < dx:  # diagonal: fill the corner cell first
             err -= dy
             x0 += sx
-        if e2 < dx:
+            plot(x0, y0)
+            err += dx
+            y0 += sy
+        elif e2 > -dy:
+            err -= dy
+            x0 += sx
+        else:
             err += dx
             y0 += sy
 
@@ -241,6 +253,13 @@ def city_overlay_and_hits_for_bbox(
                 if hx + 1 + len(label) <= cols:
                     place(hx + 1, hy, label)
 
+    def clear_around(x0: int, length: int, y0: int) -> bool:
+        """Cells x0..x0+length free, with a free (or off-map) cell either
+        side, so neighbouring labels never run together."""
+        if x0 < 0 or x0 + length > cols:
+            return False
+        return not any((xx, y0) in occupied for xx in range(x0 - 1, x0 + length + 1))
+
     placed = 0
     for code, lat, lon in MAJOR_CITIES:
         if placed >= max_labels:
@@ -248,19 +267,19 @@ def city_overlay_and_hits_for_bbox(
         if not (minlat <= lat <= maxlat and minlon <= lon <= maxlon):
             continue
         x, y = project(lat, lon)
-        if (x, y) in occupied:
-            continue
-        grid[y][x] = "@"
-        hit_map[(x, y)] = (code, float(lat), float(lon))
-        occupied.add((x, y))
-        text_len = len(code)
-        for lx in (x + 1, x - text_len):
-            if not is_occupied(lx, y, text_len):
-                place(lx, y, code)
-                for xx in range(lx, lx + text_len):
+        # Marker and name go down together ("@DEN", or "DEN@" near the right
+        # edge) or not at all: a bare "@" beside another label reads as noise.
+        n = len(code)
+        for label_x, marker_x in ((x, x), (x - n, x)):
+            if clear_around(label_x, n + 1, y):
+                text_x = label_x + 1 if label_x == marker_x else label_x
+                place(text_x, y, code)
+                grid[y][marker_x] = "@"
+                occupied.add((marker_x, y))
+                for xx in range(label_x, label_x + n + 1):
                     hit_map[(xx, y)] = (code, float(lat), float(lon))
+                placed += 1
                 break
-        placed += 1
 
     return (["".join(r) for r in grid], hit_map)
 

@@ -9,6 +9,7 @@ when they don't all fit.
 
 from __future__ import annotations
 
+import os
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
 import curses
@@ -24,6 +25,13 @@ if TYPE_CHECKING:
 COL_MIN_W = 58
 COL_GAP = 4
 KEY_W = 9
+
+
+def _tilde(path: str) -> str:
+    """Show paths under $HOME as ~/..., which is shorter and wraps less."""
+    home = os.path.expanduser("~")
+    return "~" + path[len(home):] if path.startswith(home + os.sep) else path
+
 
 # Row kinds: ("title", text) | ("key", key, text) | ("text", text) | ("legend",) | ("blank",)
 Row = Tuple[str, ...]
@@ -88,8 +96,8 @@ SECTIONS: List[Tuple[str, List[Tuple[Optional[str], str]]]] = [
                "NEXRAD, then the NWS station WMS."),
     ]),
     ("Files", [
-        ("config", CONFIG_PATH),
-        ("state", STATE_PATH),
+        ("config", _tilde(CONFIG_PATH)),
+        ("state", _tilde(STATE_PATH)),
         (None, "Requires astral, numpy, pillow and requests."),
     ]),
 ]

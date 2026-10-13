@@ -22,8 +22,16 @@ ruff check --fix .
 ```
 
 ### Testing
-- **No tests currently exist** - Test framework can be added (pytest recommended)
-- To add tests, create a `tests/` directory with `test_*.py` files
+```bash
+pip install -e '.[test]'
+pytest                      # fast suite (~3 s, offline): snapshots, correctness, units, vermin
+pytest -m slow              # Python 3.9 run via uvx, pipx install-and-launch check
+pytest --update-snapshots   # after an intended rendering change; review the diff
+```
+- Every screen is snapshot-tested (text and colours) at 80x24, 120x40 and 200x60
+  from recorded API responses; see `tests/README.md` for re-recording.
+- A layout change can change the radar panel size and so its requests: run
+  `python tests/record_fixtures.py --missing-only`.
 
 ### Code Style Guidelines
 
@@ -35,17 +43,16 @@ ruff check --fix .
   3. Local modules, always absolute from the package root
      (`from nws_weather_tui.api.client import NWSClient`, `from nws_weather_tui.helpers import ...`)
 - Sort alphabetically within each group
-- Use explicit imports (`from x import y, z`) rather than `import x`
 
 #### Type Hints
 - Always use type hints for function arguments and return types
-- Use `Optional[X]` instead of `X | None` for Python 3.9 compatibility
+- Use `Optional[X]` instead of `X | None`; the package supports Python 3.9 (`requires-python = ">=3.9"`)
 - Use `Dict[str, Any]` for dict types, not `dict[str, Any]`
 - Example: `def func(arg: str) -> Optional[bool]:`
 
 #### Naming Conventions
 - **Classes**: PascalCase (e.g., `class App`, `class NWSClient`)
-- **Functions/Variables**: snake_case (e.g., `def _handle_key`, `self.location_name`)
+- **Functions/Variables**: snake_case (e.g., `def handle_key`, `self.location_name`)
 - **Constants**: SCREAMING_SNAKE_CASE (e.g., `CONFIG_PATH`, `MIN_COLS`)
 - **Private methods**: Prefix with underscore (e.g., `_load_points`, `_set_view`)
 
@@ -60,24 +67,10 @@ ruff check --fix .
 - Use `_flash()` to display user-facing errors in the TUI
 - Log debug info with `dbg()` helper for development
 
-#### Key Handler Methods (Important!)
-- **CRITICAL**: All methods called from `_handle_key` MUST return `bool`
-- Return `True` to continue the application
-- Return `False` to quit the application
-- Methods that return `None` will cause the app to exit unexpectedly!
-
-Example:
-```python
-# CORRECT
-def _refresh(self) -> bool:
-    self._show_loading("Refreshing now...")
-    return True
-
-# WRONG - will cause crash!
-def _refresh(self) -> None:
-    self._show_loading("Refreshing now...")
-    # returns None implicitly
-```
+#### Key Handlers
+`handle_key` in `input_handler.py` returns whatever the matched entry in its `key_handlers`
+dict returns, and the main loop quits on a falsy result. Every handler must return `True` to keep
+running or `False` to quit; one that falls through and returns `None` silently exits the app.
 
 #### TUI/UI Guidelines
 - Use `_flash(message, duration)` for temporary status messages
@@ -86,7 +79,8 @@ def _refresh(self) -> None:
 - Use `clamp()` helper for value bounds
 
 #### Code Formatting
-- Maximum line length: 100 characters (ruff default)
+- Line length isn't configured: there is no ruff config, so ruff's defaults apply (88 columns for
+  `ruff format`; long lines are not a lint error by default)
 - Use 4 spaces for indentation
 - No trailing whitespace
 - One blank line between top-level definitions
@@ -106,7 +100,7 @@ All code lives under `src/nws_weather_tui/`:
 - `helpers.py`, `formatting.py`, `geo.py`, `conversions.py` - Utility functions
 - `moon.py`, `windsock.py`, `icons.py`, `curses_init.py` - Moon math, windsock, icons, curses setup
 - `api/` - HTTP clients: `client.py` (NWS), `geocode.py`, `geo_boundaries.py`,
-  `air_quality.py`, `uv_index.py`, and `cache.py` (TTL cache)
+  `air_quality.py`, `uv_index.py`, `cache.py` (TTL cache) and `fixtures.py` (FIXTURE record/replay)
 - `radar/` - `client.py`, `decode.py`, `renderer.py`, `palette.py`, `state.py`,
   `overlays.py`, `cities.py`
 - `views/` - One module per screen (`current.py`, `forecast.py`, `hourly.py`, `alerts.py`,

@@ -13,7 +13,7 @@ import datetime as dt
 import textwrap
 import unicodedata
 from functools import lru_cache
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from nws_weather_tui.constants import DEBUG_LOG_PATH, ensure_dir
 
@@ -48,10 +48,12 @@ def get_sunrise_sunset(
     try:
         loc = LocationInfo(latitude=lat, longitude=lon)
         # LocationInfo defaults to Europe/London, which puts the US's sunset
-        # on the previous calendar day; use the local zone the app displays in.
-        local_tz = dt.datetime.now().astimezone().tzinfo
+        # on the previous calendar day; use the local zone the app displays
+        # in, with the offset in force on `date` (not today's: across a DST
+        # change that would land an hour off).
+        local_tz = dt.datetime(date.year, date.month, date.day, 12).astimezone().tzinfo
         s = sun(loc.observer, date=date, tzinfo=local_tz)
-        return s["sunrise"], s["sunset"]
+        return s["sunrise"].astimezone(), s["sunset"].astimezone()
     except Exception:
         return None, None
 
@@ -107,7 +109,7 @@ def _wrap_lines_cached(text: str, width: int) -> Tuple[str, ...]:
     Single newlines reflow within a paragraph; double newlines (blank
     lines) are preserved as paragraph breaks.
     """
-    lines: list[str] = []
+    lines: List[str] = []
     for paragraph in text.split("\n\n"):
         if lines:
             lines.append("")  # blank line between paragraphs

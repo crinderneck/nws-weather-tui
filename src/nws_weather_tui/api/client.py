@@ -13,11 +13,16 @@ import requests
 
 from nws_weather_tui.api.air_quality import AirQualityClient
 from nws_weather_tui.api.cache import TTLCache
-from nws_weather_tui.constants import BASE
-from nws_weather_tui.api.geocode import Geocoder
+from nws_weather_tui.api.fixtures import (
+    FixtureMissError,
+    FixtureSession,
+    fixture_settings_from_env,
+)
 from nws_weather_tui.api.geo_boundaries import BoundaryClient
-from nws_weather_tui.radar.client import RadarFetcher
+from nws_weather_tui.api.geocode import Geocoder
 from nws_weather_tui.api.uv_index import UVIndexClient
+from nws_weather_tui.constants import BASE
+from nws_weather_tui.radar.client import RadarFetcher
 
 
 class _ThreadLocalSession:
@@ -46,13 +51,30 @@ class _ThreadLocalSession:
 
 
 class NWSClient:
-    def __init__(self, user_agent: str, timeout: int, ttls: Dict[str, int]) -> None:
-        self.s = _ThreadLocalSession(
+    def __init__(
+        self,
+        user_agent: str,
+        timeout: int,
+        ttls: Dict[str, int],
+        fixture_dir: Optional[str] = None,
+        fixture_mode: str = "replay",
+    ) -> None:
+        live = _ThreadLocalSession(
             {
                 "User-Agent": user_agent,
                 "Accept": "application/geo+json, application/json",
             }
         )
+        # FIXTURE mode (see api/fixtures.py): an explicit fixture_dir wins,
+        # otherwise NWS_TUI_FIXTURE_DIR / NWS_TUI_FIXTURE_MODE switch it on.
+        if fixture_dir is None:
+            env = fixture_settings_from_env()
+            if env:
+                fixture_dir, fixture_mode = env["directory"], env["mode"]
+        self.fixtures: Optional[FixtureSession] = (
+            FixtureSession(fixture_dir, fixture_mode, inner=live) if fixture_dir else None
+        )
+        self.s = self.fixtures or live
         self.timeout = timeout
         self.ttls = ttls
         self.cache = TTLCache()
@@ -82,6 +104,8 @@ class NWSClient:
                 data = r.json()
                 self.cache.set(url, data, ttl)
                 return data
+            except FixtureMissError:
+                raise  # replaying: a retry can't conjure a recording
             except Exception as e:
                 last_err = e
                 time.sleep(backoff * (2 ** i))

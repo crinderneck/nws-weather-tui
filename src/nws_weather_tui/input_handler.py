@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import threading
 import webbrowser
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING
 
 import curses
 
@@ -140,7 +140,7 @@ def prompt_line(app: "App", prompt: str, max_len: int = 96) -> Optional[str]:
         app.stdscr.nodelay(False)
 
 
-def _parse_lat_lon(text: str) -> Optional[tuple[float, float]]:
+def _parse_lat_lon(text: str) -> Optional[Tuple[float, float]]:
     """Try to parse 'lat,lon' or 'lat lon' from text. Returns (lat, lon) or None."""
     import re
     m = re.match(r"^\s*([+-]?\d+\.?\d*)\s*[,\s]\s*([+-]?\d+\.?\d*)\s*$", text)

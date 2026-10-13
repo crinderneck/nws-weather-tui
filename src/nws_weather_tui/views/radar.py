@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime as dt
 import math
+import time
 from typing import TYPE_CHECKING, List
 
 import curses
@@ -23,6 +24,17 @@ from nws_weather_tui.radar.renderer import (
 
 if TYPE_CHECKING:
     from nws_weather_tui.app import App
+
+
+RADAR_STALE_S = 20 * 60  # MRMS updates every ~2 min; older than this is notable
+
+
+def radar_age_tag(age_s: float) -> str:
+    """'  (3h 43m old)' once a radar frame is stale enough to mention."""
+    if age_s < RADAR_STALE_S:
+        return ""
+    mins = int(age_s // 60)
+    return f"  ({mins // 60}h {mins % 60:02d}m old)" if mins >= 60 else f"  ({mins}m old)"
 
 
 def draw_radar_panel(
@@ -49,14 +61,21 @@ def draw_radar_panel(
         else ""
     )
     ts_tag = ""
+    age_tag = ""
     if app._radar_ts_ms:
         local = dt.datetime.fromtimestamp(app._radar_ts_ms / 1000).astimezone()
         ts_tag = f"  {fmt_time(local, app.use_24h)}"
+        age_tag = radar_age_tag(time.time() - app._radar_ts_ms / 1000)
     state_tag = f" \u2014 {app.state_code}" if app.state_code else ""
     header = f"Radar{state_tag}{ts_tag}{anim_tag}"
     header = header[: cols - 1]
-    header_x = max(0, (cols - 1 - len(header)) // 2)
+    age_tag = age_tag[: max(0, cols - 1 - len(header))]
+    header_x = max(0, (cols - 1 - len(header) - len(age_tag)) // 2)
     safe_addstr(win, y, header_x, header, curses.color_pair(15) | curses.A_BOLD)
+    if age_tag:
+        # An old frame is easy to mistake for the current picture.
+        safe_addstr(win, y, header_x + len(header), age_tag,
+                    curses.color_pair(2) | curses.A_BOLD)
     y += 1
 
     # --- radar map ---

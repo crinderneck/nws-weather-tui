@@ -13,9 +13,26 @@ import curses
 from nws_weather_tui.formatting import fmt_time
 from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import safe_addstr, wrap_lines
+from nws_weather_tui.models import AlertItem
 
 if TYPE_CHECKING:
     from nws_weather_tui.app import App
+
+
+def alert_window(a: AlertItem, use_24h: bool) -> str:
+    """'From Thu Oct 15, 6:00am until Fri Oct 16, 10:00pm · Sent ...' —
+    the hazard's own window, not the message's `expires`, which usually
+    comes well before the hazard ends."""
+    parts = []
+    now = dt.datetime.now(dt.timezone.utc)
+    if a.onset is not None and a.onset > now:
+        parts.append(f"From {fmt_time(a.onset, use_24h, True)}")
+    if a.until is not None:
+        parts.append(f"until {fmt_time(a.until, use_24h, True)}" if parts
+                     else f"Until {fmt_time(a.until, use_24h, True)}")
+    window = " ".join(parts)
+    sent = f"Sent {fmt_time(a.sent, use_24h, True)}"
+    return f"{window} · {sent}" if window else sent
 
 
 def _build_alert_lines(app: "App", cols: int) -> List[tuple]:
@@ -25,12 +42,8 @@ def _build_alert_lines(app: "App", cols: int) -> List[tuple]:
         title = f"{a.event}  [{a.severity}/{a.urgency}/{a.certainty}]"
         out.append((title[: cols - 1], curses.color_pair(4) | curses.A_BOLD))
 
-        meta = (
-            f"Sent: {fmt_time(a.sent, app.use_24h, True)}"
-            f"   Effective: {fmt_time(a.effective, app.use_24h, True)}"
-            f"   Expires: {fmt_time(a.expires, app.use_24h, True)}"
-        )
-        out.append((meta[: cols - 1], curses.A_DIM))
+        for wline in wrap_lines(alert_window(a, app.use_24h), cols - 1):
+            out.append((wline, curses.A_DIM))
 
         for wline in wrap_lines(a.headline or "\u2014", cols - 1):
             out.append((wline[: cols - 1], curses.color_pair(2)))
@@ -77,7 +90,7 @@ def _draw_no_alerts(app: "App", win, rows: int, cols: int) -> None:
     for a in others:
         if y >= rows:
             break
-        until = f"until {fmt_time(a.expires, app.use_24h, True)}" if a.expires else ""
+        until = f"until {fmt_time(a.until, app.use_24h, True)}" if a.until else ""
         attr = curses.color_pair(4) | curses.A_BOLD if a.severity in ("Extreme", "Severe") \
             else curses.color_pair(2)
         safe_addstr(win, y, 0, a.event[:event_w].ljust(event_w), attr)

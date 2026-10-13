@@ -2,7 +2,7 @@
 
 A terminal weather app for the US, powered by the [National Weather Service API](https://www.weather.gov/documentation/services-web-api). Built with Python and curses. Every view adapts to the size of your terminal, from an 80-column window up to an ultrawide one.
 
-![Python 3](https://img.shields.io/badge/python-3.8+-blue)
+![Python 3](https://img.shields.io/badge/python-3.9+-blue)
 
 ![Current conditions with radar](docs/screenshots/current.png)
 
@@ -198,7 +198,7 @@ All code lives in the `src/nws_weather_tui/` package.
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.9+
 - A terminal with curses support (most Linux and macOS terminals)
 - A 256-color terminal is recommended for radar; it falls back to ASCII automatically
 - `astral`, `numpy`, `pillow` and `requests` (installed automatically)

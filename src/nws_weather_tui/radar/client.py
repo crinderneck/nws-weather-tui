@@ -30,24 +30,11 @@ class RadarFetcher:
     # MRMS helpers
     # ------------------------------------------------------------------
 
-    def _mrms_latest_time(self) -> Optional[int]:
-        """Fetch the latest available timestamp (ms) from MRMS ImageServer."""
-        ck = MRMS_BASE + ":latest_time"
-        cached = self.cache.get(ck)
-        if isinstance(cached, int):
-            return cached
-        try:
-            meta = self.s.get(MRMS_BASE, params={"f": "pjson"}, timeout=self.timeout)
-            meta.raise_for_status()
-            mj = meta.json()
-            te = ((mj or {}).get("timeInfo") or {}).get("timeExtent") or []
-            if isinstance(te, list) and len(te) >= 2 and isinstance(te[1], (int, float)):
-                ts = int(te[1])
-                self.cache.set(ck, ts, 180)
-                return ts
-        except Exception as e:
-            dbg(f"RADAR MRMS latest-time lookup failed: {e}")
-        return None
+    # The ImageServer sits behind several nodes that don't agree: one can
+    # report a time extent hours behind the others. Re-ask when the answer
+    # looks stale and keep the freshest.
+    STALE_EXTENT_S = 30 * 60
+    EXTENT_TRIES = 3
 
     def _mrms_time_extent(self) -> Tuple[Optional[int], Optional[int]]:
         """Return (start_ms, end_ms) of available MRMS time series."""
@@ -55,19 +42,31 @@ class RadarFetcher:
         cached = self.cache.get(ck)
         if isinstance(cached, tuple):
             return cached  # type: ignore[return-value]
-        try:
-            meta = self.s.get(MRMS_BASE, params={"f": "pjson"}, timeout=self.timeout)
-            meta.raise_for_status()
-            mj = meta.json()
-            te = ((mj or {}).get("timeInfo") or {}).get("timeExtent") or []
-            if isinstance(te, list) and len(te) >= 2:
-                t0, t1 = int(te[0]), int(te[1])
-                out = (t0, t1)
-                self.cache.set(ck, out, 180)
-                return out
-        except Exception as e:
-            dbg(f"RADAR MRMS time-extent lookup failed: {e}")
-        return None, None
+        best: Optional[Tuple[int, int]] = None
+        for _ in range(self.EXTENT_TRIES):
+            try:
+                meta = self.s.get(MRMS_BASE, params={"f": "pjson"}, timeout=self.timeout)
+                meta.raise_for_status()
+                mj = meta.json()
+                te = ((mj or {}).get("timeInfo") or {}).get("timeExtent") or []
+                if isinstance(te, list) and len(te) >= 2:
+                    out = (int(te[0]), int(te[1]))
+                    if best is None or out[1] > best[1]:
+                        best = out
+            except Exception as e:
+                dbg(f"RADAR MRMS time-extent lookup failed: {e}")
+            if best is not None and time.time() * 1000 - best[1] < self.STALE_EXTENT_S * 1000:
+                break
+            if best is not None:
+                dbg(f"RADAR MRMS time extent looks stale (ends {best[1]}), asking again")
+        if best is None:
+            return None, None
+        self.cache.set(ck, best, 180)
+        return best
+
+    def _mrms_latest_time(self) -> Optional[int]:
+        """Fetch the latest available timestamp (ms) from MRMS ImageServer."""
+        return self._mrms_time_extent()[1]
 
     def _fetch_mrms_png(
         self,

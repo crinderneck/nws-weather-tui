@@ -114,6 +114,11 @@ CARD_MAX_W = 60
 GAP = 1           # separator column between cards
 ICON_ROWS = 5
 TEXT_PAD = 3      # blank columns between the description text and the separators
+NARROW_CARD_W = 24  # below this, a full TEXT_PAD squeezes words apart mid-word
+
+
+def _text_pad(w: int) -> int:
+    return TEXT_PAD if w >= NARROW_CARD_W else 1
 
 
 def _card_attr_temp(v: Optional[float], unit: str) -> int:
@@ -124,6 +129,7 @@ def _card_attr_temp(v: Optional[float], unit: str) -> int:
 
 def _card_lines(card: DayCard, w: int, app: "App") -> List[Tuple[str, int, bool]]:
     """(text, attr, centered) lines for one card, top to bottom."""
+    inner = max(1, w - 2)  # centred text keeps a space clear of each separator
     # Fixed-height blocks so every card's rows line up across the screen.
     out: List[Tuple[str, int, bool]] = []
     icon_art = ICON_BIG.get(card.icon_key, ICON_BIG.get("unknown", ""))
@@ -133,7 +139,7 @@ def _card_lines(card: DayCard, w: int, app: "App") -> List[Tuple[str, int, bool]
     icon = [line.rstrip().ljust(art_w)[:w] for line in art]
     icon += [""] * (ICON_ROWS - len(icon))
     out += [(line, curses.color_pair(2), True) for line in icon[:ICON_ROWS]]
-    short = list(wrap_lines(card.short_forecast, w))[:2]
+    short = list(wrap_lines(card.short_forecast, inner))[:2]
     short += [""] * (2 - len(short))
     out += [(line, curses.A_BOLD, True) for line in short]
 
@@ -147,7 +153,11 @@ def _card_lines(card: DayCard, w: int, app: "App") -> List[Tuple[str, int, bool]
     wind_p = card.day or card.night
     wind = ""
     if wind_p and wind_p.wind_speed and wind_p.wind_speed != "—":
-        wind = f"{wind_p.wind_dir} {wind_p.wind_speed}"[:w]
+        wind = f"{wind_p.wind_dir} {wind_p.wind_speed}"
+        if len(wind) > inner:  # "ESE 2 to 6 mph" -> "ESE 2–6 mph"
+            wind = wind.replace(" to ", "\u2013")
+        if len(wind) > inner:
+            wind = wind[: inner - 1] + "\u2026"
     out.append((wind, curses.A_DIM, True))
 
     sun = ""
@@ -155,7 +165,7 @@ def _card_lines(card: DayCard, w: int, app: "App") -> List[Tuple[str, int, bool]
     if sdt:
         rise, sset = get_sunrise_sunset(app.lat, app.lon, sdt.date())
         sun = f"\u2191{fmt_time(rise, app.use_24h)}  \u2193{fmt_time(sset, app.use_24h)}"
-    out.append((sun if len(sun) <= w else "", curses.color_pair(2) | curses.A_DIM, True))
+    out.append((sun if len(sun) <= inner else "", curses.color_pair(2) | curses.A_DIM, True))
 
     # Detailed day/night narratives fill whatever height is left.
     for label, period in (("Day", card.day), ("Night", card.night)):
@@ -163,7 +173,7 @@ def _card_lines(card: DayCard, w: int, app: "App") -> List[Tuple[str, int, bool]
             continue
         out.append(("", 0, False))
         out.append((label, curses.color_pair(1) | curses.A_BOLD, False))
-        for wl in wrap_lines(period.detailed_forecast, max(1, w - 2 * TEXT_PAD)):
+        for wl in wrap_lines(period.detailed_forecast, max(1, w - 2 * _text_pad(w))):
             out.append((wl, 0, False))
     return out
 
@@ -174,8 +184,11 @@ def _card_label(card: DayCard, w: int) -> str:
     if sdt is None:
         return name
     local = sdt.astimezone()
-    long = f"{name} · {local.strftime('%b')} {local.day}"
-    return long if len(long) <= w else name
+    for label in (f"{name} · {local.strftime('%b')} {local.day}",
+                  f"{name} {local.strftime('%b')} {local.day}"):
+        if len(label) <= w - 2:
+            return label
+    return name
 
 
 def draw_forecast(app: "App", win) -> None:
@@ -226,7 +239,8 @@ def draw_forecast(app: "App", win) -> None:
             if y >= bottom:
                 break
             # Description text sits TEXT_PAD columns in from both separators.
-            tx, tw = (x, card_w) if centered else (x + TEXT_PAD, max(1, card_w - 2 * TEXT_PAD))
+            pad = _text_pad(card_w)
+            tx, tw = (x, card_w) if centered else (x + pad, max(1, card_w - 2 * pad))
             if y == bottom - 1 and i < len(lines) - 1:
                 text = (text[: tw - 1] + "\u2026") if text else "\u2026"
             safe_addstr(win, y, tx + ((tw - len(text)) // 2 if centered else 0),

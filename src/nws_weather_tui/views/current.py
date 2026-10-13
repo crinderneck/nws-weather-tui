@@ -5,6 +5,7 @@ NWS Weather TUI — Current conditions view.
 
 from __future__ import annotations
 
+import datetime as dt
 import time
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
@@ -133,6 +134,21 @@ def _draw_windsock(win, lines: List[str], x0: int, has_256color: bool) -> None:
         flush(len(line))
 
 
+def _conditions(app: "App") -> Tuple[str, str]:
+    """(description, icon key). Some stations (e.g. RAWS/mesonet sites) send
+    no sky condition at all; then say what the forecast has for this hour
+    rather than show "N/A" under a question mark."""
+    c = app.current
+    text = c.text_description.replace("Current Conditions: ", "").strip()
+    if text and text != "N/A":
+        return text, c.icon_key
+    now = dt.datetime.now(dt.timezone.utc)
+    for h in app.hourly_periods:
+        if h.start is not None and h.start <= now < h.start + dt.timedelta(hours=1):
+            return f"{h.short_forecast} (forecast)", h.icon_key
+    return "Not reported", c.icon_key
+
+
 def draw_current(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
@@ -148,7 +164,8 @@ def draw_current(app: "App", win) -> None:
         return
 
     c = app.current
-    icon_lines = ICON_BIG.get(c.icon_key, ICON_BIG["unknown"]).strip("\n").splitlines()
+    description, icon_key = _conditions(app)
+    icon_lines = ICON_BIG.get(icon_key, ICON_BIG["unknown"]).strip("\n").splitlines()
     icon_w = max((len(x) for x in icon_lines), default=0)
     left_w = clamp(icon_w + 2, 12, cols - 1)
 
@@ -209,7 +226,7 @@ def draw_current(app: "App", win) -> None:
     text_lines: List[Tuple[str, int]] = [(line, temp_attr) for line in big_temp]
     text_lines += [
         ("", 0),
-        (c.text_description.replace("Current Conditions: ", ""), curses.A_BOLD),
+        (description, curses.A_BOLD),
     ]
     if show_feels_like:
         label = "Heat Index" if c.heat_index_c is not None else "Wind Chill"
@@ -240,7 +257,14 @@ def draw_current(app: "App", win) -> None:
             f"Active Alerts: {len(app.alerts)}  (press 'a')",
             curses.color_pair(4) | curses.A_BOLD,
         ))
-        text_lines.append((f"  {top.event} \u2014 {top.headline}", curses.color_pair(4)))
+        # Event and end time only: the full headline is long enough to widen
+        # the whole layout block and push the radar off to the side.
+        line = f"  {top.event}"
+        if top.until is not None:
+            line += f" until {fmt_time(top.until, app.use_24h, True)}"
+        if len(app.alerts) > 1:
+            line += f" \u00b7 +{len(app.alerts) - 1} more"
+        text_lines.append((line, curses.color_pair(4)))
     else:
         text_lines.append(("Active Alerts: 0", curses.A_DIM))
 

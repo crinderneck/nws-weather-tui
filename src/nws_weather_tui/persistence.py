@@ -210,6 +210,7 @@ def load_app_state(app: "App") -> bool:
         ("alerts", AlertItem, [
             "event", "severity", "urgency", "certainty", "headline",
             "sent", "effective", "expires", "description", "instruction",
+            "area_desc", "id", "onset", "ends",
         ]),
     ]:
         items = st.get(key, [])

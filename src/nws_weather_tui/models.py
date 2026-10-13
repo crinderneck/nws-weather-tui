@@ -86,6 +86,15 @@ class AlertItem:
     geometry: Optional[Dict[str, Any]] = None
     area_desc: str = ""
     id: str = ""
+    # `expires` is when this message lapses (NWS usually reissues before
+    # then); `onset`/`ends` bound the hazard itself.
+    onset: Optional[dt.datetime] = None
+    ends: Optional[dt.datetime] = None
+
+    @property
+    def until(self) -> Optional[dt.datetime]:
+        """When the hazard ends, falling back to the message expiry."""
+        return self.ends or self.expires
 
 
 @dataclass
@@ -466,6 +475,12 @@ def extract_alerts(alerts_json: Dict[str, Any]) -> List[AlertItem]:
                 if isinstance((f or {}).get("geometry"), dict) else None,
                 area_desc=str(props.get("areaDesc") or ""),
                 id=str(props.get("id") or ""),
+                onset=parse_iso(props.get("onset"))
+                if isinstance(props.get("onset"), str)
+                else None,
+                ends=parse_iso(props.get("ends"))
+                if isinstance(props.get("ends"), str)
+                else None,
             )
         )
     sev_rank = {"Extreme": 0, "Severe": 1, "Moderate": 2, "Minor": 3, "Unknown": 4}

@@ -15,10 +15,11 @@ from nws_weather_tui.formatting import fmt_time
 from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import safe_addstr
 from nws_weather_tui.moon import (
+    HAVE_ASTRAL,
     get_moonrise_moonset,
     lunation_number,
     moon_age,
-    moon_illumination,
+    moon_illumination_at,
     moon_phase_name,
     next_moon_phases,
 )
@@ -125,36 +126,39 @@ def draw_moon(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
 
+    now = dt.datetime.now(dt.timezone.utc)
     today = dt.date.today()
-    age = moon_age(today)
+    age = moon_age(now)
     phase = moon_phase_name(age)
-    illum = moon_illumination(age)
+    illum = moon_illumination_at(now)
     upcoming = next_moon_phases(today)
 
     info: List[Tuple[str, int]] = [
         (phase, curses.color_pair(14) | curses.A_BOLD),
         (f"{illum:.0%} illuminated", 0),
-        (f"{age:.1f} days into lunation #{lunation_number(today)}", curses.A_DIM),
+        (f"{age:.1f} days into lunation #{lunation_number(now)}", curses.A_DIM),
         ("", 0),
     ]
-    rise, mset = get_moonrise_moonset(app.lat, app.lon, today)
-    if rise or mset:
-        info.append((f"Moonrise  {fmt_time(rise, app.use_24h) if rise else '—'}", 0))
-        info.append((f"Moonset   {fmt_time(mset, app.use_24h) if mset else '—'}", 0))
+    if HAVE_ASTRAL:
+        rise, mset = get_moonrise_moonset(app.lat, app.lon, today)
+        info.append((f"Moonrise  {fmt_time(rise, app.use_24h) if rise else 'none today'}", 0))
+        info.append((f"Moonset   {fmt_time(mset, app.use_24h) if mset else 'none today'}", 0))
     else:
         info.append(("Moonrise/set: install 'astral' for times", curses.A_DIM))
     info += [("", 0), ("Upcoming", curses.color_pair(1) | curses.A_BOLD)]
-    for name, pdate in upcoming:
-        days = (pdate - today).days
-        when = f"{pdate.strftime('%a %b')} {pdate.day}"
-        info.append((f"{name:<14} {when:<11} in {days}d", 0))
+    for name, when in upcoming:
+        days = (when.date() - today).days
+        day = f"{when.strftime('%a %b')} {when.day}"
+        info.append((f"{name:<14} {day:<11} {fmt_time(when, app.use_24h):>7}  in {days}d", 0))
     info_w = max(len(t) for t, _ in info)
 
     # Side by side when there's room for a moon as tall as the screen plus
     # the details; otherwise the moon on top, details underneath.
+    # The moon may shrink to make room beside it, but not below ~2/3 height.
     side_rows = max(5, rows - 1)
-    if cols >= moon_width(side_rows) + 6 + info_w:
-        moon_rows = side_rows
+    fit_rows = int((cols - 1 - 6 - info_w) / (2 * PX_ASPECT))
+    if min(side_rows, fit_rows) >= max(5, side_rows * 2 // 3):
+        moon_rows = min(side_rows, fit_rows)
         block_w = moon_width(moon_rows) + 6 + info_w
         x0 = max(0, (cols - block_w) // 2)
         _draw_moon(win, 0, x0, age, moon_rows)

@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 import threading
 import time
-from typing import Any, Dict, TYPE_CHECKING
+from typing import Any, Dict, List, TYPE_CHECKING
 
 from nws_weather_tui.helpers import dbg
 from nws_weather_tui.models import (
@@ -21,6 +21,7 @@ from nws_weather_tui.models import (
     extract_uv_index,
     merge_grid_into_hourly,
 )
+from nws_weather_tui.text_product import segment_for_zones
 
 if TYPE_CHECKING:
     from nws_weather_tui.app import App
@@ -50,6 +51,18 @@ def refresh_all(app: "App", force: bool = False, allow_offline: bool = False) ->
     threading.Thread(
         target=_bg_weather_fetch, args=(app, ctx, gen), daemon=True
     ).start()
+
+
+def _point_zones(points_data: Any) -> List[str]:
+    """UGC codes for the point, e.g. ["OHZ055", "OHC049"], from the
+    forecastZone/county URLs in its /points response."""
+    props = (points_data or {}).get("properties", {}) or {}
+    out = []
+    for key in ("forecastZone", "county", "fireWeatherZone"):
+        url = props.get(key)
+        if isinstance(url, str) and url.rstrip("/"):
+            out.append(url.rstrip("/").rsplit("/", 1)[-1].upper())
+    return out
 
 
 def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
@@ -142,7 +155,11 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
         if office_id:
             result["afd"] = app.client.forecast_discussion(office_id)
             result["afd_earlier"] = app.client.earlier_forecast_discussions(office_id)
-            result["hwo"] = app.client.hazardous_weather_outlook(office_id)
+            hwo = app.client.hazardous_weather_outlook(office_id)
+            if hwo:
+                # An HWO has a segment per zone group; show only ours.
+                hwo["text"] = segment_for_zones(hwo["text"], _point_zones(points_data))
+            result["hwo"] = hwo
         # Air quality and UV index are supplementary, non-NWS sources —
         # failures there are swallowed internally and must not take the
         # whole refresh offline.

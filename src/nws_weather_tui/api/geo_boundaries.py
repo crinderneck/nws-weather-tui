@@ -153,7 +153,12 @@ class BoundaryClient:
             "returnGeometry": "true",
             "outSR": "4326",
             "outFields": "*",
-            "f": "pjson",
+            # Full-resolution coastlines run to ~30 MB per query; simplify on
+            # the server to ~1/2000 of the view's width, far finer than a
+            # terminal cell even at 1000+ columns (~1 MB).
+            "maxAllowableOffset": f"{max(1e-4, (maxlon - minlon) / 2000):.5f}",
+            "geometryPrecision": "4",
+            "f": "json",
         }
         try:
             r = self.s.get(layer_url + "/query", params=params, timeout=self.timeout)

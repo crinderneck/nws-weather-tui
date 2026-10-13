@@ -22,11 +22,10 @@ def parse_iso(ts: Optional[str]) -> Optional[dt.datetime]:
         return None
 
 
-def _local_tzinfo() -> dt.tzinfo:
-    return dt.datetime.now().astimezone().tzinfo or dt.timezone.utc
-
-
 def _to_local(t: Optional[object]) -> Optional[dt.datetime]:
+    """`t` in local time, using the UTC offset in force at that moment — not
+    today's: a fixed offset would show times past a DST change an hour off.
+    Naive datetimes are taken to be local already."""
     if t is None:
         return None
     if isinstance(t, str):
@@ -35,10 +34,7 @@ def _to_local(t: Optional[object]) -> Optional[dt.datetime]:
             return None
     if not isinstance(t, dt.datetime):
         return None
-    ltz = _local_tzinfo()
-    if t.tzinfo is None:
-        t = t.replace(tzinfo=ltz)
-    return t.astimezone(ltz)
+    return t.astimezone()
 
 
 def fmt_time(t: Optional[object], use_24h: bool, with_date: bool = False) -> str:

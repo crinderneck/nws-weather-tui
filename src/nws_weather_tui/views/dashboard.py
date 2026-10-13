@@ -58,13 +58,24 @@ def _row(app: "App", data: Optional[Dict[str, Any]]) -> Dict[str, Tuple[str, int
     us = app.units == "us"
     temp = c_to_f(c.temperature_c) if us else c.temperature_c
     wind = mps_to_mph(c.wind_mps) if us else c.wind_mps
+    periods = data.get("periods") or []
+    cond = (c.text_description or "").replace("Current Conditions: ", "").strip()
+    icon_key = c.icon_key
+    if (not cond or cond == "N/A") and periods:
+        # No sky condition from this station: use the forecast, and say so.
+        cond, icon_key = f"{periods[0].short_forecast} (fcst)", periods[0].icon_key
+    if c.wind_mps is None:
+        wind_s = "—"  # missing, which is not the same as calm
+    elif c.wind_mps < 0.5:
+        wind_s = "calm"
+    else:
+        wind_s = f"{fmt_num(wind, 0)} {'mph' if us else 'm/s'}"
     cells: Dict[str, Tuple[str, int]] = {
         "temp": ("—" if temp is None else f"{fmt_num(temp, 0)}°{'F' if us else 'C'}", 0),
-        "icon": (ICON_TINY.get(c.icon_key, "?") or "?", 0),
-        "cond": ((c.text_description or "—").replace("Current Conditions: ", ""), 0),
-        "wind": ("calm" if not wind else f"{fmt_num(wind, 0)} {'mph' if us else 'm/s'}", 0),
+        "icon": (ICON_TINY.get(icon_key, "?") or "?", 0),
+        "cond": (cond or "—", 0),
+        "wind": (wind_s, 0),
     }
-    periods = data.get("periods") or []
     if periods:
         hilo, pop = _today(periods)
         cells["today"] = (hilo, 0)
@@ -124,13 +135,25 @@ def draw_dashboard(app: "App", win) -> None:
         columns = [
             (k, h, max(floor, w - over) if k == key else w, a) for k, h, w, a in columns
         ]
+    # Still too wide: drop the least useful columns rather than run off the
+    # edge (curses would wrap the overflow onto the next row).
+    for key in ("updated", "wind", "pop", "today"):
+        if sum(c[2] for c in columns) + gap * (len(columns) - 1) <= cols - 3:
+            break
+        columns = [c for c in columns if c[0] != key]
 
     x = 3
     xs: Dict[str, int] = {}
+    fitted: List[Tuple[str, str, int, str]] = []
     for key, head, w, align in columns:
+        w = min(w, cols - 1 - x)  # never past the right edge
+        if w < 1:
+            break
         xs[key] = x
+        fitted.append((key, head, w, align))
         safe_addstr(win, 1, x, fit_width(head, w, align), curses.A_BOLD)
         x += w + gap
+    columns = fitted
     safe_addstr(win, 2, 0, "─" * min(cols - 1, x - gap), curses.A_DIM)
 
     any_here = False

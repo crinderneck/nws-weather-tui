@@ -112,21 +112,28 @@ def step_radar_frame(app: "App", direction: int) -> bool:
     return True
 
 
+RADAR_RETRY_S = 60  # after a failed fetch, wait this long before trying again
+
+
 def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
     if not app.show_radar_map:
         return
     if app._bg_radar_running:
         return
     ttl = int(app.cfg.get("cache_ttls", {}).get("radar", 300))
-    if (
-        (time.time() - app._radar_last) < ttl
-        and (app._radar_cells or app._radar_ascii)
-        and app._radar_src_cols == target_cols
+    age = time.time() - app._radar_last
+    same_view = (
+        app._radar_src_cols == target_cols
         and app._radar_src_rows == target_rows
         # The first fetch can happen before the weather load sets state_code,
         # leaving a radius view around the user; rebuild once the state is known.
         and app._radar_bbox_state == app.state_code
-    ):
+    )
+    if same_view and age < ttl and (app._radar_cells or app._radar_ascii):
+        return
+    # A failed fetch leaves no frames; without this every redraw (several a
+    # second) would start another full round of requests to every source.
+    if same_view and app._radar_err and age < RADAR_RETRY_S:
         return
 
     try:

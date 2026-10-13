@@ -10,7 +10,7 @@ description = "A terminal-based weather application for the US, powered by the N
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [
     { name = "crinderneck" },
 ]
@@ -21,7 +21,6 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -35,6 +34,10 @@ dependencies = [
     "pillow",
     "requests",
 ]
+
+[project.optional-dependencies]
+# Regression harness (tests/README.md). uv provides uvx for the Python 3.9 run.
+test = ["pytest", "freezegun", "pyte", "vermin", "uv"]
 
 [project.urls]
 Homepage = "https://github.com/crinderneck/nws-weather-tui"
@@ -50,3 +53,10 @@ where = ["src"]
 [tool.setuptools.dynamic]
 # Single source of truth for the version; the release workflow checks the tag matches it.
 version = { attr = "nws_weather_tui.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Plain `pytest` runs the fast suite (~3 s); `pytest -m slow` runs the Python 3.9
+# and pipx checks, `pytest -m "slow or not slow"` everything.
+addopts = "-m 'not slow'"
+markers = ["slow: needs network, another Python or a pipx install"]

@@ -14,5 +14,5 @@ env/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
-.claude/
+.claude/settings.local.json
 tools/*
