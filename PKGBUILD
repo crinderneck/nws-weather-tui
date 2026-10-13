@@ -20,7 +20,7 @@ makedepends=(
 )
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
 # After pushing the v$pkgver tag, run `updpkgsums` to fill this in (see RELEASING.md).
-sha256sums=('30b42e751f77cbe42bea2cd511a987c13db77dabe4dfb49678281c10c52ac312')
+sha256sums=('3edeb1645c339a26753bb3b33192ce2bdbcbd21934dd5e8feb0af4faaf2cc162')
 
 build() {
     cd "$pkgname-$pkgver"
