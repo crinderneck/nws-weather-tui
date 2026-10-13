@@ -101,11 +101,7 @@ def draw_radar_panel(
     alert_lines: List[str] = app._radar_alert_overlay if show_alert_polygons else []
 
     if stale:
-        safe_addstr(
-            win, y, map_x,
-            "(loading radar\u2026)"[:map_cols],
-            curses.A_DIM,
-        )
+        _draw_loading(win, y, map_x, map_cols, map_rows)
     elif app._radar_has_256color and app._radar_cells:
         for i, row_cells in enumerate(app._radar_cells[:map_rows]):
             ry = y + i
@@ -144,11 +140,16 @@ def draw_radar_panel(
             curses.color_pair(4),
         )
     else:
-        safe_addstr(
-            win, y, map_x,
-            "(loading radar\u2026)"[:map_cols],
-            curses.A_DIM,
-        )
+        _draw_loading(win, y, map_x, map_cols, map_rows)
+
+
+def _draw_loading(win, y: int, map_x: int, map_cols: int, map_rows: int) -> None:
+    text = "(loading radar\u2026)"[:map_cols]
+    safe_addstr(
+        win, y + map_rows // 2, map_x + (map_cols - len(text)) // 2,
+        text,
+        curses.A_DIM,
+    )
 
 
 def draw_radar_view(app: "App", win) -> None:

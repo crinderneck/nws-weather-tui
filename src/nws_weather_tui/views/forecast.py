@@ -6,6 +6,7 @@ NWS Weather TUI — Forecast view (horizontal day cards).
 from __future__ import annotations
 
 import datetime as dt
+import textwrap
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
@@ -126,7 +127,10 @@ def _card_lines(card: DayCard, w: int, app: "App") -> List[Tuple[str, int, bool]
     # Fixed-height blocks so every card's rows line up across the screen.
     out: List[Tuple[str, int, bool]] = []
     icon_art = ICON_BIG.get(card.icon_key, ICON_BIG.get("unknown", ""))
-    icon = [line.rstrip()[:w] for line in (icon_art.strip("\n").split("\n") if icon_art else [])]
+    # Centre the art as one block: per-line centring would skew its shape.
+    art = textwrap.dedent(icon_art.strip("\n")).split("\n") if icon_art else []
+    art_w = max((len(line.rstrip()) for line in art), default=0)
+    icon = [line.rstrip().ljust(art_w)[:w] for line in art]
     icon += [""] * (ICON_ROWS - len(icon))
     out += [(line, curses.color_pair(2), True) for line in icon[:ICON_ROWS]]
     short = list(wrap_lines(card.short_forecast, w))[:2]
