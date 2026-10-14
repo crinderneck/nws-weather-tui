@@ -227,8 +227,6 @@ def test_no_match_is_none() -> None:
     assert geo.geocode_us("   ") is None and len(s.calls) == 1  # blank: no request at all
 
 
-@pytest.mark.xfail(strict=True, reason="network errors come back as None, i.e. "
-                                       "'No match found' (fixed in a later commit)")
 def test_network_failure_is_not_reported_as_no_match() -> None:
     """A dropped connection must surface as an error (the search prompt then
     says 'Location search failed: ...'), not as 'No match found', which

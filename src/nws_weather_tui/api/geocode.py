@@ -89,8 +89,10 @@ class Geocoder:
             name = _format_nominatim_name(hit)
             return (name, lat, lon)
         except Exception as e:
+            # Not "no match": the caller has to be able to say the search
+            # failed, rather than that the place doesn't exist.
             dbg(f"Nominatim geocode failed for '{q}': {e}")
-        return None
+            raise
 
 
 def _format_nominatim_name(hit: dict) -> str:
