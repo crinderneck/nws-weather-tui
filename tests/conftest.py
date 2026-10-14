@@ -25,13 +25,16 @@ def pytest_addoption(parser: Any) -> None:
     )
 
 
-def _render(location: str, cols: int, rows: int) -> Dict[str, Any]:
+def run_driver(location: str, cols: int, rows: int, *extra: str,
+               timeout: float = 300) -> Dict[str, Any]:
+    """Run harness/driver.py once; `extra` are further driver arguments
+    (--views, --keys, --home, --fixture-dir)."""
     with tempfile.TemporaryDirectory() as tmp:
         out = os.path.join(tmp, "out.json")
         proc = subprocess.run(
             [sys.executable, DRIVER, "--location", location,
-             "--cols", str(cols), "--rows", str(rows), "--out", out],
-            capture_output=True, text=True, timeout=300,
+             "--cols", str(cols), "--rows", str(rows), "--out", out, *extra],
+            capture_output=True, text=True, timeout=timeout,
         )
         if not os.path.exists(out):
             return {"error": f"driver crashed (rc={proc.returncode})",
@@ -49,7 +52,7 @@ class Renders:
     def prime(self) -> None:
         jobs = [(loc, c, r) for loc in LOCATIONS for c, r in SIZES]
         with ThreadPoolExecutor(max_workers=min(len(jobs), os.cpu_count() or 4)) as pool:
-            for key, result in zip(jobs, pool.map(lambda j: _render(*j), jobs)):
+            for key, result in zip(jobs, pool.map(lambda j: run_driver(*j), jobs)):
                 self._results[key] = result
 
     def get(self, location: str, cols: int, rows: int) -> Dict[str, Any]:
