@@ -11,8 +11,6 @@ import os
 import re
 from typing import Any, Dict
 
-import pytest
-
 from conftest import run_driver
 
 
@@ -103,8 +101,6 @@ def test_supplementary_failures_stay_online(tmp_path: Any) -> None:
     assert "Today" in forecast or "Tonight" in forecast, forecast
 
 
-@pytest.mark.xfail(strict=True, reason="the alerts view crashes on a saved alert's onset, "
-                                       "which loads as a string (fixed in the next commit)")
 def test_offline_restart_shows_saved_state(tmp_path: Any) -> None:
     """Run once online (which saves state.json), then again with no
     network from the same HOME: the saved forecast and alerts come back.

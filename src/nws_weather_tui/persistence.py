@@ -98,12 +98,15 @@ def save_app_state(app: "App") -> None:
 def _parse_field(value: Any, field_name: str) -> Any:
     if value is None:
         return None
-    if field_name in ("start", "end", "sent", "effective", "expires", "timestamp"):
+    if field_name in (
+        "start", "end", "sent", "effective", "expires", "onset", "ends", "timestamp",
+    ):
         return parse_iso(value) if isinstance(value, str) else None
     if field_name in (
         "temperature", "wind_speed_num", "pop", "humidity_pct",
         "pressure_pa", "visibility_m", "wind_mps", "wind_dir_deg", "gust_mps",
         "heat_index_c", "wind_chill_c", "precip_mm", "snow_mm",
+        "dewpoint_c", "apparent_c", "sky_pct", "gust_kmh", "thunder_pct",
     ):
         return value if isinstance(value, (int, float)) else None
     if field_name == "is_daytime":
@@ -205,7 +208,8 @@ def load_app_state(app: "App") -> bool:
         ("hourly_periods", HourlyPeriod, [
             "start", "temperature", "temperature_unit", "wind_speed",
             "wind_speed_num", "wind_dir", "short_forecast", "icon_key", "pop",
-            "precip_mm", "snow_mm",
+            "is_daytime", "dewpoint_c", "humidity_pct", "precip_mm", "snow_mm",
+            "apparent_c", "sky_pct", "gust_kmh", "thunder_pct",
         ]),
         ("alerts", AlertItem, [
             "event", "severity", "urgency", "certainty", "headline",

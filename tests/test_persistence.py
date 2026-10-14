@@ -160,8 +160,6 @@ def _diff(saved: Any, loaded: Any) -> list:
     return out
 
 
-@pytest.mark.xfail(strict=True, reason="alert onset/ends load as strings; 7 hourly fields "
-                                       "are not restored (fixed in the next commit)")
 def test_state_round_trip(config_dir: str) -> None:
     """Everything a refresh produced comes back from state.json with the same
     values and types (a datetime saved must load as a datetime)."""
