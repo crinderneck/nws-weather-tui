@@ -96,26 +96,36 @@ def test_snapshot(
 _LEAKS = re.compile(r"(?<!\.\.\.)\bNone\b|\bnan\b|\binf\b|\[\]|\{\}|<object|Traceback")
 
 
-@pytest.mark.parametrize("loc,cols,rows,view", CASES)
-def test_no_leaked_values(renders: Any, loc: str, cols: int, rows: int, view: str) -> None:
-    lines = renders.get(loc, cols, rows)["screens"].get(view, {}).get("text", [])
-    bad = [f"{i:3}: {line}" for i, line in enumerate(lines) if _LEAKS.search(line)]
+# The two checks below look at frames that test_snapshot already compares
+# byte for byte, so on an unchanged rendering they can't fail. They earn their
+# place when a rendering changes and is accepted with --update-snapshots: a
+# leaked "None" or a lost footer still fails then. One test per render (not per
+# view) keeps them from multiplying the test count.
+
+@pytest.mark.parametrize("loc,cols,rows", [(loc, c, r) for loc in LOCATIONS for c, r in SIZES])
+def test_no_leaked_values(renders: Any, loc: str, cols: int, rows: int) -> None:
+    bad = [
+        f"{view} {i:3}: {line}"
+        for view, screen in renders.get(loc, cols, rows)["screens"].items()
+        for i, line in enumerate(screen["text"]) if _LEAKS.search(line)
+    ]
     assert not bad, "raw values on screen:\n" + "\n".join(bad)
 
 
-@pytest.mark.parametrize("loc,cols,rows,view", CASES)
-def test_chrome_intact(renders: Any, loc: str, cols: int, rows: int, view: str) -> None:
-    """Header carries the location and view tag; footer keys are on the last row."""
-    lines = renders.get(loc, cols, rows)["screens"].get(view, {}).get("text", [])
-    assert len(lines) == rows
-    assert str(LOCATIONS[loc]["name"]) in lines[0] or view == "dashboard"
-    assert "q Quit" in lines[-1] or "Esc" in lines[-1], lines[-1]
+@pytest.mark.parametrize("loc,cols,rows", [(loc, c, r) for loc in LOCATIONS for c, r in SIZES])
+def test_chrome_intact(renders: Any, loc: str, cols: int, rows: int) -> None:
+    """Header carries the location; footer keys are on the last row."""
+    screens = renders.get(loc, cols, rows)["screens"]
+    assert set(screens) == set(views_for(loc))
+    for view, screen in screens.items():
+        lines = screen["text"]
+        assert len(lines) == rows, view
+        assert str(LOCATIONS[loc]["name"]) in lines[0] or view == "dashboard", (view, lines[0])
+        assert "q Quit" in lines[-1] or "Esc" in lines[-1], (view, lines[-1])
 
 
-@pytest.mark.parametrize("cols,rows", SIZES)
-def test_help_shows_version(renders: Any, cols: int, rows: int) -> None:
-    """The real version is on the help screen (the snapshots mask it)."""
-    lines = renders.get("denver", cols, rows)["screens"]["help"]["text"]
-    if not any("About" in line for line in lines):
-        pytest.skip("About section is below the fold at this size")
+def test_help_shows_version(renders: Any) -> None:
+    """The real version is on the help screen (the snapshots mask it). Only
+    the largest size shows the About section without scrolling."""
+    lines = renders.get("denver", 200, 60)["screens"]["help"]["text"]
     assert any(re.search(rf"version\s+{re.escape(__version__)}\b", line) for line in lines)

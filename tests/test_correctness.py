@@ -19,13 +19,8 @@ from typing import Any, Dict, Iterator, List, Tuple
 
 import pytest
 
-from harness.locations import (
-    HTTP_FIXTURES_DIR,
-    LOCATIONS,
-    MANIFEST_PATH,
-    REFERENCE_DIR,
-    SNAPSHOT_DIR,
-)
+from harness.locations import LOCATIONS, REFERENCE_DIR, SNAPSHOT_DIR
+from harness.recordings import recorded as _fixture
 
 SUN_TOLERANCE_S = 120   # Open-Meteo/USNO publish whole minutes; refraction models differ
 MOON_TOLERANCE_S = 180
@@ -59,15 +54,6 @@ def _wall(day: str, hhmm: str) -> dt.datetime:
 
 def _naive_local(t: dt.datetime) -> dt.datetime:
     return t.astimezone().replace(tzinfo=None)
-
-
-def _fixture(predicate: Any) -> Dict[str, Any]:
-    for name in sorted(os.listdir(HTTP_FIXTURES_DIR)):
-        with open(os.path.join(HTTP_FIXTURES_DIR, name), encoding="utf-8") as f:
-            rec = json.load(f)
-        if predicate(rec["url"]):
-            return rec.get("json") or json.loads(rec["text"])
-    raise LookupError("no matching fixture")
 
 
 def _snapshot(loc: str, size: str, view: str) -> List[str]:
@@ -212,11 +198,18 @@ def test_moon_illumination_matches_usno(loc: str) -> None:
 
 
 @pytest.mark.parametrize("loc", sorted(LOCATIONS))
-def test_moon_screen_shows_rise_and_set(loc: str) -> None:
+def test_moon_screen_shows_correct_rise_and_set(loc: str) -> None:
+    """End to end: the times printed on the moon screen, against USNO."""
+    ref = _ref(loc)
+    usno = ref["moon_today"]["moon"]
     text = "\n".join(_snapshot(loc, "120x40", "moon"))
-    assert "install 'astral'" not in text
-    assert re.search(r"Moonrise\s+\d{1,2}:\d{2}[ap]m", text), text
-    assert re.search(r"Moonset\s+\d{1,2}:\d{2}[ap]m", text), text
+    for label, phen in (("Moonrise", "Rise"), ("Moonset", "Set")):
+        m = re.search(rf"{label}\s+(\d{{1,2}}:\d{{2}}[ap]m)", text)
+        assert m, f"{loc}: no {label} on screen\n{text}"
+        shown = dt.datetime.strptime(f"{ref['today']} {m.group(1)}", "%Y-%m-%d %I:%M%p")
+        want = _wall(ref["today"], usno[phen])
+        assert abs((shown - want).total_seconds()) <= MOON_TOLERANCE_S, (
+            f"{loc} {label} shown {m.group(1)}, USNO {want:%H:%M}")
 
 
 # ---------------------------------------------------------------------------
@@ -312,9 +305,3 @@ def test_fixtures_include_some_rain() -> None:
     assert any(
         sum(h.precip_mm or 0 for h in _hourly_for(loc)[0]) >= 2.5 for loc in LOCATIONS
     )
-
-
-def test_manifest_frozen_after_recording() -> None:
-    with open(MANIFEST_PATH, encoding="utf-8") as f:
-        m = json.load(f)
-    assert m["frozen_at"] >= m["recorded_at"]

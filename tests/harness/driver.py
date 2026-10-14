@@ -233,7 +233,10 @@ def _run(stdscr: Any, args: argparse.Namespace, tap: ScreenTap, out: Dict[str, A
     }
     app = App(stdscr, app_config_full(args.location))
     try:
-        for view in views_for(args.location):
+        if args.keys is not None:
+            _run_keys(app, tap, args.keys, out)
+            return
+        for view in (args.views.split(",") if args.views else views_for(args.location)):
             app.view = view
             _settle(app)
             # Steady state: no "Updated." flash or spinner in the footer.
@@ -250,6 +253,45 @@ def _run(stdscr: Any, args: argparse.Namespace, tap: ScreenTap, out: Dict[str, A
             out["fixture_hits"] = len(fx.hits)
         if app._state_thread is not None:
             app._state_thread.join(timeout=5)
+
+
+# Named keys for --keys, looked up in terminfo so they arrive as the real
+# terminal would send them (and curses has to decode them).
+_NAMED_KEYS = {"down": "kcud1", "up": "kcuu1", "left": "kcub1", "right": "kcuf1",
+               "pgdn": "knp", "pgup": "kpp", "enter": None}
+
+
+def _key_bytes(script: str) -> bytes:
+    """'e<down>Kq' -> bytes; <name> is a terminfo key, anything else literal."""
+    import curses
+    import re
+
+    out = b""
+    for name, literal in re.findall(r"<(\w+)>|(.)", script, re.S):
+        if not name:
+            out += literal.encode()
+        elif name == "enter":
+            out += b"\r"
+        else:
+            seq = curses.tigetstr(_NAMED_KEYS[name])
+            if not seq:
+                raise RuntimeError(f"terminfo has no {name} key")
+            out += seq
+    return out
+
+
+def _run_keys(app: Any, tap: ScreenTap, script: str, out: Dict[str, Any]) -> None:
+    """Type `script` into the terminal and run the app's real main loop,
+    which has to return on its own (so the script should end with q)."""
+    _settle(app)
+    os.write(tap.fd, _key_bytes(script))
+    app.run()
+    out["final"] = {
+        "view": app.view,
+        "use_24h": app.use_24h,
+        "favorites": [f.get("name") for f in app.favorites],
+    }
+    out["screens"]["final"] = tap.mark("final")
 
 
 def _fix_aware_now() -> None:
@@ -281,6 +323,11 @@ def main() -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--mode", choices=("replay", "record"), default="replay")
     ap.add_argument("--fixture-dir", default=HTTP_FIXTURES_DIR)
+    ap.add_argument("--views", help="comma-separated views to render (default: all)")
+    ap.add_argument("--keys", help="type these keys and run the main loop instead "
+                                   "(<down>, <enter>, ... for named keys)")
+    ap.add_argument("--home", help="HOME to use (and keep) instead of a fresh temp dir, "
+                                   "e.g. to start a second run from the first one's state")
     args = ap.parse_args()
 
     out: Dict[str, Any] = {"location": args.location, "cols": args.cols,
@@ -288,7 +335,8 @@ def main() -> int:
 
     # Everything the app persists (config, state, debug log, radar PNG) lands
     # in a throwaway HOME; the constants module reads HOME at import time.
-    home = tempfile.mkdtemp(prefix="nws-tui-home-")
+    home = args.home or tempfile.mkdtemp(prefix="nws-tui-home-")
+    os.makedirs(home, exist_ok=True)
     os.environ["HOME"] = home
     os.environ["TZ"] = str(LOCATIONS[args.location]["tz"])
     time.tzset()
@@ -350,6 +398,10 @@ def main() -> int:
         if os.path.exists(debug_log):
             with open(debug_log, encoding="utf-8") as f:
                 out["debug_log"] = f.read()
+        config = os.path.join(home, ".config", "nws-weather-tui", "config.json")
+        if os.path.exists(config):
+            with open(config, encoding="utf-8") as f:
+                out["config"] = json.load(f)
 
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, ensure_ascii=False)

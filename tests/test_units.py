@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import datetime as dt
 import json
-import os
 import time
 from typing import Any, Dict, List, Optional
 
 import pytest
 
 from harness.locations import HTTP_FIXTURES_DIR
+from harness.recordings import records
 
 
 # ---------------------------------------------------------------------------
@@ -123,13 +123,11 @@ def test_ugc_zone_expansion() -> None:
 
 
 def _iln_hwo() -> str:
-    for name in sorted(os.listdir(HTTP_FIXTURES_DIR)):
-        with open(os.path.join(HTTP_FIXTURES_DIR, name), encoding="utf-8") as f:
-            rec = json.load(f)
+    for rec in records():
         body = rec.get("json") or {}
         if body.get("productCode") == "HWO" and "HWOILN" in body.get("productText", ""):
-            return body["productText"]
-    pytest.skip("no ILN HWO in this recording")
+            return str(body["productText"])
+    pytest.fail("no ILN HWO in the recording: Columbus must stay a covered location")
     return ""
 
 
@@ -137,8 +135,9 @@ def test_hwo_shows_only_the_segment_for_the_point() -> None:
     from nws_weather_tui.text_product import parse_sections, segment_for_zones
 
     raw = _iln_hwo()
-    if raw.count("$$") < 2:
-        pytest.skip("this recording's ILN HWO has a single segment")
+    # Fail rather than skip: after a re-record this test must not quietly stop
+    # running. If ILN issued a single-segment HWO that day, re-record later.
+    assert raw.count("$$") >= 2, "this recording's ILN HWO has a single segment"
     columbus = segment_for_zones(raw, ["OHZ055", "OHC049"])  # Franklin County, OH
     assert "OHZ" not in columbus  # UGC header lines removed
     titles = [t for t, _ in parse_sections(columbus)]
@@ -332,15 +331,40 @@ def test_failed_radar_fetch_backs_off(monkeypatch: Any) -> None:
     assert started == [1] and app._bg_radar_running
 
 
-def test_line_raster_is_four_connected() -> None:
+@pytest.mark.parametrize("dx,dy", [
+    (7, 5), (5, 7), (-7, 5), (-5, 7), (7, -5), (5, -7), (-7, -5), (-5, -7),  # every octant
+    (7, 0), (0, -7), (6, 6), (-6, 6), (0, 0),                               # axes, diagonals, a point
+])
+def test_line_raster_is_four_connected(dx: int, dy: int) -> None:
+    """Every direction: the line joins its endpoints through cells that share
+    an edge, never only a corner, and stays a thin line (no extra cells)."""
     from nws_weather_tui.radar.overlays import _draw_segment
 
-    grid = [[" "] * 8 for _ in range(8)]
-    _draw_segment(grid, 0, 0, 7, 5, "#")
+    x0, y0 = 8, 8
+    grid = [[" "] * 17 for _ in range(17)]
+    _draw_segment(grid, x0, y0, x0 + dx, y0 + dy, "#")
     cells = {(x, y) for y, row in enumerate(grid) for x, ch in enumerate(row) if ch == "#"}
-    assert (0, 0) in cells and (7, 5) in cells
-    for x, y in cells - {(7, 5)}:
-        assert {(x + 1, y), (x, y + 1)} & cells, f"diagonal-only step after {(x, y)}"
+    start, end = (x0, y0), (x0 + dx, y0 + dy)
+    assert start in cells and end in cells
+    seen, todo = {start}, [start]
+    while todo:  # flood fill through edge neighbours only
+        x, y = todo.pop()
+        for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if n in cells and n not in seen:
+                seen.add(n)
+                todo.append(n)
+    assert end in seen, f"corner-only step between {start} and {end}"
+    assert seen == cells, "stray cells off the line"
+    assert len(cells) == abs(dx) + abs(dy) + 1  # the shortest 4-connected path
+
+
+def test_line_raster_clips_to_the_grid() -> None:
+    from nws_weather_tui.radar.overlays import _draw_segment
+
+    grid = [[" "] * 5 for _ in range(4)]
+    _draw_segment(grid, -3, 1, 9, 2, "#")  # starts and ends off the grid
+    assert [len(row) for row in grid] == [5] * 4
+    assert "".join(grid[1]) + "".join(grid[2]) != " " * 10
 
 
 def test_city_labels_never_touch() -> None:
@@ -370,8 +394,10 @@ def test_dashboard_missing_wind_is_not_calm(monkeypatch: Any) -> None:
         units = "us"
 
     def row(wind: Optional[float]) -> str:
-        c = CurrentConditions("KCMH", None, 20.0, wind, None, None, None, None, None,
-                              "Clear", "clear")
+        c = CurrentConditions(
+            station="KCMH", timestamp=None, temperature_c=20.0, wind_mps=wind,
+            wind_dir_deg=None, gust_mps=None, humidity_pct=None, pressure_pa=None,
+            visibility_m=None, text_description="Clear", icon_key="clear")
         return dashboard._row(App(), {"current": c, "ts": time.time()})["wind"][0]  # type: ignore[arg-type]
 
     assert row(None) == "—"
