@@ -538,3 +538,53 @@ def test_dashboard_missing_wind_is_not_calm(monkeypatch: Any) -> None:
     assert row(None) == "—"
     assert row(0.0) == "calm"
     assert row(4.47) == "10 mph"
+
+
+# ---------------------------------------------------------------------------
+# TTLCache
+# ---------------------------------------------------------------------------
+
+def test_cache_tells_a_cached_none_from_a_miss() -> None:
+    from nws_weather_tui.api.cache import MISSING, TTLCache
+
+    c = TTLCache()
+    assert c.get("k") is None and c.get("k", MISSING) is MISSING
+    c.set("k", None, 600)
+    assert c.get("k") is None and c.get("k", MISSING) is None  # a remembered miss
+    c.set("k", None, 0)  # expired at once
+    assert c.get("k", MISSING) is MISSING
+    c.set("k", "v", 600)
+    c.clear()
+    assert c.get("k", MISSING) is MISSING
+
+
+def test_cache_survives_concurrent_use() -> None:
+    """The main loop, the weather thread and the radar/dashboard pools share
+    one cache. Before: a sweep iterating the dict while another thread
+    inserted raised 'dictionary changed size during iteration'."""
+    from nws_weather_tui.api.cache import TTLCache
+
+    c = TTLCache()
+    c._SWEEP_INTERVAL = 1  # sweep (iterate the whole dict) on every set
+    errors: List[BaseException] = []
+    stop = threading.Event()
+
+    def writer(tag: str) -> None:
+        try:
+            i = 0
+            while not stop.is_set() and i < 5_000:
+                c.set(f"{tag}:{i}", i, 0 if i % 2 else 600)  # half expire at once
+                c.get(f"{tag}:{i - 1}")
+                if i % 2_500 == 0:
+                    c.clear()
+                i += 1
+        except BaseException as e:  # noqa: BLE001 - the failure under test
+            errors.append(e)
+            stop.set()
+
+    threads = [threading.Thread(target=writer, args=(t,)) for t in "abcd"]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=30)
+    assert errors == []

@@ -237,3 +237,32 @@ def test_network_failure_is_not_reported_as_no_match() -> None:
         geo.geocode_us("Denver")
     assert geo.geocode_us("Denver") == ("Denver, Colorado", 39.7392, -104.9903)
     assert s.count("nominatim") == 2
+
+
+def test_no_match_is_remembered() -> None:
+    """A miss is cached for a while; before, only hits were (a cached None
+    read as 'not cached'), so every retype of a bad name went back out."""
+    geo, s = _geocoder({"nominatim": (200, [])})
+    assert geo.geocode_us("Atlantis") is None
+    assert geo.geocode_us("Atlantis") is None
+    assert s.count("nominatim") == 1
+
+
+# ---------------------------------------------------------------------------
+# State boundaries
+# ---------------------------------------------------------------------------
+
+def test_unknown_state_bbox_is_remembered() -> None:
+    """The bbox lookup is several requests; a state the map service doesn't
+    know must not be asked again on every radar refresh."""
+    from nws_weather_tui.api.cache import TTLCache
+    from nws_weather_tui.api.geo_boundaries import BoundaryClient
+
+    s = ScriptedSession({"MapServer/3/query": (200, {"extent": {}}),  # matched first
+                         "MapServer/3": (200, {"fields": [{"name": "STUSPS"}]})})
+    client = BoundaryClient(s, 5, TTLCache())
+    assert client.state_bbox("XX") is None
+    first = len(s.calls)
+    assert first >= 2
+    assert client.state_bbox("XX") is None
+    assert len(s.calls) == first
