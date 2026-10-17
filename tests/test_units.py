@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import threading
 import time
 from typing import Any, Dict, List, Optional
 
@@ -306,6 +307,140 @@ class _RadarApp:
         self._radar_anim_playing = False
         self._bg_generation = 0
         self.client = type("C", (), {"state_bbox": lambda _s, _c: (-109.1, 37.0, -102.0, 41.0)})()
+        # What a finished fetch (apply_bg_radar) writes.
+        self._bg_lock = threading.Lock()
+        self._bg_radar_pending: Optional[Dict[str, Any]] = None
+        self._bg_weather_running = False
+        self._is_loading = False
+        self.status_msg, self.status_until = "", 0.0
+        self._radar_bbox: Optional[Any] = None
+        self._radar_frames: List[Any] = []
+        self._radar_frame_idx = 0
+        self._radar_kind: List[str] = []
+        self._radar_ts_ms, self._radar_ts_utc = 0, ""
+        self._radar_state_overlay: List[str] = []
+        self._radar_city_overlay: List[str] = []
+        self._radar_alert_overlay: List[str] = []
+        self._radar_city_hitmap: Dict[Any, Any] = {}
+        self._radar_progress = (0, 0)
+        self.flashed: List[str] = []
+
+    def _flash(self, msg: str, seconds: float = 2.0) -> None:
+        self.flashed.append(msg)
+
+
+class _RadarClient:
+    """Counts bbox lookups; radar frames come from `frames` or raise `error`."""
+
+    STATE_BBOX = (-109.1, 37.0, -102.0, 41.0)
+
+    def __init__(self, frames: Optional[List[Any]] = None, error: Optional[str] = None) -> None:
+        self.frames, self.error = frames or [], error
+        self.bbox_calls: List[str] = []
+        self.requests: List[Any] = []
+
+    def state_bbox(self, state_code: str) -> Any:
+        self.bbox_calls.append(state_code)
+        return self.STATE_BBOX
+
+    def radar_frames_png(self, radar_id: str, bbox: Any, width: int, height: int, **_: Any) -> Any:
+        self.requests.append((radar_id, bbox, width, height))
+        if self.error:
+            raise RuntimeError(self.error)
+        return list(self.frames)
+
+
+def _capture_threads(monkeypatch: Any) -> List[Any]:
+    """Replace Thread so a test can run the worker itself, on this thread."""
+    from nws_weather_tui.radar import state
+
+    started: List[Any] = []
+
+    class Thread:
+        def __init__(self, target: Any, args: Any, daemon: bool) -> None:
+            self.run = lambda: target(*args)
+
+        def start(self) -> None:
+            started.append(self.run)
+
+    monkeypatch.setattr(state.threading, "Thread", Thread)
+    return started
+
+
+def _fresh_radar_app(client: Any) -> _RadarApp:
+    """An app that has never fetched radar for its current location."""
+    app = _RadarApp()
+    app.client = client
+    app._radar_err = None
+    app._radar_last = 0.0
+    app._radar_src_cols = app._radar_src_rows = 0
+    app._radar_bbox_state = None
+    app.cfg["radar"] = {"show_state_lines": False, "show_city_labels": False,
+                        "show_alert_polygons": False, "animation_frames": 1}
+    return app
+
+
+def test_radar_bbox_lookup_runs_on_the_worker(monkeypatch: Any) -> None:
+    """Before: the draw path looked the state bbox up synchronously, up to
+    six HTTP requests on the UI thread after every location change."""
+    from nws_weather_tui.radar import state
+    from nws_weather_tui.geo import expand_bbox_km
+
+    monkeypatch.setattr(state, "save_radar_png", lambda png: None)
+    workers = _capture_threads(monkeypatch)
+    client = _RadarClient(frames=[(_blank_png(), 1_700_000_000_000)])
+    app = _fresh_radar_app(client)
+
+    state.maybe_refresh_radar(app, 80, 20)  # type: ignore[arg-type]
+    assert app._bg_radar_running and len(workers) == 1
+    assert client.bbox_calls == []  # nothing fetched on the calling thread
+    assert app._radar_bbox is None and app._radar_src_cols == 0
+
+    workers[0]()  # the worker: bbox lookup, fit to the panel, frames
+    assert client.bbox_calls == ["CO"]
+    expected, req_w, req_h = state.fit_bbox_to_panel(
+        expand_bbox_km(client.STATE_BBOX, 20.0), 80, 20
+    )
+    assert client.requests == [("KFTG", expected, req_w, req_h)]
+
+    state.apply_bg_radar(app)  # type: ignore[arg-type]
+    assert not app._bg_radar_running and app._radar_err is None
+    assert app._radar_bbox == expected and app._radar_bbox_state == "CO"
+    assert (app._radar_src_cols, app._radar_src_rows) == (80, 20)
+    assert len(app._radar_frames) == 1 and app._radar_cells
+    state.maybe_refresh_radar(app, 80, 20)  # type: ignore[arg-type]
+    assert len(workers) == 1  # same view, fresh frames: nothing to do
+
+
+def test_failed_background_fetch_still_backs_off(monkeypatch: Any) -> None:
+    """A failure records the view it was for, so the retry wait applies."""
+    from nws_weather_tui.radar import state
+
+    workers = _capture_threads(monkeypatch)
+    app = _fresh_radar_app(_RadarClient(error="all radar sources failed"))
+
+    state.maybe_refresh_radar(app, 80, 20)  # type: ignore[arg-type]
+    workers[0]()
+    state.apply_bg_radar(app)  # type: ignore[arg-type]
+    assert app._radar_err == "all radar sources failed" and app._radar_frames == []
+    assert app._radar_bbox_state == "CO" and (app._radar_src_cols, app._radar_src_rows) == (80, 20)
+
+    for _ in range(5):
+        state.maybe_refresh_radar(app, 80, 20)  # type: ignore[arg-type]
+    assert len(workers) == 1
+    app._radar_last -= state.RADAR_RETRY_S + 1
+    state.maybe_refresh_radar(app, 80, 20)  # type: ignore[arg-type]
+    assert len(workers) == 2
+
+
+def _blank_png() -> bytes:
+    import io
+
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.new("RGBA", (8, 8), (0, 0, 0, 0)).save(buf, "PNG")
+    return buf.getvalue()
 
 
 def test_failed_radar_fetch_backs_off(monkeypatch: Any) -> None:
