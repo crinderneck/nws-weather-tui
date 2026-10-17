@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 
-from nws_weather_tui.api.cache import TTLCache
+from nws_weather_tui.api.cache import MISSING, TTLCache
 from nws_weather_tui.constants import ZIP_RE
 from nws_weather_tui.helpers import dbg
 
@@ -23,8 +23,8 @@ class Geocoder:
         if not q:
             return None
         ck = f"geocode:{q.lower()}"
-        cached = self.cache.get(ck)
-        if cached is not None:
+        cached = self.cache.get(ck, MISSING)
+        if cached is not MISSING:
             return cached  # type: ignore[return-value]
 
         if ZIP_RE.fullmatch(q):

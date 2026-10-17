@@ -5,9 +5,10 @@ NWS Weather TUI — Cache implementation.
 
 from __future__ import annotations
 
+import threading
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 
 @dataclass
@@ -16,27 +17,39 @@ class CacheEntry:
     expires_at: float
 
 
+# Pass as `default` to get() to tell a cached None apart from a missing key.
+MISSING = object()
+
+
 class TTLCache:
+    """A dict with per-key expiry, safe to share between threads: the main
+    loop, the weather thread and the radar/dashboard pools all use one."""
+
     _SWEEP_INTERVAL = 100  # sweep expired entries every N inserts
 
     def __init__(self):
         self._d: Dict[str, CacheEntry] = {}
         self._sets_since_sweep = 0
+        self._lock = threading.Lock()
 
-    def get(self, key: str) -> Optional[Any]:
-        e = self._d.get(key)
-        if not e:
-            return None
-        if time.time() >= e.expires_at:
-            self._d.pop(key, None)
-            return None
-        return e.value
+    def get(self, key: str, default: Any = None) -> Any:
+        """The live value for `key`, else `default` (None unless given, so a
+        cached None reads as missing: pass MISSING to see the difference)."""
+        with self._lock:
+            e = self._d.get(key)
+            if not e:
+                return default
+            if time.time() >= e.expires_at:
+                self._d.pop(key, None)
+                return default
+            return e.value
 
     def set(self, key: str, value: Any, ttl_seconds: int) -> None:
-        self._d[key] = CacheEntry(value=value, expires_at=time.time() + ttl_seconds)
-        self._sets_since_sweep += 1
-        if self._sets_since_sweep >= self._SWEEP_INTERVAL:
-            self._sweep_expired()
+        with self._lock:
+            self._d[key] = CacheEntry(value=value, expires_at=time.time() + ttl_seconds)
+            self._sets_since_sweep += 1
+            if self._sets_since_sweep >= self._SWEEP_INTERVAL:
+                self._sweep_expired()
 
     def _sweep_expired(self) -> None:
         """Drop expired entries that were never re-fetched via get().
@@ -45,6 +58,8 @@ class TTLCache:
         embed exact bbox floats) accumulate for the life of the process even
         after they expire, since expiry is otherwise only checked lazily on
         the next get() for that exact key.
+
+        Called with the lock held.
         """
         self._sets_since_sweep = 0
         now = time.time()
@@ -53,5 +68,6 @@ class TTLCache:
             self._d.pop(k, None)
 
     def clear(self) -> None:
-        self._d.clear()
-        self._sets_since_sweep = 0
+        with self._lock:
+            self._d.clear()
+            self._sets_since_sweep = 0

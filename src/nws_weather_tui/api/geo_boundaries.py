@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-from nws_weather_tui.api.cache import TTLCache
+from nws_weather_tui.api.cache import MISSING, TTLCache
 from nws_weather_tui.helpers import dbg
 
 NWS_REF_MAP_BASE = (
@@ -80,8 +80,8 @@ class BoundaryClient:
         if not re.fullmatch(r"[A-Z]{2}", st):
             return None
         ck = f"state_bbox:{st}"
-        cached = self.cache.get(ck)
-        if cached is not None:
+        cached = self.cache.get(ck, MISSING)
+        if cached is not MISSING:
             return cached  # type: ignore[return-value]
 
         layer_url = NWS_REF_MAP_BASE + "/3"
