@@ -70,7 +70,7 @@ class FixtureResponse:
 
     def raise_for_status(self) -> None:
         if not self.ok:
-            raise requests.HTTPError(f"{self.status_code} for url: {self.url}", response=None)
+            raise requests.HTTPError(f"{self.status_code} for url: {self.url}", response=self)
 
 
 def _encode_body(content: bytes, content_type: str) -> Dict[str, Any]:
