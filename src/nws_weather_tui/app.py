@@ -138,7 +138,6 @@ class App:
         # --- Scroll positions ---
         self.fc_scroll: int = 0
         self.hr_scroll: int = 0
-        self.alert_scroll: int = 0
         self.alert_line_scroll: int = 0
         self.help_scroll: int = 0
         self.afd_scroll: int = 0
