@@ -288,22 +288,25 @@ class _RadarApp:
     """The attributes maybe_refresh_radar reads."""
 
     def __init__(self) -> None:
+        from nws_weather_tui.radar.state import RadarState
+
         self.show_radar_map = True
+        self.radar = RadarState()
         self._bg_radar_running = False
         self.cfg = {"cache_ttls": {"radar": 300}}
-        self._radar_last = time.time()
-        self._radar_cells: List[Any] = []
-        self._radar_ascii: List[str] = []
-        self._radar_src_cols, self._radar_src_rows = 80, 20
-        self._radar_bbox_state = "CO"
+        self.radar.last = time.time()
+        self.radar.cells: List[Any] = []
+        self.radar.ascii_lines: List[str] = []
+        self.radar.src_cols, self.radar.src_rows = 80, 20
+        self.radar.bbox_state = "CO"
         self.state_code = "CO"
-        self._radar_err: Optional[str] = "all radar sources failed"
+        self.radar.err: Optional[str] = "all radar sources failed"
         # What starting a fetch reads.
         self.lat, self.lon = 39.74, -104.99
         self.radar_station = "KFTG"
         self.alerts: List[Any] = []
-        self._radar_has_256color = True
-        self._radar_anim_playing = False
+        self.radar.has_256color = True
+        self.radar.anim_playing = False
         self._bg_generation = 0
         self.client = type("C", (), {"state_bbox": lambda _s, _c: (-109.1, 37.0, -102.0, 41.0)})()
 
@@ -326,7 +329,7 @@ def test_failed_radar_fetch_backs_off(monkeypatch: Any) -> None:
     for _ in range(5):  # five redraws in quick succession
         state.maybe_refresh_radar(app, 80, 20)  # type: ignore[arg-type]
     assert started == []
-    app._radar_last -= state.RADAR_RETRY_S + 1
+    app.radar.last -= state.RADAR_RETRY_S + 1
     state.maybe_refresh_radar(app, 80, 20)  # type: ignore[arg-type]
     assert started == [1] and app._bg_radar_running
 
