@@ -290,17 +290,14 @@ class App:
 
         # Update loading spinner, but let an active _flash() message finish first
         flash_active = not self._is_loading and time.time() < self.status_until
-        if (self._bg_weather_running or self._bg_radar_running) and not flash_active:
+        # (the radar panel draws its own progress with the same spinner).
+        if self._bg_weather_running or self._bg_radar_running:
             frame = self._spinner_frames[self._spinner_idx % len(self._spinner_frames)]
             self._spinner_idx += 1
-            self._is_loading = True
-            if self._bg_weather_running:
+            if self._bg_weather_running and not flash_active:
+                self._is_loading = True
                 self.status_msg = f"{frame} Loading weather data..."
-            else:
-                done, total = self.radar.progress
-                progress = f" ({done}/{total} frames)" if total > 1 else ""
-                self.status_msg = f"{frame} Loading radar...{progress}"
-            self.status_until = time.time() + 3600
+                self.status_until = time.time() + 3600
 
         # Advance radar animation
         if self.radar.anim_playing and len(self.radar.frames) > 1:

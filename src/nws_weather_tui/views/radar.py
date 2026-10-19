@@ -120,7 +120,7 @@ def draw_radar_panel(
     alert_lines: List[str] = app.radar.alert_overlay if show_alert_polygons else []
 
     if stale:
-        _draw_loading(win, y, map_x, map_cols, map_rows)
+        _draw_loading(app, win, y, map_x, map_cols, map_rows)
     elif app.radar.has_256color and app.radar.cells:
         for i, row_cells in enumerate(app.radar.cells[:map_rows]):
             ry = y + i
@@ -159,11 +159,20 @@ def draw_radar_panel(
             curses.color_pair(4),
         )
     else:
-        _draw_loading(win, y, map_x, map_cols, map_rows)
+        _draw_loading(app, win, y, map_x, map_cols, map_rows)
 
 
-def _draw_loading(win, y: int, map_x: int, map_cols: int, map_rows: int) -> None:
-    text = "(loading radar\u2026)"[:map_cols]
+def _draw_loading(
+    app: "App", win, y: int, map_x: int, map_cols: int, map_rows: int
+) -> None:
+    if app._bg_radar_running:
+        frame = app._spinner_frames[app._spinner_idx % len(app._spinner_frames)]
+        done, total = app.radar.progress
+        progress = f" ({done}/{total} frames)" if total > 1 else ""
+        text = f"{frame} Loading radar\u2026{progress}"
+    else:
+        text = "(loading radar\u2026)"
+    text = text[:map_cols]
     safe_addstr(
         win, y + map_rows // 2, map_x + (map_cols - len(text)) // 2,
         text,

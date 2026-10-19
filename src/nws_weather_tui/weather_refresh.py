@@ -275,7 +275,7 @@ def apply_bg_weather(app: "App") -> None:
         app._bg_weather_running = False
         return
     app._bg_weather_running = False
-    app._is_loading = app._bg_radar_running
+    app._is_loading = False
 
     if result.get("ok"):
         if "points_data" in result:

@@ -184,10 +184,8 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
     # cleared on every location change), so it happens on the worker thread;
     # radar.bbox/src_* are stored by apply_bg_radar from the result.
     app.radar.last = time.time()
+    # Its progress shows in the radar panel, not the status line.
     app._bg_radar_running = True
-    app._is_loading = True
-    app.status_msg = "/ Loading radar..."
-    app.status_until = time.time() + 3600
 
     ctx = {
         "radar_station": app.radar_station or "",
