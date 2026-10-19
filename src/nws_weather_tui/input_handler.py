@@ -82,6 +82,7 @@ def handle_key(app: "App", ch: int) -> bool:
         27: lambda: _set_view(app, "current"),  # Escape
         curses.KEY_NPAGE: lambda: scroll(app, 10),
         curses.KEY_PPAGE: lambda: scroll(app, -10),
+        ord("M"): lambda: _toggle_music(app),
     }
     handler = key_handlers.get(ch)
     if handler:
@@ -273,6 +274,18 @@ def _toggle_time_format(app: "App") -> None:
 def _toggle_pause(app: "App") -> None:
     app.paused = not app.paused
     app._flash("Paused." if app.paused else "Resumed.", 1.2)
+
+
+def _toggle_music(app: "App") -> None:
+    if app.music.playing:
+        app.music.stop()
+        app._flash("Muted.", 1.2)
+    elif not app.current:
+        app._flash("No conditions to play yet.", 1.5)
+    elif app.music.play(app.current):
+        app._flash("Playing the weather.", 1.2)
+    else:
+        app._flash("No audio player found (pw-play, paplay or aplay).", 2.5)
 
 
 def _toggle_radar_anim(app: "App") -> None:

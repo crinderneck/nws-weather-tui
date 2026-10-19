@@ -79,6 +79,12 @@ A terminal weather app for the US, powered by the [National Weather Service API]
 - An editor (`e`) to add, rename, delete and reorder favorites
 - A dashboard (`D`) with current conditions, today's high/low, chance of precipitation and active alerts for every favorite, refreshed in the background
 
+### Weather tune (`M`)
+- When conditions load, a short melody generated from the weather plays on a loop: 64 notes on a pentatonic scale, synthesized live (no audio files)
+- Clear skies play in a major key; rain, snow, storms, fog or clouds in a minor one. Warmer weather pitches it higher and wind speeds it up
+- `M` mutes it, or plays it again from the latest conditions
+- Plays through `pw-play`, `paplay` or `aplay`, whichever is installed; set `"music": false` to keep it from starting on its own
+
 ### Everything else
 - Location search by city/state, ZIP code, or `lat,lon` (`l`)
 - US or SI units (`u`), 12- or 24-hour clock (`t`)
@@ -135,6 +141,7 @@ python -m nws_weather_tui
 | `u` | Toggle US / SI units |
 | `t` | Toggle 12h / 24h clock |
 | `p` | Pause / resume auto-refresh |
+| `M` | Mute / replay the weather tune |
 | `F` | Save / remove the current location as a favorite |
 | `n` / `b` | Next / previous favorite |
 | `e` | Favorites editor |
@@ -163,6 +170,7 @@ Settings live in `~/.config/nws-weather-tui/config.json`, which is created with 
 | `http_timeout` | `10` | Seconds before an API request gives up |
 | `hourly_hours` | `0` | Hours shown in the hourly view; `0` shows everything the NWS provides |
 | `show_radar_map` | `true` | Show radar on the current conditions view |
+| `music` | `true` | Play the weather tune once conditions load (`M` mutes it either way) |
 | `favorites` | `[]` | Saved locations (`name`, `lat`, `lon`) |
 | `radar.animation_frames` | `8` | Frames in the radar animation |
 | `radar.animation_interval_s` | `0.5` | Seconds between animation frames |
@@ -193,6 +201,7 @@ All code lives in the `src/nws_weather_tui/` package.
 | `views/` | One module per screen, plus `chrome.py` for the header and footer |
 | `dashboard.py`, `favorites.py` | Favorites dashboard fetch and favorites editing |
 | `moon.py`, `windsock.py`, `icons.py` | Moon math, windsock animation, weather icons |
+| `music.py` | The weather tune: composition and live synthesis |
 | `constants.py`, `persistence.py` | Default config, config and state files |
 | `helpers.py`, `formatting.py`, `geo.py`, `conversions.py` | Shared utilities |
 
@@ -202,6 +211,7 @@ All code lives in the `src/nws_weather_tui/` package.
 - A terminal with curses support (most Linux and macOS terminals)
 - A 256-color terminal is recommended for radar; it falls back to ASCII automatically
 - `astral`, `numpy`, `pillow` and `requests` (installed automatically)
+- Optional, for the weather tune: `pw-play` (PipeWire), `paplay` (PulseAudio) or `aplay` (ALSA)
 
 ## Data sources
 

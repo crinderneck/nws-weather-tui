@@ -33,6 +33,7 @@ from nws_weather_tui.models import (
     HourlyPeriod,
     UVIndex,
 )
+from nws_weather_tui.music import Music
 from nws_weather_tui.notify import AlertNotifier
 from nws_weather_tui.persistence import build_state_dict, load_app_state, save_app_config
 from nws_weather_tui.radar.state import RadarState, reset_radar_state
@@ -86,6 +87,8 @@ class App:
         self.hourly_hours: int = int(cfg.get("hourly_hours", 0))
         self.show_radar_map: bool = bool(cfg.get("show_radar_map", True))
         self.alert_notifier = AlertNotifier(cfg.get("alert_notify") or [])
+        self.music = Music()
+        self.music_autoplay: bool = bool(cfg.get("music", True))
         self.favorites: List[Dict[str, Any]] = list(cfg.get("favorites", []) or [])
         self.fav_idx: int = 0
         self.fav_edit_idx: int = 0
@@ -365,4 +368,5 @@ def main(stdscr) -> None:
     try:
         app.run()
     finally:
+        app.music.stop()
         app.alert_notifier.restore()

@@ -87,6 +87,7 @@ FOOTER_ITEMS: List[Tuple[int, int, str, str]] = [
     (1, 5, "u", "Units"),
     (1, 6, "t", "12/24h"),
     (1, 6, "p", "Pause"),
+    (1, 5, "M", "Mute"),
     (2, 7, "A", "Anim"),
     (2, 7, "</>", "Frame"),
     (2, 5, "e", "Favs"),

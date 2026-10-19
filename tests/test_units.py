@@ -662,3 +662,49 @@ def test_unchanged_config_is_not_rewritten(tmp_path: Any, monkeypatch: Any) -> N
     load_config()
     with open(path, encoding="utf-8") as f:
         assert json.load(f)["radar"] == DEFAULT_CONFIG["radar"]  # new defaults filled in
+
+
+# ---------------------------------------------------------------------------
+# Weather tune
+# ---------------------------------------------------------------------------
+
+def _conditions(temp_c: Optional[float], desc: str) -> Any:
+    from nws_weather_tui.models import CurrentConditions
+
+    return CurrentConditions("KDEN", None, temp_c, 3.0, 0.0, None, 50.0, None, None, desc, "")
+
+
+def test_tune_is_64_notes_and_the_same_for_the_same_weather() -> None:
+    from nws_weather_tui.music import NOTES, compose
+
+    tune = compose(_conditions(21.0, "Sunny"))
+    assert len(tune) == NOTES == 64
+    assert compose(_conditions(21.0, "Sunny")) == tune
+    assert compose(_conditions(4.0, "Light Rain")) != tune
+
+
+def test_tune_key_follows_the_conditions() -> None:
+    """Every note lands on the major pentatonic when it's clear and the minor
+    one when it's wet, and each 16-note phrase ends on the root."""
+    import math
+
+    from nws_weather_tui.music import MAJOR, MINOR, compose
+
+    for desc, scale in (("Sunny", MAJOR), ("Light Rain", MINOR), ("Thunderstorms", MINOR)):
+        tune = compose(_conditions(15.0, desc))
+        notes = [round(69 + 12 * math.log2(f / 440.0)) for f in tune if f]
+        root = 57 + 25 * 12 // 45
+        assert all((n - root) % 12 in scale for n in notes), desc
+        for i in (15, 31, 47, 63):
+            assert tune[i] and (round(69 + 12 * math.log2(tune[i] / 440.0)) - root) % 12 == 0
+
+
+def test_tone_is_the_right_length_and_starts_silent() -> None:
+    import numpy as np
+
+    from nws_weather_tui.music import RATE, _tone
+
+    samples = np.frombuffer(_tone(440.0, 0.2), dtype=np.int16)
+    assert len(samples) == int(RATE * 0.2)
+    assert abs(int(samples[0])) < 50  # 5 ms fade-in: no click
+    assert not np.frombuffer(_tone(None, 0.2), dtype=np.int16).any()

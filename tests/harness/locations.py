@@ -60,5 +60,6 @@ def app_config(location: str) -> Dict[str, object]:
         "units": "us",
         "use_24h": False,
         "alert_notify": [],  # no bells or tab retitles mid-test
+        "music": False,
         "favorites": favorites(),
     }

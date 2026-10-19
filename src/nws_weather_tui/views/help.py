@@ -62,6 +62,7 @@ SECTIONS: List[Tuple[str, List[Tuple[Optional[str], str]]]] = [
         ("u", "Toggle US / SI units"),
         ("t", "Toggle 12h / 24h clock"),
         ("p", "Pause / resume auto-refresh"),
+        ("M", "Mute / replay the weather tune"),
         ("F", "Save / remove the current location as a favorite"),
         ("n / b", "Next / previous favorite"),
         ("e", "Open the favorites editor"),

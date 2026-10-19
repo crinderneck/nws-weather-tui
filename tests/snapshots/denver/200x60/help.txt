@@ -7,23 +7,23 @@
            don't all fit                                         │  PgDn/PgUp Scroll by 10 lines                                    │  u         Toggle US / SI units
  h         Hourly — highlights, condition ribbon, a column per   │  G         Jump to the end                                       │  t         Toggle 12h / 24h clock
            day on wide screens                                   │  Esc       Back to current conditions                            │  p         Pause / resume auto-refresh
- a         Active alerts for this location                       │                                                                  │  F         Save / remove the current location as a favorite
- m         Moon phase, rise/set and upcoming phases              │  Favorites editor (e) ────────────────────────────────────────── │  n / b     Next / previous favorite
- d         Area Forecast Discussion — forecaster narrative in    │  j / k     Move the cursor                                       │  e         Open the favorites editor
-           columns                                               │  J / K     Move the selected favorite up / down                  │  q         Quit
- H         Hazardous Weather Outlook — the office's 7-day heads- │  Enter     Jump to the selected favorite                         │
-           up                                                    │  a         Add a favorite (search by city/ZIP)                   │  Favorites dashboard (D) ───────────────────────────────────────
- D         Favorites dashboard — every favorite at a glance      │  r         Rename the selected favorite                          │  j / k     Move the cursor
- ?         This help                                             │  d         Delete the selected favorite                          │  Enter     Jump to the selected favorite
-                                                                 │  e / Esc   Leave the editor (q also works)                       │  r         Refresh every favorite
- Radar (current view) ────────────────────────────────────────── │                                                                  │  D / Esc   Back to current conditions
- A         Play / pause the animation                            │  Radar colors ────────────────────────────────────────────────── │
- < / >     Step back / forward one frame                         │  256-color terminals: half-block cells on the NWS dBZ scale.     │  About ─────────────────────────────────────────────────────────
- o         Open weather.gov radar in a browser                   │  Otherwise an ASCII ramp " .:-=+*#%@", colored by precip type.   │  version   <version>
- click     Click a city marker to jump there                     │  dBZ: ▀ 5 ▀10 ▀15 ▀20 ▀25 ▀30 ▀35 ▀40 ▀45 ▀50 ▀55 ▀60 ▀65 ▀      │  config    ~/.config/nws-weather-tui/config.json
- ◉ you marks the current location.                               │  Sources, tried in order: NOAA MRMS composite, Iowa State IEM    │  state     ~/.config/nws-weather-tui/state.json
-                                                                 │  NEXRAD, then the NWS station WMS.                               │  Requires astral, numpy, pillow and requests.
-
+ a         Active alerts for this location                       │                                                                  │  M         Mute / replay the weather tune
+ m         Moon phase, rise/set and upcoming phases              │  Favorites editor (e) ────────────────────────────────────────── │  F         Save / remove the current location as a favorite
+ d         Area Forecast Discussion — forecaster narrative in    │  j / k     Move the cursor                                       │  n / b     Next / previous favorite
+           columns                                               │  J / K     Move the selected favorite up / down                  │  e         Open the favorites editor
+ H         Hazardous Weather Outlook — the office's 7-day heads- │  Enter     Jump to the selected favorite                         │  q         Quit
+           up                                                    │  a         Add a favorite (search by city/ZIP)                   │
+ D         Favorites dashboard — every favorite at a glance      │  r         Rename the selected favorite                          │  Favorites dashboard (D) ───────────────────────────────────────
+ ?         This help                                             │  d         Delete the selected favorite                          │  j / k     Move the cursor
+                                                                 │  e / Esc   Leave the editor (q also works)                       │  Enter     Jump to the selected favorite
+ Radar (current view) ────────────────────────────────────────── │                                                                  │  r         Refresh every favorite
+ A         Play / pause the animation                            │  Radar colors ────────────────────────────────────────────────── │  D / Esc   Back to current conditions
+ < / >     Step back / forward one frame                         │  256-color terminals: half-block cells on the NWS dBZ scale.     │
+ o         Open weather.gov radar in a browser                   │  Otherwise an ASCII ramp " .:-=+*#%@", colored by precip type.   │  About ─────────────────────────────────────────────────────────
+ click     Click a city marker to jump there                     │  dBZ: ▀ 5 ▀10 ▀15 ▀20 ▀25 ▀30 ▀35 ▀40 ▀45 ▀50 ▀55 ▀60 ▀65 ▀      │  version   <version>
+ ◉ you marks the current location.                               │  Sources, tried in order: NOAA MRMS composite, Iowa State IEM    │  config    ~/.config/nws-weather-tui/config.json
+                                                                 │  NEXRAD, then the NWS station WMS.                               │  state     ~/.config/nws-weather-tui/state.json
+                                                                 │                                                                  │  Requires astral, numpy, pillow and requests.
 
 
 
@@ -57,4 +57,4 @@
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-     c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · p Pause  │  e Favs · D Dashboard · Esc Back · ? Help · q Quit
+ c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · M Mute  │  A Anim · e Favs · D Dashboard · Esc Back · ? Help · q Quit

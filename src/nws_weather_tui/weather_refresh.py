@@ -269,6 +269,9 @@ def apply_bg_weather(app: "App") -> None:
 
         if "current" in result:
             app.current = result["current"]
+            if app.music_autoplay and app.current:
+                app.music_autoplay = False
+                app.music.play(app.current)
         if "forecast_periods" in result:
             app.forecast_periods = result["forecast_periods"]
         if "hourly_periods" in result:

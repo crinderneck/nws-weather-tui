@@ -99,6 +99,7 @@ All code lives under `src/nws_weather_tui/`:
 - `dashboard.py`, `favorites.py` - Favorites dashboard and editor logic
 - `helpers.py`, `formatting.py`, `geo.py`, `conversions.py` - Utility functions
 - `moon.py`, `windsock.py`, `icons.py`, `curses_init.py` - Moon math, windsock, icons, curses setup
+- `music.py` - Weather tune: pentatonic composition, numpy synthesis streamed to pw-play/paplay/aplay
 - `api/` - HTTP clients: `client.py` (NWS), `geocode.py`, `geo_boundaries.py`,
   `air_quality.py`, `uv_index.py`, `cache.py` (TTL cache) and `fixtures.py` (FIXTURE record/replay)
 - `radar/` - `client.py`, `decode.py`, `renderer.py`, `palette.py`, `state.py` (the

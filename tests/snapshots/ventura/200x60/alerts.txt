@@ -57,4 +57,4 @@
   * WHERE...Malibu Coast, Ventura County Beaches, and Ventura County Inland Coast.
  Scroll: 1/33 (j/k ↑↓)
 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-     c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · p Pause  │  e Favs · D Dashboard · Esc Back · ? Help · q Quit
+ c Current · f Forecast · h Hourly · a Alerts · m Moon · d Discussion · H Outlook  │  l Locate · r Refresh · u Units · t 12/24h · M Mute  │  A Anim · e Favs · D Dashboard · Esc Back · ? Help · q Quit
