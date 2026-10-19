@@ -238,6 +238,7 @@ def _run(stdscr: Any, args: argparse.Namespace, tap: ScreenTap, out: Dict[str, A
             return
         for view in (args.views.split(",") if args.views else views_for(args.location)):
             app.view = view
+            app.splash = view == "splash"
             _settle(app)
             # Steady state: no "Updated." flash or spinner in the footer.
             app.status_msg = ""

@@ -45,6 +45,10 @@ _LAT_LON_RE = re.compile(r"^\s*([+-]?\d+\.?\d*)\s*[,\s]\s*([+-]?\d+\.?\d*)\s*$")
 
 def handle_key(app: "App", ch: int) -> bool:
     """Dispatch one key; False means quit."""
+    if app.splash and ch != curses.KEY_RESIZE:
+        app.splash = False  # any key skips the splash; only q also acts
+        if ch not in (ord("q"), ord("Q")):
+            return True
     if app.view == "favorites":
         return handle_favorites_key(app, ch)
     if app.view == "dashboard":

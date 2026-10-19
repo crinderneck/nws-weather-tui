@@ -32,7 +32,10 @@ LOCATIONS: Dict[str, Dict[str, object]] = {
 SIZES: List[Tuple[int, int]] = [(80, 24), (120, 40), (200, 60)]
 
 # Views whose content depends on the location.
-LOCATION_VIEWS: List[str] = ["current", "forecast", "hourly", "alerts", "afd", "hwo", "moon"]
+# "splash" is the startup screen, drawn once the first refresh is in.
+LOCATION_VIEWS: List[str] = [
+    "current", "forecast", "hourly", "alerts", "afd", "hwo", "moon", "splash",
+]
 # Views that look the same whichever location is active; rendered once, for Denver.
 GLOBAL_VIEWS: List[str] = ["help", "favorites", "dashboard"]
 GLOBAL_VIEW_LOCATION = "denver"
@@ -61,5 +64,6 @@ def app_config(location: str) -> Dict[str, object]:
         "use_24h": False,
         "alert_notify": [],  # no bells or tab retitles mid-test
         "music": False,
+        "splash": False,  # snapshots start on the views; splash has its own
         "favorites": favorites(),
     }

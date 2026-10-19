@@ -79,6 +79,11 @@ A terminal weather app for the US, powered by the [National Weather Service API]
 - An editor (`e`) to add, rename, delete and reorder favorites
 - A dashboard (`D`) with current conditions, today's high/low, chance of precipitation and active alerts for every favorite, refreshed in the background
 
+### Startup splash
+- While the first refresh loads, the splash shows the sky at your location right now: the sun and moon where they actually are (east on the left, west on the right), and stars after dark
+- Underneath, each request ticks off as it arrives with what it found: current temperature and wind, the first forecast period, alerts, air quality and UV
+- It gives way to the normal views a moment after everything is in, or right away on any key (`q` still quits); set `"splash": false` to skip it
+
 ### Weather tune (`M`)
 - When conditions load, a short melody generated from the weather plays on a loop: 64 notes on a pentatonic scale, synthesized live (no audio files)
 - Clear skies play in a major key; rain, snow, storms, fog or clouds in a minor one. Warmer weather pitches it higher and wind speeds it up
@@ -171,6 +176,7 @@ Settings live in `~/.config/nws-weather-tui/config.json`, which is created with 
 | `hourly_hours` | `0` | Hours shown in the hourly view; `0` shows everything the NWS provides |
 | `show_radar_map` | `true` | Show radar on the current conditions view |
 | `music` | `true` | Play the weather tune once conditions load (`M` mutes it either way) |
+| `splash` | `true` | Show the sky and load progress at startup |
 | `favorites` | `[]` | Saved locations (`name`, `lat`, `lon`) |
 | `radar.animation_frames` | `8` | Frames in the radar animation |
 | `radar.animation_interval_s` | `0.5` | Seconds between animation frames |
@@ -198,7 +204,7 @@ All code lives in the `src/nws_weather_tui/` package.
 | `text_product.py` | Cleanup and reflow of NWS text products (AFD, HWO) |
 | `api/` | HTTP clients: `client.py` (NWS API, delegates to the others), geocoding, state boundaries, air quality, UV, and the TTL cache |
 | `radar/` | Radar fetching, decoding, rendering, palette, map overlays, city data and radar state |
-| `views/` | One module per screen, plus `chrome.py` for the header and footer |
+| `views/` | One module per screen, plus `chrome.py` for the header and footer and `splash.py` for the startup splash |
 | `dashboard.py`, `favorites.py` | Favorites dashboard fetch and favorites editing |
 | `moon.py`, `windsock.py`, `icons.py` | Moon math, windsock animation, weather icons |
 | `music.py` | The weather tune: composition and live synthesis |

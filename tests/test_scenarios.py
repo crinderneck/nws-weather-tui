@@ -60,7 +60,10 @@ def test_offline_start_without_saved_state(tmp_path: Any) -> None:
     assert result["fixture_misses"], "expected every request to miss"
     for view, screen in result["screens"].items():
         text = "\n".join(screen["text"])
-        assert "[OFFLINE]" in screen["text"][0], (view, screen["text"][0])
+        if view == "splash":  # no header: the failed lookup shows on its own row
+            assert "✗ location" in text, text
+        else:
+            assert "[OFFLINE]" in screen["text"][0], (view, screen["text"][0])
         assert "None" not in text and "nan" not in text, (view, text)
 
 

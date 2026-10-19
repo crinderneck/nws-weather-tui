@@ -72,7 +72,7 @@ def test_snapshot(
     result = renders.get(loc, cols, rows)
     assert view in result["screens"], f"{view} was not rendered: {result.get('error')}"
     actual = _text(result["screens"][view]["text" if kind == "txt" else "style"])
-    if view == "help":  # the version changes every release; see test_help_shows_version
+    if view in ("help", "splash"):  # the version changes every release; see test_help_shows_version
         actual = actual.replace(__version__, "<version>")
     path = _snapshot_path(loc, cols, rows, view, kind)
     if request.config.getoption("--update-snapshots"):
@@ -118,6 +118,8 @@ def test_chrome_intact(renders: Any, loc: str, cols: int, rows: int) -> None:
     screens = renders.get(loc, cols, rows)["screens"]
     assert set(screens) == set(views_for(loc))
     for view, screen in screens.items():
+        if view == "splash":  # no header or footer; test_splash covers it
+            continue
         lines = screen["text"]
         assert len(lines) == rows, view
         assert str(LOCATIONS[loc]["name"]) in lines[0] or view == "dashboard", (view, lines[0])

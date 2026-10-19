@@ -107,7 +107,8 @@ All code lives under `src/nws_weather_tui/`:
   `overlays.py`, `cities.py`
 - `views/` - One module per screen (`current.py`, `forecast.py`, `hourly.py`, `alerts.py`,
   `afd.py`, `hwo.py`, `moon.py`, `radar.py`, `favorites.py`, `dashboard.py`, `help.py`),
-  `chrome.py` for header/footer, `style.py` for shared colour rules; `__init__.py`
+  `chrome.py` for header/footer, `splash.py` for the startup splash (sky + load
+  progress from `App.load_progress`), `style.py` for shared colour rules; `__init__.py`
   re-exports the `draw_*` functions
 
 #### Git Conventions

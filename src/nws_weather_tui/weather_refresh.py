@@ -31,6 +31,14 @@ if TYPE_CHECKING:
 
 # Independent requests in one refresh run at most this many at a time.
 MAX_PARALLEL_FETCHES = 8
+# How long the startup splash stays up once the first refresh is in.
+SPLASH_HOLD_S = 1.5
+
+# Fetch results that share a row on the startup splash.
+_PROGRESS_GROUPS = {
+    "afd": "discussion", "hwo": "discussion",
+    "air_quality": "air", "uv_index": "air",
+}
 
 
 def refresh_all(app: "App", force: bool = False, allow_offline: bool = False) -> None:
@@ -44,6 +52,8 @@ def refresh_all(app: "App", force: bool = False, allow_offline: bool = False) ->
     app._is_loading = True
     app.status_msg = "/ Loading weather data..."
     app.status_until = time.time() + 3600
+    # Filled in by the fetch thread as each request lands (the splash reads it).
+    app.load_progress = {}
     ctx = {
         "lat": app.lat, "lon": app.lon, "units": app.units,
         "points_data": app.points_data, "forecast_url": app.forecast_url,
@@ -52,6 +62,7 @@ def refresh_all(app: "App", force: bool = False, allow_offline: bool = False) ->
         "office_id": app.office_id, "grid_data_url": app.grid_data_url,
         "state_code": app.state_code,
         "allow_offline": allow_offline,
+        "progress": app.load_progress,
     }
     gen = app._bg_generation
     threading.Thread(
@@ -122,9 +133,33 @@ def _fetch_hwo(app: "App", office_id: str, points_data: Any) -> Optional[Dict[st
     return hwo
 
 
+def _track(progress: Dict[str, Any], futures: Dict[str, Any]) -> None:
+    """Record each fetch in `progress` as it finishes: key -> ("ok", value)
+    or ("fail", None). Grouped fetches share a key and report once all of
+    them are in, failing if any did."""
+    groups: Dict[str, List[str]] = {}
+    for key in futures:
+        groups.setdefault(_PROGRESS_GROUPS.get(key, key), []).append(key)
+
+    def done(group: str) -> None:
+        futs = [futures[k] for k in groups[group]]
+        if not all(f.done() for f in futs) or group in progress:
+            return
+        if any(f.exception() is not None for f in futs):
+            progress[group] = ("fail", None)
+            return
+        values = [f.result() for f in futs]
+        progress[group] = ("ok", values[0] if len(values) == 1 else tuple(values))
+
+    for key, fut in futures.items():
+        group = _PROGRESS_GROUPS.get(key, key)
+        fut.add_done_callback(lambda _f, g=group: done(g))
+
+
 def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
     """Run in background thread — fetches all weather data."""
     result: Dict[str, Any] = {"ok": False}
+    progress: Dict[str, Any] = ctx.get("progress", {})
     try:
         points_data = ctx["points_data"]
         station_id = ctx["station_id"]
@@ -169,6 +204,8 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
                     station_id = sid
                     result["station_id"] = sid
 
+        progress["location"] = ("ok", (office_id, station_id))
+
         # Everything else needs only the URLs above, so it runs concurrently:
         # a cold start or location change then takes about as long as the
         # slowest request instead of the sum of a dozen. The observation,
@@ -204,6 +241,7 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
 
         with ThreadPoolExecutor(max_workers=min(MAX_PARALLEL_FETCHES, len(tasks))) as pool:
             futures = {key: pool.submit(fn) for key, fn in tasks.items()}
+            _track(progress, futures)
             fetched = {key: fut.result() for key, fut in futures.items()}
 
         for key in ("current", "forecast_periods", "hourly_periods",
@@ -218,6 +256,7 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
         result["ok"] = True
 
     except Exception as e:
+        progress.setdefault("location", ("fail", None))
         result["error"] = f"{type(e).__name__}: {e}"
         result["allow_offline"] = ctx["allow_offline"]
 
@@ -299,6 +338,9 @@ def apply_bg_weather(app: "App") -> None:
             app._flash(f"Offline: showing last saved data ({app.offline_reason})", 4.0)
         else:
             app._flash(f"Refresh failed: {app.offline_reason}", 6.0)
+
+    if app.splash and not app.splash_until:
+        app.splash_until = time.time() + SPLASH_HOLD_S
 
     if app.startup_warning:
         app._flash(app.startup_warning, 10.0)

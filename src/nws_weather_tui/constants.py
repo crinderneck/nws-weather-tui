@@ -44,6 +44,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "show_radar_map": True,
     "alert_notify": ["bell", "tab"],  # any of: bell, desktop, tab
     "music": True,  # play a weather tune once conditions load; M mutes
+    "splash": True,  # show the sky and load progress while starting up
     "favorites": [],
     "radar": {
         "show_state_lines": True,

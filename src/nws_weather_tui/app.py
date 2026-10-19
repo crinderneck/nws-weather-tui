@@ -51,6 +51,7 @@ from nws_weather_tui.views import (
     draw_hwo,
     draw_dashboard,
 )
+from nws_weather_tui.views.splash import draw_splash
 from nws_weather_tui.weather_refresh import refresh_all
 
 _DRAWERS = {
@@ -89,6 +90,11 @@ class App:
         self.alert_notifier = AlertNotifier(cfg.get("alert_notify") or [])
         self.music = Music()
         self.music_autoplay: bool = bool(cfg.get("music", True))
+        # The startup splash; it ends a moment after the first refresh lands
+        # (splash_until, set then) or on any key.
+        self.splash: bool = bool(cfg.get("splash", True))
+        self.splash_until: float = 0.0
+        self.load_progress: Dict[str, Any] = {}
         self.favorites: List[Dict[str, Any]] = list(cfg.get("favorites", []) or [])
         self.fav_idx: int = 0
         self.fav_edit_idx: int = 0
@@ -275,6 +281,9 @@ class App:
             from nws_weather_tui.dashboard import apply_bg_dashboard
             apply_bg_dashboard(self)
 
+        if self.splash and self.splash_until and time.time() >= self.splash_until:
+            self.splash = False
+
         if not self.paused:
             refresh_all(self, force=False, allow_offline=True)
 
@@ -334,6 +343,11 @@ class App:
                 curses.color_pair(4) | curses.A_BOLD,
             )
             safe_addstr(self.stdscr, 2, 0, "Resize and try again.  Press q to quit.")
+            self.stdscr.refresh()
+            return
+
+        if self.splash:
+            draw_splash(self, rows, cols)
             self.stdscr.refresh()
             return
 

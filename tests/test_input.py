@@ -27,6 +27,7 @@ class FakeApp:
         self.location_name, self.lat, self.lon = DENVER["name"], DENVER["lat"], DENVER["lon"]
         self.units, self.use_24h, self.paused = "us", False, False
         self.show_radar_map = True
+        self.splash = False
         self.radar = RadarState()
         self.forecast_periods: List[Any] = [object()] * 7
         self.hourly_periods: List[Any] = [object()] * 48
@@ -66,6 +67,15 @@ def names(app: FakeApp) -> List[str]:
 
 VIEW_KEYS = {"c": "current", "f": "forecast", "h": "hourly", "a": "alerts", "m": "moon",
              "d": "afd", "H": "hwo", "D": "dashboard", "?": "help"}
+
+
+def test_any_key_skips_the_splash_and_only_q_also_acts() -> None:
+    app = FakeApp()
+    app.splash = True
+    assert press(app, "f") == [True]
+    assert not app.splash and app.view == "current"  # skipped, not acted on
+    app.splash = True
+    assert press(app, "q") == [False]
 
 
 def test_help_lists_every_view_key() -> None:

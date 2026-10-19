@@ -708,3 +708,52 @@ def test_tone_is_the_right_length_and_starts_silent() -> None:
     assert len(samples) == int(RATE * 0.2)
     assert abs(int(samples[0])) < 50  # 5 ms fade-in: no click
     assert not np.frombuffer(_tone(None, 0.2), dtype=np.int16).any()
+
+
+# ---------------------------------------------------------------------------
+# Startup splash
+# ---------------------------------------------------------------------------
+
+def test_load_progress_reports_each_fetch_and_groups_the_extras() -> None:
+    from concurrent.futures import Future
+
+    from nws_weather_tui.weather_refresh import _track
+
+    futures: Dict[str, Any] = {k: Future() for k in ("current", "afd", "hwo", "air_quality",
+                                                     "uv_index")}
+    progress: Dict[str, Any] = {}
+    _track(progress, futures)
+    futures["current"].set_result("obs")
+    futures["afd"].set_result("afd")
+    futures["air_quality"].set_exception(RuntimeError("down"))
+    assert progress == {"current": ("ok", "obs")}  # each group waits for all its parts
+    futures["hwo"].set_result("hwo")
+    futures["uv_index"].set_result("uv")
+    assert progress == {"current": ("ok", "obs"), "discussion": ("ok", ("afd", "hwo")),
+                        "air": ("fail", None)}
+
+
+def test_splash_sky_puts_east_left_west_right_and_the_horizon_low() -> None:
+    from nws_weather_tui.views.splash import _sky_xy
+
+    assert _sky_xy(90.0, 0.0, 10, 81) == (13, 9)    # rising in the east, on the horizon
+    assert _sky_xy(180.0, 90.0, 10, 81) == (40, 0)  # overhead, due south: top centre
+    assert _sky_xy(270.0, 30.0, 10, 81) == (67, 6)
+    assert _sky_xy(10.0, 5.0, 10, 81)[0] == 0       # north of NE: pinned to the edge
+
+
+def test_splash_stars_hold_still_and_stay_in_the_sky() -> None:
+    from nws_weather_tui.views.splash import _draw_stars
+
+    class Win:
+        def __init__(self) -> None:
+            self.cells: List[Any] = []
+
+        def addstr(self, y: int, x: int, s: str, attr: int = 0) -> None:
+            self.cells.append((y, x, s))
+
+    a, b = Win(), Win()
+    _draw_stars(a, 8, 80, "2026-10-13 39.96", 30)
+    _draw_stars(b, 8, 80, "2026-10-13 39.96", 30)
+    assert a.cells == b.cells and len(a.cells) == 30
+    assert all(0 <= y < 8 and 0 <= x < 79 for y, x, _ in a.cells)
