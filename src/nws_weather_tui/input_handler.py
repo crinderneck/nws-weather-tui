@@ -289,7 +289,7 @@ def _toggle_music(app: "App") -> None:
     elif app.music.play(app.current):
         app._flash("Playing the weather.", 1.2)
     else:
-        app._flash("No audio player found (pw-play, paplay or aplay).", 2.5)
+        app._flash("No audio output found (pw-play, paplay, aplay or sounddevice).", 2.5)
 
 
 def _toggle_radar_anim(app: "App") -> None:

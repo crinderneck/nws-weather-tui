@@ -19,6 +19,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console :: Curses",
     "Intended Audience :: End Users/Desktop",
+    "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
@@ -33,6 +34,9 @@ dependencies = [
     "numpy",
     "pillow",
     "requests",
+    # The weather tune's audio output on macOS, which has no raw-PCM player
+    # to pipe to. PortAudio comes bundled in the macOS wheel.
+    "sounddevice; sys_platform == 'darwin'",
 ]
 
 [project.optional-dependencies]
