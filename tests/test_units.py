@@ -710,6 +710,124 @@ def test_tone_is_the_right_length_and_starts_silent() -> None:
     assert not np.frombuffer(_tone(None, 0.2), dtype=np.int16).any()
 
 
+class _FakeOutputStream:
+    def __init__(self, **kwargs: Any) -> None:
+        self.kwargs = kwargs
+        self.written = bytearray()
+        self.closed_by: Optional[threading.Thread] = None
+        self.aborted = False
+
+    def start(self) -> None:
+        pass
+
+    def write(self, data: bytes) -> bool:
+        time.sleep(0.001)  # a real write blocks while PortAudio's buffer is full
+        self.written += data
+        return False
+
+    def abort(self) -> None:
+        self.aborted = True
+
+    def close(self) -> None:
+        self.closed_by = threading.current_thread()
+
+
+class _FakeSounddevice:
+    class PortAudioError(Exception):
+        pass
+
+    def __init__(self, fail: bool = False) -> None:
+        self.fail = fail
+        self.streams: List[_FakeOutputStream] = []
+
+    def RawOutputStream(self, **kwargs: Any) -> _FakeOutputStream:
+        if self.fail:
+            raise self.PortAudioError("Error querying device -1")
+        self.streams.append(_FakeOutputStream(**kwargs))
+        return self.streams[-1]
+
+
+def test_tune_loops_through_sounddevice_when_no_player_is_installed(monkeypatch: Any) -> None:
+    """macOS: no pw-play/paplay/aplay, so a writer thread keeps a buffered
+    PortAudio stream fed with the tune on a loop, and closes it on mute."""
+    from nws_weather_tui import music
+
+    sd = _FakeSounddevice()
+    monkeypatch.setattr(music.shutil, "which", lambda _: None)
+    monkeypatch.setattr(music, "_sounddevice", lambda: sd)
+    cur = _conditions(21.0, "Sunny")  # wind 3 m/s -> 0.27 s notes
+    player = music.Music()
+
+    assert player.play(cur)
+    assert player.playing
+    (stream,) = sd.streams
+    assert {k: stream.kwargs[k] for k in ("samplerate", "channels", "dtype", "latency")} == {
+        "samplerate": music.RATE, "channels": 1, "dtype": "int16", "latency": music.SD_LATENCY}
+
+    tune = b"".join(music._tone(f, 0.27) for f in music.compose(cur))
+    deadline = time.time() + 10
+    while len(stream.written) < len(tune) + 10_000 and time.time() < deadline:
+        time.sleep(0.01)
+    player.stop()
+
+    written = bytes(stream.written)
+    assert written[:len(tune)] == tune
+    assert written[len(tune):len(tune) + 10_000] == tune[:10_000]  # looped back to the start
+    assert stream.aborted and stream.closed_by not in (None, threading.main_thread())
+    assert not player.playing
+
+
+def test_tune_prefers_an_installed_player_over_sounddevice(monkeypatch: Any) -> None:
+    """Linux keeps playing through pw-play/paplay/aplay as before."""
+    from nws_weather_tui import music
+
+    class _Proc:
+        def __init__(self, cmd: List[str], **_: Any) -> None:
+            self.cmd, self.returncode = cmd, None
+            self.stdin = self
+
+        def write(self, data: bytes) -> int:
+            time.sleep(0.001)
+            return len(data)
+
+        def poll(self) -> Optional[int]:
+            return self.returncode
+
+        def kill(self) -> None:
+            self.returncode = -9
+
+        def wait(self) -> int:
+            return -9
+
+        def close(self) -> None:
+            pass
+
+    sd = _FakeSounddevice()
+    monkeypatch.setattr(music.shutil, "which", lambda name: "/usr/bin/" + name)
+    monkeypatch.setattr(music.subprocess, "Popen", _Proc)
+    monkeypatch.setattr(music, "_sounddevice", lambda: sd)
+    player = music.Music()
+
+    assert player.play(_conditions(21.0, "Sunny"))
+    assert player._proc.cmd[0] == "pw-play"
+    assert not sd.streams
+    player.stop()
+    assert not player.playing
+
+
+@pytest.mark.parametrize("sd", [None, _FakeSounddevice(fail=True)], ids=["missing", "no-device"])
+def test_tune_reports_failure_when_nothing_can_play(monkeypatch: Any, sd: Any) -> None:
+    from nws_weather_tui import music
+
+    monkeypatch.setattr(music.shutil, "which", lambda _: None)
+    monkeypatch.setattr(music, "_sounddevice", lambda: sd)
+    player = music.Music()
+
+    assert not player.play(_conditions(21.0, "Sunny"))
+    assert not player.playing
+    player.stop()  # still safe to mute
+
+
 # ---------------------------------------------------------------------------
 # Startup splash
 # ---------------------------------------------------------------------------
