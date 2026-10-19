@@ -295,6 +295,29 @@ def _run_keys(app: Any, tap: ScreenTap, script: str, out: Dict[str, Any]) -> Non
     out["screens"]["final"] = tap.mark("final")
 
 
+def _curses_session(func: Any, *args: Any) -> None:
+    """curses.wrapper's setup without its teardown, which can deadlock here.
+
+    The teardown (nocbreak, endwin) sets the tty with TCSADRAIN, holding the
+    GIL (CPython's curses doesn't release it). On macOS a pty's output stays
+    queued until the master reads it, so the drain waits for ScreenTap's
+    thread, which needs the GIL to read: neither moves. Linux ptys hand
+    output straight to the master, so there it never waits. The pty is
+    thrown away afterwards, so there's no terminal to restore.
+    """
+    import curses
+
+    stdscr = curses.initscr()
+    curses.noecho()
+    curses.cbreak()
+    stdscr.keypad(True)
+    try:
+        curses.start_color()
+    except curses.error:
+        pass
+    func(stdscr, *args)
+
+
 def _fix_aware_now() -> None:
     """freezegun adds tz_offset to now(tz) as well as to naive now(), so
     now(timezone.utc) comes back shifted by the local offset. Only the
@@ -378,10 +401,8 @@ def main() -> int:
     sys.stderr = log
     tap = ScreenTap(master, args.cols, args.rows)
 
-    import curses
-
     try:
-        curses.wrapper(_run, args, tap, out)
+        _curses_session(_run, args, tap, out)
     except Exception as e:  # report, don't hide: the parent turns this into a failure
         import traceback
 
