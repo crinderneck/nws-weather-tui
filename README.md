@@ -89,6 +89,7 @@ A terminal weather app for the US, powered by the [National Weather Service API]
 - Clear skies play in a major key; rain, snow, storms, fog or clouds in a minor one. Warmer weather pitches it higher and wind speeds it up
 - `M` mutes it, or plays it again from the latest conditions
 - Plays through `pw-play`, `paplay` or `aplay`, whichever is installed; set `"music": false` to keep it from starting on its own
+- Linux only for now: on macOS there's no supported player, so `M` reports that none was found and the rest of the app works as usual
 
 ### Everything else
 - Location search by city/state, ZIP code, or `lat,lon` (`l`)
@@ -214,10 +215,10 @@ All code lives in the `src/nws_weather_tui/` package.
 ## Requirements
 
 - Python 3.9+
-- A terminal with curses support (most Linux and macOS terminals)
+- Linux or macOS, in a terminal with curses support. Windows is not supported: Python on Windows has no `curses` module, so the app won't start there
 - A 256-color terminal is recommended for radar; it falls back to ASCII automatically
 - `astral`, `numpy`, `pillow` and `requests` (installed automatically)
-- Optional, for the weather tune: `pw-play` (PipeWire), `paplay` (PulseAudio) or `aplay` (ALSA)
+- Optional, for the weather tune (Linux only): `pw-play` (PipeWire), `paplay` (PulseAudio) or `aplay` (ALSA)
 
 ## Data sources
 
