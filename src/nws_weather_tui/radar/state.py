@@ -156,34 +156,9 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
     n_frames = int(radar_cfg.get("animation_frames", 8))
     step_min = int(radar_cfg.get("animation_step_min", 5))
 
-    bbox = app.client.state_bbox(app.state_code) if app.state_code else None
-    bbox = (
-        expand_bbox_km(bbox, 20.0)
-        if bbox
-        else bbox_around(app.lat, app.lon, 300.0)
-    )
-
-    minlon, minlat, maxlon, maxlat = bbox
-    cos_lat = abs(math.cos(math.radians((minlat + maxlat) / 2)))
-    geo_aspect = ((maxlon - minlon) * cos_lat) / max(1e-9, maxlat - minlat)
-    # On a panel wider than the state's shape, show more country east and
-    # west rather than leave the sides empty (terminal cells ~2:1, and the
-    # half-block renderer packs 2 pixels per row). Capped so a very wide
-    # screen doesn't zoom out to half the continent.
-    want_aspect = target_cols / max(1, target_rows * 2)
-    if want_aspect > geo_aspect * 1.05:
-        widen = min(want_aspect / geo_aspect, 4.0)
-        mid, half = (minlon + maxlon) / 2, (maxlon - minlon) * widen / 2
-        minlon, maxlon = mid - half, mid + half
-        bbox = (minlon, minlat, maxlon, maxlat)
-        geo_aspect *= widen
-    req_h = max(64, target_rows * 12)
-    req_w = max(64, int(req_h * geo_aspect))
-
-    app._radar_bbox = bbox
-    app._radar_bbox_state = app.state_code
-    app._radar_src_cols = target_cols
-    app._radar_src_rows = target_rows
+    # The state bbox lookup can make several HTTP requests (and the cache is
+    # cleared on every location change), so it happens on the worker thread;
+    # _radar_bbox/_radar_src_* are stored by apply_bg_radar from the result.
     app._radar_last = time.time()
     app._bg_radar_running = True
     app._is_loading = True
@@ -192,8 +167,6 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
 
     ctx = {
         "radar_station": app.radar_station or "",
-        "bbox": bbox,
-        "req_w": req_w, "req_h": req_h,
         "target_cols": target_cols, "target_rows": target_rows,
         "has_256color": app._radar_has_256color,
         "ramp": ramp,
@@ -215,11 +188,53 @@ def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
     ).start()
 
 
+def fit_bbox_to_panel(
+    bbox: Tuple[float, float, float, float], target_cols: int, target_rows: int
+) -> Tuple[Tuple[float, float, float, float], int, int]:
+    """Widen `bbox` to the panel's shape; return (bbox, req_w, req_h)."""
+    minlon, minlat, maxlon, maxlat = bbox
+    cos_lat = abs(math.cos(math.radians((minlat + maxlat) / 2)))
+    geo_aspect = ((maxlon - minlon) * cos_lat) / max(1e-9, maxlat - minlat)
+    # On a panel wider than the state's shape, show more country east and
+    # west rather than leave the sides empty (terminal cells ~2:1, and the
+    # half-block renderer packs 2 pixels per row). Capped so a very wide
+    # screen doesn't zoom out to half the continent.
+    want_aspect = target_cols / max(1, target_rows * 2)
+    if want_aspect > geo_aspect * 1.05:
+        widen = min(want_aspect / geo_aspect, 4.0)
+        mid, half = (minlon + maxlon) / 2, (maxlon - minlon) * widen / 2
+        minlon, maxlon = mid - half, mid + half
+        bbox = (minlon, minlat, maxlon, maxlat)
+        geo_aspect *= widen
+    req_h = max(64, target_rows * 12)
+    req_w = max(64, int(req_h * geo_aspect))
+    return bbox, req_w, req_h
+
+
 def _bg_radar_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
     """Run in background thread — fetches radar frames + overlays."""
-    result: Dict[str, Any] = {"ok": False}
+    # Recorded even when the fetch fails, so apply_bg_radar can mark the view
+    # as fetched and maybe_refresh_radar's retry backoff applies to it.
+    result: Dict[str, Any] = {
+        "ok": False,
+        "target_cols": ctx["target_cols"], "target_rows": ctx["target_rows"],
+        "state_code": ctx["state_code"],
+    }
     app._radar_progress = (0, ctx["n_frames"])
     try:
+        state_code = ctx["state_code"]
+        bbox = app.client.state_bbox(state_code) if state_code else None
+        bbox = (
+            expand_bbox_km(bbox, 20.0)
+            if bbox
+            else bbox_around(ctx["lat"], ctx["lon"], 300.0)
+        )
+        bbox, req_w, req_h = fit_bbox_to_panel(
+            bbox, ctx["target_cols"], ctx["target_rows"]
+        )
+        result["bbox"] = bbox
+        ctx = dict(ctx, bbox=bbox, req_w=req_w, req_h=req_h)
+
         raw_frames = app.client.radar_frames_png(
             ctx["radar_station"], ctx["bbox"],
             ctx["req_w"], ctx["req_h"],
@@ -337,6 +352,13 @@ def apply_bg_radar(app: "App") -> None:
     app._bg_radar_running = False
     app._is_loading = app._bg_weather_running
     app._radar_last = time.time()
+    # The view this result was fetched for (success or not); the next draw
+    # compares against it to decide whether to fetch again.
+    if result.get("bbox"):
+        app._radar_bbox = result["bbox"]
+    app._radar_bbox_state = result.get("state_code")
+    app._radar_src_cols = int(result.get("target_cols", 0))
+    app._radar_src_rows = int(result.get("target_rows", 0))
 
     if result.get("ok"):
         frames = result["frames"]

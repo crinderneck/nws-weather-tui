@@ -50,6 +50,13 @@ class _ThreadLocalSession:
         return self._headers
 
 
+def _is_client_error(err: requests.HTTPError) -> bool:
+    """A 4xx other than 429: retrying can't help (404, 400, 403...), whereas a
+    429 or any 5xx may clear up on the next try."""
+    status = getattr(err.response, "status_code", None)
+    return isinstance(status, int) and 400 <= status < 500 and status != 429
+
+
 class NWSClient:
     def __init__(
         self,
@@ -106,8 +113,13 @@ class NWSClient:
                 return data
             except FixtureMissError:
                 raise  # replaying: a retry can't conjure a recording
+            except requests.HTTPError as e:
+                last_err = e
+                if _is_client_error(e):
+                    break  # 4xx: the same request will get the same answer
             except Exception as e:
                 last_err = e
+            if i < tries - 1:
                 time.sleep(backoff * (2 ** i))
         if last_err:
             raise last_err
