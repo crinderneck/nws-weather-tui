@@ -1,24 +1,38 @@
   0: 1-28 fg=cyan bold
   0: 97-102 bold
   0: 163-198 fg=magenta
+  3: 52-67 fg=brown
   3: 70-84 fg=green bold
   3: 132-132 fg=white
+  4: 52-66 fg=brown
   4: 70-83 fg=green bold
   4: 132-134 fg=white
+  5: 52-67 fg=brown
   5: 70-82 fg=green bold
   5: 132-132 fg=white
   5: 134-135 fg=008787
+  6: 52-67 fg=brown
   6: 132-132 fg=white
   6: 136-136 fg=white
-  7: 52-67 fg=brown
   7: 70-82 bold
   7: 132-132 fg=white
-  8: 52-66 fg=brown
+  8: 56-63 fg=4e4e4e
+  8: 64-64 fg=dadada
   8: 70-87 fg=brown
-  9: 52-67 fg=brown
- 10: 52-67 fg=brown
+  9: 54-64 fg=4e4e4e
+  9: 65-66 fg=dadada
+ 10: 53-65 fg=4e4e4e
+ 10: 66-67 fg=dadada
+ 11: 53-65 fg=4e4e4e
+ 11: 66-67 fg=dadada
  11: 70-100 fg=green
+ 12: 53-65 fg=4e4e4e
+ 12: 66-67 fg=dadada
  12: 70-93 fg=brown
+ 13: 54-64 fg=4e4e4e
+ 13: 65-66 fg=dadada
+ 14: 56-63 fg=4e4e4e
+ 14: 64-64 fg=dadada
  15: 85-113 fg=cyan bold
  16: 6-6 fg=0000ff bg=0000ff
  16: 7-7 fg=0000d7

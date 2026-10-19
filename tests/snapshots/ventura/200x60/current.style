@@ -104,14 +104,24 @@
  21: 142-144 fg=brown
  22: 111-113 fg=brown
  22: 144-146 fg=brown
+ 23: 37-52 fg=4e4e4e
+ 23: 53-53 fg=dadada bg=4e4e4e
+ 23: 54-55 fg=4e4e4e
+ 23: 56-58 fg=dadada
  23: 113-114 fg=brown
  23: 129-129 fg=white bold
  23: 130-132 fg=green bold
  23: 146-148 fg=brown
+ 24: 32-57 fg=4e4e4e
+ 24: 58-59 fg=dadada bg=4e4e4e
+ 24: 60-63 fg=dadada
  24: 114-116 fg=brown
  24: 148-150 fg=brown
  24: 193-193 fg=00875f
  24: 196-196 fg=00875f
+ 25: 28-61 fg=4e4e4e
+ 25: 62-62 fg=dadada bg=4e4e4e
+ 25: 63-67 fg=dadada
  25: 116-118 fg=brown
  25: 121-125 fg=brown
  25: 127-128 fg=brown
@@ -119,6 +129,9 @@
  25: 189-190 fg=00875f
  25: 191-191 fg=00875f bg=00875f
  25: 196-196 fg=00875f bg=00875f
+ 26: 25-63 fg=4e4e4e
+ 26: 64-64 fg=dadada bg=4e4e4e
+ 26: 65-70 fg=dadada
  26: 116-118 fg=brown
  26: 120-129 fg=brown
  26: 152-155 fg=brown
@@ -128,6 +141,9 @@
  26: 191-192 fg=00875f
  26: 195-195 fg=00875f
  26: 196-197 fg=00875f bg=00875f
+ 27: 23-65 fg=4e4e4e
+ 27: 66-66 fg=dadada bg=4e4e4e
+ 27: 67-72 fg=dadada
  27: 118-120 fg=brown
  27: 121-121 fg=white bold
  27: 122-123 fg=green bold
@@ -135,16 +151,23 @@
  27: 155-157 fg=brown
  27: 187-187 fg=00875f
  27: 193-193 fg=00875f
+ 28: 21-67 fg=4e4e4e
+ 28: 68-68 fg=dadada bg=4e4e4e
+ 28: 69-74 fg=dadada
  28: 116-116 fg=brown
  28: 120-124 fg=brown
  28: 157-160 fg=brown
  28: 190-190 fg=00005f
  28: 191-192 fg=00875f
+ 29: 19-69 fg=4e4e4e
+ 29: 70-76 fg=dadada
  29: 120-125 fg=brown
  29: 160-162 fg=brown
  29: 190-190 fg=00875f bg=00875f
  29: 191-194 fg=00875f
  29: 195-197 fg=00875f bg=00875f
+ 30: 17-70 fg=4e4e4e
+ 30: 71-78 fg=dadada
  30: 121-121 fg=brown
  30: 126-126 fg=white bold
  30: 127-129 fg=green bold
@@ -154,6 +177,8 @@
  30: 192-192 fg=00875f bg=00875f
  30: 193-194 fg=00875f
  30: 197-197 fg=00875f
+ 31: 16-71 fg=4e4e4e
+ 31: 72-79 fg=dadada
  31: 121-123 fg=brown
  31: 165-167 fg=brown
  31: 189-189 fg=00875f bg=00875f
@@ -162,11 +187,15 @@
  31: 193-195 fg=green bold
  31: 196-196 fg=white bold
  31: 197-197 fg=00875f bg=00875f
+ 32: 15-72 fg=4e4e4e
+ 32: 73-80 fg=dadada
  32: 123-127 fg=brown
  32: 167-169 fg=brown
  32: 188-190 fg=00875f
  32: 191-191 fg=00875f bg=00875f
  32: 192-192 fg=00875f
+ 33: 14-73 fg=4e4e4e
+ 33: 74-81 fg=dadada
  33: 125-127 fg=brown
  33: 144-144 fg=white bold
  33: 145-147 fg=green bold
@@ -179,6 +208,9 @@
  33: 194-194 fg=0000d7
  33: 196-196 fg=00875f
  33: 197-197 fg=00875f bg=00875f
+ 34: 13-73 fg=4e4e4e
+ 34: 74-74 fg=dadada bg=4e4e4e
+ 34: 75-82 fg=dadada
  34: 125-126 fg=brown
  34: 171-173 fg=brown
  34: 183-183 fg=00875f
@@ -188,11 +220,16 @@
  34: 192-192 fg=00875f
  34: 195-195 fg=00875f bg=00875f
  34: 196-197 fg=00875f
+ 35: 13-74 fg=4e4e4e
+ 35: 75-82 fg=dadada
  35: 126-126 fg=brown
  35: 173-175 fg=brown
  35: 184-184 fg=0000ff
  35: 188-188 fg=00875f
  35: 192-192 fg=0000d7 bg=0000d7
+ 36: 12-74 fg=4e4e4e
+ 36: 75-75 fg=dadada bg=4e4e4e
+ 36: 76-83 fg=dadada
  36: 126-128 fg=brown
  36: 175-177 fg=brown
  36: 181-182 fg=00875f
@@ -201,6 +238,8 @@
  36: 190-190 fg=00875f
  36: 193-194 fg=00875f
  36: 195-195 fg=00875f bg=00875f
+ 37: 12-75 fg=4e4e4e
+ 37: 76-83 fg=dadada
  37: 128-130 fg=brown
  37: 177-179 fg=brown
  37: 181-181 fg=00875f
@@ -208,56 +247,95 @@
  37: 191-191 fg=0000d7
  37: 194-194 fg=00875f bg=00875f
  37: 195-195 fg=00875f
+ 38: 11-75 fg=4e4e4e
+ 38: 76-84 fg=dadada
  38: 130-131 fg=brown
  38: 179-181 fg=brown
  38: 187-187 fg=00875f
  38: 189-189 fg=00875f
  38: 191-192 fg=00875f
+ 39: 11-75 fg=4e4e4e
+ 39: 76-84 fg=dadada
  39: 131-132 fg=brown
  39: 181-183 fg=brown
  39: 189-190 fg=00875f
+ 40: 11-75 fg=4e4e4e
+ 40: 76-84 fg=dadada
  40: 132-135 fg=brown
  40: 150-150 fg=white bold
  40: 151-153 fg=green bold
  40: 183-185 fg=brown
+ 41: 11-75 fg=4e4e4e
+ 41: 76-84 fg=dadada
  41: 134-136 fg=brown
  41: 185-187 fg=brown
+ 42: 11-75 fg=4e4e4e
+ 42: 76-84 fg=dadada
  42: 136-136 fg=brown
  42: 187-187 fg=brown
+ 43: 12-75 fg=4e4e4e
+ 43: 76-83 fg=dadada
  43: 136-137 fg=brown
  43: 187-189 fg=brown
+ 44: 12-74 fg=4e4e4e
+ 44: 75-75 fg=dadada bg=4e4e4e
+ 44: 76-83 fg=dadada
  44: 136-137 fg=brown
  44: 189-190 fg=brown
+ 45: 13-74 fg=4e4e4e
+ 45: 75-82 fg=dadada
  45: 137-147 fg=brown
  45: 190-192 fg=brown
+ 46: 13-73 fg=4e4e4e
+ 46: 74-74 fg=dadada bg=4e4e4e
+ 46: 75-82 fg=dadada
  46: 146-147 fg=brown
  46: 148-148 fg=red bold
  46: 149-151 fg=green bold
  46: 190-192 fg=brown
+ 47: 14-73 fg=4e4e4e
+ 47: 74-81 fg=dadada
  47: 138-155 fg=brown
  47: 157-157 fg=white bold
  47: 158-160 fg=green bold
  47: 189-190 fg=brown
+ 48: 15-72 fg=4e4e4e
+ 48: 73-80 fg=dadada
  48: 140-144 fg=brown
  48: 155-155 fg=brown
  48: 157-157 fg=brown
  48: 188-189 fg=brown
+ 49: 16-71 fg=4e4e4e
+ 49: 72-79 fg=dadada
  49: 155-160 fg=brown
  49: 188-189 fg=brown
+ 50: 17-70 fg=4e4e4e
+ 50: 71-78 fg=dadada
  50: 150-150 fg=brown
  50: 154-156 fg=brown
  50: 160-162 fg=brown
  50: 187-188 fg=brown
+ 51: 19-69 fg=4e4e4e
+ 51: 70-76 fg=dadada
  51: 145-147 fg=brown
  51: 155-156 fg=brown
  51: 162-163 fg=brown
  51: 187-187 fg=brown
+ 52: 21-67 fg=4e4e4e
+ 52: 68-68 fg=dadada bg=4e4e4e
+ 52: 69-74 fg=dadada
  52: 154-154 fg=brown
  52: 163-165 fg=brown
  52: 187-189 fg=brown
+ 53: 23-65 fg=4e4e4e
+ 53: 66-66 fg=dadada bg=4e4e4e
+ 53: 67-72 fg=dadada
  53: 154-156 fg=brown
  53: 165-165 fg=brown
  53: 188-189 fg=brown
+ 54: 25-63 fg=4e4e4e
+ 54: 64-64 fg=dadada bg=4e4e4e
+ 54: 65-70 fg=dadada
  54: 155-156 fg=brown
  54: 165-165 fg=brown
  54: 166-166 fg=white bold
@@ -265,7 +343,17 @@
  54: 180-186 fg=brown
  54: 187-187 fg=white bold
  54: 188-190 fg=green bold
+ 55: 28-61 fg=4e4e4e
+ 55: 62-62 fg=dadada bg=4e4e4e
+ 55: 63-67 fg=dadada
  55: 166-180 fg=brown
+ 56: 32-57 fg=4e4e4e
+ 56: 58-59 fg=dadada bg=4e4e4e
+ 56: 60-63 fg=dadada
+ 57: 37-52 fg=4e4e4e
+ 57: 53-53 fg=dadada bg=4e4e4e
+ 57: 54-55 fg=4e4e4e
+ 57: 56-58 fg=dadada
  59: 1-1 fg=cyan bold
  59: 13-13 fg=cyan bold
  59: 26-26 fg=cyan bold

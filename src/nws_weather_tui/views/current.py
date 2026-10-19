@@ -18,6 +18,8 @@ from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import safe_addstr, wrap_lines
 from nws_weather_tui.icons import ICON_BIG
 from nws_weather_tui.models import uv_category
+from nws_weather_tui.moon import moon_age
+from nws_weather_tui.views.moon import PX_ASPECT, _draw_moon, moon_width
 from nws_weather_tui.views.radar import draw_radar_panel
 from nws_weather_tui.views.style import temp_attr
 from nws_weather_tui.windsock import WINDSOCK_MAX_W, windsock_lines
@@ -27,6 +29,7 @@ if TYPE_CHECKING:
 
 SIDE_GAP = 5            # space either side of the divider before the radar
 SIDE_MIN_RADAR_W = 100  # radar width needed before it moves beside the text
+MOON_MIN_ROWS = 3       # smaller than this and the phase can't be made out
 
 _CARDINAL = [
     "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
@@ -288,12 +291,26 @@ def draw_current(app: "App", win) -> None:
     x0 = margin + left_w
     sock_x = x0 + text_max_w + gap
 
-    # --- Icon, vertically centered against the text block ---
+    # --- Icon, vertically centered against the text block; in the stacked
+    # layout it moves to the top when that leaves room for the moon below ---
     icon_h = min(len(icon_lines), rows)
     text_h = min(len(text_lines), rows)
     icon_y0 = max(0, (text_h - icon_h) // 2)
+    moon_rows = 0
+    if not side_by_side:
+        moon_rows = min(
+            text_h - icon_h - 1,
+            int((left_w - 1) / (2 * PX_ASPECT)),
+        )
+        if moon_rows >= MOON_MIN_ROWS:
+            icon_y0 = 0
     for i, line in enumerate(icon_lines[: rows - icon_y0]):
         safe_addstr(win, icon_y0 + i, icon_x0, line[:left_w], curses.color_pair(2))
+    now = dt.datetime.now(dt.timezone.utc)
+    if moon_rows >= MOON_MIN_ROWS:
+        moon_w = moon_width(moon_rows)
+        _draw_moon(win, icon_h + 1, icon_x0 + (left_w - 1 - moon_w) // 2,
+                   moon_age(now), moon_rows)
 
     # --- Text block ---
     y = 0
@@ -321,6 +338,15 @@ def draw_current(app: "App", win) -> None:
                 safe_addstr(win, y, margin, line)
                 y += 1
             y += 1
+        # The moon as big as the room left under the forecast allows,
+        # centered in it.
+        moon_rows = min(rows - y, int(block_w / (2 * PX_ASPECT)))
+        if moon_rows >= MOON_MIN_ROWS:
+            _draw_moon(
+                win, y + (rows - y - moon_rows) // 2,
+                margin + (block_w - moon_width(moon_rows)) // 2,
+                moon_age(now), moon_rows,
+            )
 
     # --- Radar panel ---
     if side_by_side:

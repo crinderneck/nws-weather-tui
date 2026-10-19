@@ -1,19 +1,19 @@
  Ventura, CA — NWS Weather TUI                           2:59pm                    [CURRENT] Units:US Auto:300s Fav:1/3
 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-                                ▀▀█ █▀█ █▀█ █▀▀                                           o
-                                  █ █ █ ▀▀▀ █▀                                            |=\__
-                                  ▀ ▀▀▀     ▀                                             |    \__
-                                                                                          |       `
-                     \   /      Sunny (forecast)                                          |
-                      .-.       Dew Point: 47.4 °F
-                   ― (   ) ―    Wind: 9.7 mph  Gust: 16.0 mph  Dir: SW (217°)
-                      `-’       Humidity: 44%   Pressure: —   Visibility: —
-                     /   \      Air Quality: 51 — Moderate  (PM2.5)
-                                UV Index: 4.7 — Moderate
-                                Station: VTUC1   Observed: Tue Oct 13, 2:30pm
-                                Active Alerts: 4  (press 'a')
-                                  Red Flag Warning until Fri Oct 16, 10:00pm · +3 more
+                     \   /      ▀▀█ █▀█ █▀█ █▀▀                                           o
+                      .-.         █ █ █ ▀▀▀ █▀                                            |=\__
+                   ― (   ) ―      ▀ ▀▀▀     ▀                                             |    \__
+                      `-’                                                                 |       `
+                     /   \      Sunny (forecast)                                          |
+                                Dew Point: 47.4 °F
+                  ▄▄█████▄▄     Wind: 9.7 mph  Gust: 16.0 mph  Dir: SW (217°)
+                ▄███████████▄   Humidity: 44%   Pressure: —   Visibility: —
+               ▄█████████████▄  Air Quality: 51 — Moderate  (PM2.5)
+               ███████████████  UV Index: 4.7 — Moderate
+               ▀█████████████▀  Station: VTUC1   Observed: Tue Oct 13, 2:30pm
+                ▀███████████▀   Active Alerts: 4  (press 'a')
+                  ▀▀█████▀▀       Red Flag Warning until Fri Oct 16, 10:00pm · +3 more
                                              Radar — CA  2:41pm  frame 8/8
                                            ··───────────·                   ███████  ██    ████████
                                            ··           │                  ███ ██ ▄██ ██   ████████ ██

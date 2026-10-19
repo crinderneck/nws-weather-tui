@@ -1,18 +1,18 @@
  Columbus, OH — NWS Weather TUI            [CURRENT] Units:US Auto:300s Fav:1/3
 ───────────────────────────────────────────────────────────────────────────────
 
-                    █▀█ █ █ █▀█ █▀▀
-                    █▀█ ▀▀█ ▀▀▀ █▀
-                    ▀▀▀   ▀     ▀
-         \   /
-          .-.       Sunny (forecast)
-       ― (   ) ―    Dew Point: 57.2 °F
-          `-’       Wind: 12.7 mph  Gust: —  Dir: WSW (240°)
-         /   \      Humidity: 40%   Pressure: 29.89 inHg   Visibility: 10.0 mi
-                    Air Quality: 46 — Good  (Ozone)
-                    UV Index: 0.9 — Low
-                    Station: KCMH   Observed: Tue Oct 13, 5:45pm
-                    Active Alerts: 0
+         \   /      █▀█ █ █ █▀█ █▀▀
+          .-.       █▀█ ▀▀█ ▀▀▀ █▀
+       ― (   ) ―    ▀▀▀   ▀     ▀
+          `-’
+         /   \      Sunny (forecast)
+                    Dew Point: 57.2 °F
+      ▄▄████▀▄▄     Wind: 12.7 mph  Gust: —  Dir: WSW (240°)
+     █████████▀█    Humidity: 40%   Pressure: 29.89 inHg   Visibility: 10.0 mi
+    █████████████   Air Quality: 46 — Good  (Ozone)
+    █████████████   UV Index: 0.9 — Low
+     █████████▄█    Station: KCMH   Observed: Tue Oct 13, 5:45pm
+      ▀▀████▄▀▀     Active Alerts: 0
                    Radar — OH  5:31pm  frame 3/3  (27m old)
                       @CID    @CHI ·──·· ···@ERI
                         ▀         @FWA··─@CLE       EWR@
