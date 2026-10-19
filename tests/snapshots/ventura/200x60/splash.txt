@@ -21,7 +21,6 @@
 
 
 
-
                                                                                                ▄████▄                            ▄████▄
                                                                                               ████████                           ██████
                                                                                               ████████                           ▀████▀
@@ -40,6 +39,7 @@
                                                                         ✓ alerts      Red Flag Warning +3
                                                                         ✓ discussion  discussion + outlook
                                                                         ✓ air quality AQI 51 Moderate · UV max 6
+                                                                        ✓ radar       8 frames
 
                                                                                 NWS Weather TUI v<version> · any key to skip
 

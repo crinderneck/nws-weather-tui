@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 # Independent requests in one refresh run at most this many at a time.
 MAX_PARALLEL_FETCHES = 8
-# How long the startup splash stays up once the first refresh is in.
+# How long the startup splash stays up once the first refresh and radar are in.
 SPLASH_HOLD_S = 1.5
 
 # Fetch results that share a row on the startup splash.
@@ -339,8 +339,7 @@ def apply_bg_weather(app: "App") -> None:
         else:
             app._flash(f"Refresh failed: {app.offline_reason}", 6.0)
 
-    if app.splash and not app.splash_until:
-        app.splash_until = time.time() + SPLASH_HOLD_S
+    app.splash_data_in = True
 
     if app.startup_warning:
         app._flash(app.startup_warning, 10.0)

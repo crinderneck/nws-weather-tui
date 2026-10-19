@@ -52,7 +52,7 @@ from nws_weather_tui.views import (
     draw_dashboard,
 )
 from nws_weather_tui.views.splash import draw_splash
-from nws_weather_tui.weather_refresh import refresh_all
+from nws_weather_tui.weather_refresh import SPLASH_HOLD_S, refresh_all
 
 _DRAWERS = {
     "current": draw_current,
@@ -90,10 +90,11 @@ class App:
         self.alert_notifier = AlertNotifier(cfg.get("alert_notify") or [])
         self.music = Music()
         self.music_autoplay: bool = bool(cfg.get("music", True))
-        # The startup splash; it ends a moment after the first refresh lands
-        # (splash_until, set then) or on any key.
+        # The startup splash; it ends a moment after the first refresh and
+        # the radar behind it are in (splash_until, set then) or on any key.
         self.splash: bool = bool(cfg.get("splash", True))
         self.splash_until: float = 0.0
+        self.splash_data_in: bool = False
         self.load_progress: Dict[str, Any] = {}
         self.favorites: List[Dict[str, Any]] = list(cfg.get("favorites", []) or [])
         self.fav_idx: int = 0
@@ -347,10 +348,22 @@ class App:
             return
 
         if self.splash:
+            if self.splash_data_in and not self.splash_until:
+                # Lay out the view underneath unseen: its radar panel starts
+                # the fetch at its real size, and the splash waits for it.
+                # Once the hold starts nothing new does, even on a resize.
+                self._draw_view(rows, cols)
+                self.stdscr.erase()
+                if not self._bg_radar_running:
+                    self.splash_until = time.time() + SPLASH_HOLD_S
             draw_splash(self, rows, cols)
             self.stdscr.refresh()
             return
 
+        self._draw_view(rows, cols)
+        self.stdscr.refresh()
+
+    def _draw_view(self, rows: int, cols: int) -> None:
         draw_header(self, rows, cols)
 
         body_top = 3
@@ -359,7 +372,6 @@ class App:
         try:
             win = self.stdscr.derwin(body_h, body_w, body_top, 1)
         except curses.error:
-            self.stdscr.refresh()
             return
 
         drawer = _DRAWERS.get(self.view)
@@ -367,8 +379,6 @@ class App:
             drawer(self, win)
 
         draw_footer(self, rows, cols)
-
-        self.stdscr.refresh()
 
 
 # ---------------------------------------------------------------------------

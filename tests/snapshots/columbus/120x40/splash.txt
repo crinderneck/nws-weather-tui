@@ -13,7 +13,6 @@
 
 
 
-
                                                                        ▄████▄
                                                                       ████████
                                                                       ████████          ▄████▄
@@ -30,6 +29,7 @@
                                 ✓ alerts      none here
                                 ✓ discussion  discussion + outlook
                                 ✓ air quality AQI 46 Good · UV max 5
+                                ✓ radar       8 frames
 
                                         NWS Weather TUI v<version> · any key to skip
 

@@ -6,8 +6,8 @@ refresh ticking off underneath it.
 The sky needs no network, so it's up at once: the sun and moon where they
 really are (east on the left, west on the right, the horizon at the bottom),
 stars once it's dark. Each request fills in its row as it lands; the splash
-gives way to the normal views shortly after the refresh finishes, or on any
-key.
+gives way to the normal views shortly after the refresh and the radar behind
+it are in, or on any key.
 """
 
 from __future__ import annotations
@@ -50,6 +50,7 @@ STEPS: List[Tuple[str, str]] = [
     ("alerts", "alerts"),
     ("discussion", "discussion"),
     ("air", "air quality"),
+    ("radar", "radar"),  # from app.radar, not load_progress: it loads after the rest
 ]
 BELOW_SKY = 1 + 1 + 1 + len(STEPS) + 1 + 1
 LABEL_W = 12
@@ -164,6 +165,8 @@ def _summary(app: "App", key: str, value: Any) -> Tuple[str, int]:
         return f"{alerts[0].event}{more}", curses.color_pair(C_RED) | curses.A_BOLD
     if key == "discussion":
         return "discussion + outlook", 0
+    if key == "radar":
+        return f"{value} frames" if value > 1 else "latest frame", 0
     if key == "air":
         aq, uv = value
         parts = []
@@ -175,8 +178,20 @@ def _summary(app: "App", key: str, value: Any) -> Tuple[str, int]:
     return "", 0
 
 
+def _radar_step(app: "App") -> Tuple[Optional[str], Any]:
+    """The radar row's (state, value), in load_progress's terms."""
+    if app._bg_radar_running or not app.splash_data_in:
+        return None, None
+    if app.radar.frames:
+        return "ok", len(app.radar.frames)
+    if app.radar.err:
+        return "fail", None
+    # Nothing fetched: the view underneath has no radar panel to fill.
+    return "skip", "no room at this size" if app.show_radar_map else "turned off"
+
+
 def _checklist(app: "App", win, y: int, cols: int) -> None:
-    progress = app.load_progress
+    progress = dict(app.load_progress, radar=_radar_step(app))
     frame = app._spinner_frames[app._spinner_idx % len(app._spinner_frames)]
     x = max(1, (cols - (4 + LABEL_W + VALUE_W)) // 2)
     for i, (key, label) in enumerate(STEPS):
@@ -187,6 +202,12 @@ def _checklist(app: "App", win, y: int, cols: int) -> None:
         elif state == "fail":
             mark, mark_attr = "✗", curses.color_pair(C_RED) | curses.A_BOLD
             text, attr = "unavailable", curses.A_DIM
+        elif state == "skip":
+            mark, mark_attr, text, attr = "–", curses.A_DIM, value, curses.A_DIM
+        elif app._bg_radar_running and key == "radar":
+            done, total = app.radar.progress
+            text = f"{done}/{total} frames" if total > 1 else ""
+            mark, mark_attr, attr = frame, curses.color_pair(C_YELLOW), curses.A_DIM
         elif app._bg_weather_running:
             mark, mark_attr, text, attr = frame, curses.color_pair(C_YELLOW), "", 0
         else:
