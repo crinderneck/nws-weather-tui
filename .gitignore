@@ -17,3 +17,4 @@ env/
 .claude/settings.local.json
 tools/*
 uv.lock
+profile-results/

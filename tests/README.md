@@ -1,10 +1,11 @@
 # Regression harness
 
 ```bash
-pip install -e '.[test]'              # pytest, freezegun, pyte, vermin, uv
+pip install -e '.[test]'              # pytest, freezegun, pyte, vermin, uv, pyinstrument, time-machine
 pytest                                # fast suite, ~3 s, offline
 pytest -m slow                        # Python 3.9 run via uvx + pipx install check
 pytest --update-snapshots             # accept an intended rendering change
+python tests/profile_app.py           # profile startup, data and every screen (see Profiling)
 ```
 
 ## What runs
@@ -19,6 +20,7 @@ pytest --update-snapshots             # accept an intended rendering change
 | `test_input.py` | Every view key the help screen documents, the favorites editor and dashboard keys (bounds, reorder, delete, jump), F/n/b, scrolling, lat/lon entry, radar city clicks. |
 | `test_error_paths.py` | Server failures: NWS retries and backoff, failures never cached, AFD/HWO failing quietly, radar falling back MRMS → IEM → station WMS → single frame, location search (ZIP, place names, network errors vs. no match). |
 | `test_conversions.py` | Unit conversions and dew point against exact definitions and standard values. |
+| `test_profile.py` | The profiler runs end to end: startup, data phases and every screen are timed, every screen gets a flame graph (fast); the memory pass attributes allocations to the app, not the harness's emulator (slow). |
 | `test_compat.py` | `vermin --target=3.9` (fast); the fast suite under Python 3.9, installed from source, and `pipx install --force .` into a throwaway `PIPX_HOME` that then launches, draws and quits cleanly (slow). |
 
 A Claude Code PostToolUse hook (`hooks/run_fast_tests.sh`, wired up in
@@ -61,3 +63,37 @@ pytest --update-snapshots                       # then review the diff
 Radar requests depend on the radar panel's size, so a change that moves the
 layout needs `--missing-only` — soon after the full recording, because the
 frames are pinned to the recorded MRMS time extent and MRMS keeps ~2 hours.
+
+## Profiling
+
+```bash
+python tests/profile_app.py                        # all passes, locations, sizes (~2 min)
+python tests/profile_app.py --passes timing        # just the numbers (~10 s)
+python tests/profile_app.py --locations denver --sizes 120x40 --repeat 100
+python tests/profile_app.py --live                 # real APIs: network latency included
+python tests/profile_app.py --sizes 200x60,large   # big monitors: 266x67 355x90 477x90 533x135 (live)
+```
+
+`profile_app.py` runs the real app through the driver (`driver.py --profile`,
+`harness/profiling.py`), one process per location, size and pass, and prints
+a report. Everything lands in `profile-results/<timestamp>/` (git-ignored):
+`results.json` with every number, and with the flame pass `index.html`
+linking each run's flame graphs (`.html`, plus `.txt` for a terminal).
+
+| Pass | Measures |
+|------|----------|
+| `timing` | Startup (importing the app, `App()`, first data in, first draw); each data phase (`weather`/`radar`/`dashboard` fetch on its thread, apply on the UI thread); per screen the time to settle, the first draw, and the median/p95 of `--repeat` redraws. |
+| `flame` | pyinstrument flame graphs: startup and each screen's redraws on the UI thread, and each kind of fetch merged across its threads and pool workers. |
+| `memory` | tracemalloc: startup peak and what stays allocated, and per screen the peak and net change, with the lines that allocated most. |
+
+Replay (the default) is repeatable, so use it to compare commits. It freezes
+the clock with time-machine rather than freezegun: freezegun's pure-Python
+datetime made the Hourly screen time 9x slower than it really is. Its data
+phases read fixtures from disk, so they show parsing, not the network;
+`--live` shows that, but varies run to run (behind a TLS-intercepting proxy,
+set `REQUESTS_CA_BUNDLE`). Only 80x24, 120x40 and 200x60 have recordings:
+radar is requested at the panel's size (12 px of image per panel row), so
+any other size, including the `large` preset (approximate full-screen sizes
+on 1080p, 1440p, ultrawide and 4K monitors), runs the whole profile live
+rather than replaying it with no radar. Profile runs drain the terminal without emulating
+it, so pyte neither competes for the GIL nor shows up in the memory numbers.
