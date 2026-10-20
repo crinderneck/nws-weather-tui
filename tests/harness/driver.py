@@ -9,7 +9,9 @@ screen. Results go to a JSON file:
 
 In replay mode (the default) time is frozen at the manifest's `frozen_at` and
 HTTP is served from tests/fixtures/http; `--mode record` hits the network and
-saves every response there instead.
+saves every response there instead, and `--mode live` hits the network with
+the real clock and saves nothing. `--profile PASS` measures the app instead
+of capturing screens (see harness/profiling.py and tests/profile_app.py).
 """
 
 from __future__ import annotations
@@ -31,6 +33,7 @@ from typing import Any, Dict, List
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))  # tests/ -> `harness` package
 
+from harness import profiling  # noqa: E402
 from harness.locations import (  # noqa: E402
     HTTP_FIXTURES_DIR,
     LOCATIONS,
@@ -99,9 +102,14 @@ def _emulator() -> Any:
 
 
 class ScreenTap:
-    """Reads the pty master, feeds pyte, and snapshots at each sentinel."""
+    """Reads the pty master, feeds pyte, and snapshots at each sentinel.
 
-    def __init__(self, master_fd: int, cols: int, rows: int) -> None:
+    With emulate=False it only drains the pty, like a terminal in another
+    process: --profile runs don't capture screens, and pyte's parsing would
+    otherwise compete with the app for the GIL and show up in its memory.
+    """
+
+    def __init__(self, master_fd: int, cols: int, rows: int, emulate: bool = True) -> None:
         screen_cls, stream_cls = _emulator()
         self.fd = master_fd
         self.screen = screen_cls(cols, rows)
@@ -110,6 +118,7 @@ class ScreenTap:
         self._buf = b""
         self._cond = threading.Condition()
         self._closed = False
+        self._emulate = emulate
         threading.Thread(target=self._pump, daemon=True).start()
 
     def _pump(self) -> None:
@@ -126,6 +135,8 @@ class ScreenTap:
             if RAW_DUMP:
                 with open(RAW_DUMP, "ab") as f:
                     f.write(data)
+            if not self._emulate:
+                continue
             self._buf += data
             while True:
                 i = self._buf.find(SENTINEL_PREFIX)
@@ -295,6 +306,13 @@ def _run_keys(app: Any, tap: ScreenTap, script: str, out: Dict[str, Any]) -> Non
     out["screens"]["final"] = tap.mark("final")
 
 
+def _profile(stdscr: Any, args: argparse.Namespace, tap: ScreenTap,
+             out: Dict[str, Any]) -> None:
+    """--profile: hand the session to harness/profiling.py, with this module's
+    settle and config (it can't import them: this file runs as __main__)."""
+    profiling.run(stdscr, args, out, settle=_settle, config=app_config_full)
+
+
 def _curses_session(func: Any, *args: Any) -> None:
     """curses.wrapper's setup without its teardown, which can deadlock here.
 
@@ -345,13 +363,19 @@ def main() -> int:
     ap.add_argument("--cols", type=int, required=True)
     ap.add_argument("--rows", type=int, required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--mode", choices=("replay", "record"), default="replay")
+    ap.add_argument("--mode", choices=("replay", "record", "live"), default="replay")
     ap.add_argument("--fixture-dir", default=HTTP_FIXTURES_DIR)
     ap.add_argument("--views", help="comma-separated views to render (default: all)")
     ap.add_argument("--keys", help="type these keys and run the main loop instead "
                                    "(<down>, <enter>, ... for named keys)")
     ap.add_argument("--home", help="HOME to use (and keep) instead of a fresh temp dir, "
                                    "e.g. to start a second run from the first one's state")
+    ap.add_argument("--profile", choices=profiling.PASSES,
+                    help="measure instead of capturing screens: draw/startup timings, "
+                         "pyinstrument flame graphs, or tracemalloc memory")
+    ap.add_argument("--profile-dir", help="where --profile flame writes its HTML files")
+    ap.add_argument("--repeat", type=int, default=30,
+                    help="--profile: redraws timed per screen")
     args = ap.parse_args()
 
     out: Dict[str, Any] = {"location": args.location, "cols": args.cols,
@@ -364,26 +388,41 @@ def main() -> int:
     os.environ["HOME"] = home
     os.environ["TZ"] = str(LOCATIONS[args.location]["tz"])
     time.tzset()
-    os.environ["NWS_TUI_FIXTURE_DIR"] = args.fixture_dir
-    os.environ["NWS_TUI_FIXTURE_MODE"] = args.mode
+    if args.mode == "live":
+        os.environ.pop("NWS_TUI_FIXTURE_DIR", None)
+    else:
+        os.environ["NWS_TUI_FIXTURE_DIR"] = args.fixture_dir
+        os.environ["NWS_TUI_FIXTURE_MODE"] = args.mode
     os.environ["TERM"] = "xterm-256color"
     for var in ("LINES", "COLUMNS"):
         os.environ.pop(var, None)
 
-    freezer = None
+    freezer: Any = None
     if args.mode == "replay":
-        import freezegun
-
         with open(MANIFEST_PATH, encoding="utf-8") as f:
             frozen_at = json.load(f)["frozen_at"]
-        # freezegun's now()/fromtimestamp() add `tz_offset` to UTC (default 0,
-        # i.e. a UTC wall clock); match the location's real offset at that
-        # instant so they agree with astimezone(), which follows TZ.
-        epoch = dt.datetime.fromisoformat(frozen_at).timestamp()
-        offset = dt.timedelta(seconds=time.localtime(epoch).tm_gmtoff)
-        freezer = freezegun.freeze_time(frozen_at, tz_offset=offset, tick=False)
-        _fix_aware_now()
-        freezer.start()
+        if args.profile:
+            # freezegun swaps datetime for a pure-Python FakeDatetime whose
+            # astimezone() costs ~10x the real one, enough to make Hourly
+            # time 9x slower than it is. time-machine stops the clock in C and
+            # leaves datetime native. Given a timestamp rather than an aware
+            # datetime, it leaves the timezone (TZ, above) alone.
+            import time_machine
+
+            epoch = dt.datetime.fromisoformat(frozen_at).timestamp()
+            freezer = time_machine.travel(epoch, tick=False)
+            freezer.start()
+        else:
+            import freezegun
+
+            # freezegun's now()/fromtimestamp() add `tz_offset` to UTC (default 0,
+            # i.e. a UTC wall clock); match the location's real offset at that
+            # instant so they agree with astimezone(), which follows TZ.
+            epoch = dt.datetime.fromisoformat(frozen_at).timestamp()
+            offset = dt.timedelta(seconds=time.localtime(epoch).tm_gmtoff)
+            freezer = freezegun.freeze_time(frozen_at, tz_offset=offset, tick=False)
+            _fix_aware_now()
+            freezer.start()
 
     dump_after = float(os.environ.get("NWS_TUI_STACK_DUMP_AFTER", "0") or 0)
     if dump_after > 0:  # debugging hangs: dump every thread's stack, then exit
@@ -399,10 +438,10 @@ def main() -> int:
     os.dup2(slave, 0)
     os.dup2(slave, 1)
     sys.stderr = log
-    tap = ScreenTap(master, args.cols, args.rows)
+    tap = ScreenTap(master, args.cols, args.rows, emulate=not args.profile)
 
     try:
-        _curses_session(_run, args, tap, out)
+        _curses_session(_profile if args.profile else _run, args, tap, out)
     except Exception as e:  # report, don't hide: the parent turns this into a failure
         import traceback
 

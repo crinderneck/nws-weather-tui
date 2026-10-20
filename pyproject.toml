@@ -40,8 +40,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Regression harness (tests/README.md). uv provides uvx for the Python 3.9 run.
-test = ["pytest", "freezegun", "pyte", "vermin", "uv"]
+# Regression harness (tests/README.md). uv provides uvx for the Python 3.9 run;
+# pyinstrument and time-machine are for the profiler, tests/profile_app.py.
+test = ["pytest", "freezegun", "pyte", "vermin", "uv", "pyinstrument", "time-machine"]
 
 [project.urls]
 Homepage = "https://github.com/crinderneck/nws-weather-tui"

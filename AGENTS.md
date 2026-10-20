@@ -27,6 +27,7 @@ pip install -e '.[test]'
 pytest                      # fast suite (~3 s, offline): snapshots, correctness, units, vermin
 pytest -m slow              # Python 3.9 run via uvx, pipx install-and-launch check
 pytest --update-snapshots   # after an intended rendering change; review the diff
+python tests/profile_app.py # profile startup, data phases and every screen; see tests/README.md
 ```
 - Every screen is snapshot-tested (text and colours) at 80x24, 120x40 and 200x60
   from recorded API responses; see `tests/README.md` for re-recording.
