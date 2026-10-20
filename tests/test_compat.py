@@ -57,7 +57,8 @@ def test_suite_under_python39() -> None:
     backend has to work there too), then run the fast suite on it —
     snapshots included."""
     uvx = _require("uvx")
-    base = [uvx, "--python", "3.9", "--with", REPO_ROOT, "--with", "freezegun", "--with", "pyte"]
+    base = [uvx, "--python", "3.9", "--with", REPO_ROOT, "--with", "freezegun", "--with", "pyte",
+            "--with", "pyinstrument", "--with", "time-machine"]
     probe = subprocess.run(
         base + ["python", "-c",
                 "import sys, nws_weather_tui as p; print(sys.version_info[:2], p.__file__)"],

@@ -15,11 +15,13 @@ A terminal weather app for the US, powered by the [National Weather Service API]
 - Heat index or wind chill when it differs meaningfully from the air temperature
 - Air quality and UV index
 - An animated windsock that droops, fills and flutters with the wind speed
+- The moon, shaded to its current phase, in the space under the conditions
 - A radar panel. On wide terminals it sits beside the conditions at full height, the map widens east and west to fill the space, and the NWS forecast for today and tonight fills the column under the conditions
 
 ### Radar
 - 256-color half-block rendering (▀/▄) on the NWS dBZ color scale, with an ASCII fallback for terminals without 256 colors
 - Animation: `A` plays recent frames, `<` / `>` step through them
+- While frames load, the panel shows a spinner and how many are in
 - State borders, city labels, and polygons for active warnings drawn in red
 - `◉ you` marks your location; click a city label to jump there
 - Three sources, tried in order: NOAA MRMS composite, Iowa State IEM NEXRAD, the NWS station WMS
@@ -120,6 +122,17 @@ python -m venv .venv
 . .venv/bin/activate
 pip install -e .
 ```
+
+### Development
+
+```bash
+pip install -e '.[test]'
+pytest                      # fast suite, ~3 s, offline
+pytest -m slow              # Python 3.9 and pipx install checks
+python tests/profile_app.py # profile startup, data fetches and every screen
+```
+
+See [`tests/README.md`](tests/README.md) for the snapshot harness, re-recording fixtures, and the profiler's options.
 
 ## Usage
 
