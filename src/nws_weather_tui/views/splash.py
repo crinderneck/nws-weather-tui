@@ -24,6 +24,7 @@ from nws_weather_tui.formatting import fmt_num, fmt_time
 from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import fit_width, get_sunrise_sunset, safe_addstr, text_width
 from nws_weather_tui.moon import moon_age, moon_illumination_at, moon_phase_name
+from nws_weather_tui.views.coverage import draw_no_coverage
 from nws_weather_tui.views.current import _deg_to_cardinal
 from nws_weather_tui.views.moon import _draw_moon, _moon_pixels, moon_width
 from nws_weather_tui.views.style import C_CYAN, C_GREEN, C_RED, C_YELLOW, temp_attr
@@ -186,6 +187,8 @@ def _radar_step(app: "App") -> Tuple[Optional[str], Any]:
         return "ok", len(app.radar.frames)
     if app.radar.err:
         return "fail", None
+    if app.outside_coverage:
+        return "skip", "outside NWS coverage"
     # Nothing fetched: the view underneath has no radar panel to fill.
     return "skip", "no room at this size" if app.show_radar_map else "turned off"
 
@@ -201,7 +204,8 @@ def _checklist(app: "App", win, y: int, cols: int) -> None:
             text, attr = _summary(app, key, value)
         elif state == "fail":
             mark, mark_attr = "✗", curses.color_pair(C_RED) | curses.A_BOLD
-            text, attr = "unavailable", curses.A_DIM
+            text = value if isinstance(value, str) else "unavailable"
+            attr = curses.A_DIM
         elif state == "skip":
             mark, mark_attr, text, attr = "–", curses.A_DIM, value, curses.A_DIM
         elif app._bg_radar_running and key == "radar":
@@ -227,20 +231,31 @@ def draw_splash(app: "App", rows: int, cols: int) -> None:
         sky = win.derwin(sky_h, cols, top, 0)
     except curses.error:
         sky = None
-    if sky is not None:
+    # The sky, sunrise and moon are the location's, so they wait until the
+    # NWS has answered for it, and never show for one it doesn't cover.
+    located = app.load_progress.get("location") is not None or app.splash_data_in
+    if app.outside_coverage:
+        if sky is not None:
+            draw_no_coverage(app, sky, "weather, sky or moon",
+                             x=max(0, (cols - 80) // 2), y=max(0, sky_h // 2 - 2), hint=False)
+    elif sky is not None and located:
         _sky(app, sky, sky_h, cols, now)
 
     y = top + sky_h
     safe_addstr(win, y, 0, "─" * (cols - 1), curses.color_pair(C_GREEN) | curses.A_DIM)
 
-    age = moon_age(now)
-    moon = f"{moon_phase_name(age).lower()} {round(moon_illumination_at(now) * 100)}%"
-    info = " · ".join(s for s in (
-        app.location_name, fmt_time(now, app.use_24h), _next_sun_event(app, now), moon,
-    ) if s)
+    if app.outside_coverage:
+        parts: Tuple[str, ...] = (app.location_name, "outside NWS coverage")
+    elif not located:
+        parts = (app.location_name, fmt_time(now, app.use_24h))
+    else:
+        age = moon_age(now)
+        moon = f"{moon_phase_name(age).lower()} {round(moon_illumination_at(now) * 100)}%"
+        parts = (app.location_name, fmt_time(now, app.use_24h), _next_sun_event(app, now), moon)
+    info = " · ".join(s for s in parts if s)
     info = fit_width(info, cols - 2).rstrip()
     safe_addstr(win, y + 1, max(1, (cols - text_width(info)) // 2), info,
-                curses.color_pair(C_CYAN) | curses.A_BOLD)
+                curses.color_pair(C_RED if app.outside_coverage else C_CYAN) | curses.A_BOLD)
 
     _checklist(app, win, y + 3, cols)
 

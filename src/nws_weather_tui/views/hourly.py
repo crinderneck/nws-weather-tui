@@ -25,6 +25,7 @@ from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import get_sunrise_sunset, safe_addstr
 from nws_weather_tui.icons import ICON_TINY
 from nws_weather_tui.models import HourlyPeriod
+from nws_weather_tui.views.coverage import draw_no_coverage
 from nws_weather_tui.views.style import (
     C_BLUE, C_CYAN, C_GREEN, C_MAGENTA, C_RED, C_YELLOW, temp_attr,
 )
@@ -539,6 +540,10 @@ def _day_label(d: dt.date) -> str:
 def draw_hourly(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
+    if app.outside_coverage:
+        draw_no_coverage(app, win, "hourly forecast")
+        win.noutrefresh()
+        return
     hrs = app.hourly_periods
     if not hrs:
         safe_addstr(

@@ -65,5 +65,6 @@ def app_config(location: str) -> Dict[str, object]:
         "alert_notify": [],  # no bells or tab retitles mid-test
         "music": False,
         "splash": False,  # snapshots start on the views; splash has its own
+        "detect_location": False,  # no IP lookup: replay has no recording of it
         "favorites": favorites(),
     }

@@ -140,7 +140,7 @@ RADAR_RETRY_S = 60  # after a failed fetch, wait this long before trying again
 
 
 def maybe_refresh_radar(app: "App", target_cols: int, target_rows: int) -> None:
-    if not app.show_radar_map:
+    if not app.show_radar_map or app.outside_coverage:
         return
     if app._bg_radar_running:
         return

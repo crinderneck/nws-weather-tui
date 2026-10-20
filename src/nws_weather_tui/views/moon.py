@@ -23,6 +23,7 @@ from nws_weather_tui.moon import (
     moon_phase_name,
     next_moon_phases,
 )
+from nws_weather_tui.views.coverage import draw_no_coverage
 
 if TYPE_CHECKING:
     from nws_weather_tui.app import App
@@ -125,6 +126,11 @@ def _draw_moon(win, y0: int, x0: int, age: float, cell_rows: int) -> int:
 def draw_moon(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
+    if app.outside_coverage:
+        # Computable anywhere, but the app works for a location or not at all.
+        draw_no_coverage(app, win, "moon phase")
+        win.noutrefresh()
+        return
 
     now = dt.datetime.now(dt.timezone.utc)
     today = dt.date.today()

@@ -23,6 +23,7 @@ from nws_weather_tui.formatting import fmt_time, parse_iso
 from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import safe_addstr
 from nws_weather_tui.text_product import render_text_product, widest_preformatted_line
+from nws_weather_tui.views.coverage import draw_no_coverage
 
 if TYPE_CHECKING:
     from nws_weather_tui.app import App
@@ -143,6 +144,12 @@ def _draw_line(win, y: int, x: int, w: int, text: str, style: int) -> None:
 
 
 def draw_afd(app: "App", win) -> None:
+    if app.outside_coverage:
+        win.erase()
+        draw_no_coverage(app, win, "forecast discussion")
+        win.noutrefresh()
+        return
+
     def filler(w: int) -> List[Line]:
         # Spare room on the last page goes to the Hazardous Weather Outlook,
         # then earlier (dimmed) discussions, cut off once the page is full.

@@ -14,6 +14,7 @@ from nws_weather_tui.formatting import fmt_time
 from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import safe_addstr, wrap_lines
 from nws_weather_tui.models import AlertItem
+from nws_weather_tui.views.coverage import draw_no_coverage
 
 if TYPE_CHECKING:
     from nws_weather_tui.app import App
@@ -105,6 +106,10 @@ def _draw_no_alerts(app: "App", win, rows: int, cols: int) -> None:
 def draw_alerts(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
+    if app.outside_coverage:
+        draw_no_coverage(app, win, "NWS alerts")
+        win.noutrefresh()
+        return
     if not app.alerts:
         _draw_no_alerts(app, win, rows, cols)
         win.noutrefresh()

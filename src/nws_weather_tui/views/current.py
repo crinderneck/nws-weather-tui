@@ -19,6 +19,7 @@ from nws_weather_tui.helpers import safe_addstr, wrap_lines
 from nws_weather_tui.icons import ICON_BIG
 from nws_weather_tui.models import uv_category
 from nws_weather_tui.moon import moon_age
+from nws_weather_tui.views.coverage import draw_no_coverage
 from nws_weather_tui.views.moon import PX_ASPECT, _draw_moon, moon_width
 from nws_weather_tui.views.radar import draw_radar_panel
 from nws_weather_tui.views.style import temp_attr
@@ -158,6 +159,10 @@ def draw_current(app: "App", win) -> None:
     rows, cols = win.getmaxyx()
     win_y0, win_x0 = win.getbegyx()
 
+    if app.outside_coverage:
+        draw_no_coverage(app, win, "current conditions or radar")
+        win.noutrefresh()
+        return
     if not app.current:
         safe_addstr(
             win, 0, 0,

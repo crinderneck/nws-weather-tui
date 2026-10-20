@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 import threading
 import webbrowser
-from typing import Callable, Dict, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Callable, Dict, Optional, Tuple, TYPE_CHECKING
 
 import curses
 
@@ -45,6 +45,15 @@ _LAT_LON_RE = re.compile(r"^\s*([+-]?\d+\.?\d*)\s*[,\s]\s*([+-]?\d+\.?\d*)\s*$")
 
 def handle_key(app: "App", ch: int) -> bool:
     """Dispatch one key; False means quit."""
+    if app.ip_notice and ch != curses.KEY_RESIZE:
+        # Only Enter moves past the outside-the-US notice, so a stray key
+        # can't dismiss it unread; it skips the splash behind it too.
+        if ch in (ord("q"), ord("Q")):
+            return False
+        if ch in (curses.KEY_ENTER, 10, 13):
+            app.ip_notice = False
+            app.splash = False
+        return True
     if app.splash and ch != curses.KEY_RESIZE:
         app.splash = False  # any key skips the splash; only q also acts
         if ch not in (ord("q"), ord("Q")):
@@ -179,7 +188,25 @@ def _parse_lat_lon(text: str) -> Optional[Tuple[float, float]]:
 
 
 def geocode_with_spinner(app: "App", query: str) -> Optional[Tuple[str, float, float]]:
-    """Run geocode_us() on a background thread so the UI stays responsive
+    return _with_spinner(app, "Searching location...", lambda: app.client.geocode_us(query))
+
+
+def nws_covers(app: "App", lat: float, lon: float) -> bool:
+    """Whether the NWS has data for the point; raises when it can't be asked."""
+    from nws_weather_tui.api.client import OutsideCoverageError
+
+    def check() -> bool:
+        try:
+            app.client.points(lat, lon)
+        except OutsideCoverageError:
+            return False
+        return True
+
+    return bool(_with_spinner(app, "Checking NWS coverage...", check))
+
+
+def _with_spinner(app: "App", msg: str, fn: Callable[[], Any]) -> Any:
+    """Run fn() on a background thread so the UI stays responsive
     (spinner keeps animating, terminal stays repaintable) instead of
     freezing on the main thread for the duration of the HTTP request."""
     result: dict = {}
@@ -187,7 +214,7 @@ def geocode_with_spinner(app: "App", query: str) -> Optional[Tuple[str, float, f
 
     def _worker() -> None:
         try:
-            result["value"] = app.client.geocode_us(query)
+            result["value"] = fn()
         except Exception as e:
             result["error"] = str(e)
         done.set()
@@ -196,7 +223,7 @@ def geocode_with_spinner(app: "App", query: str) -> Optional[Tuple[str, float, f
     app.stdscr.nodelay(True)
     try:
         while not done.is_set():
-            app._show_loading("Searching location...")
+            app._show_loading(msg)
             app.stdscr.getch()  # drain/discard so keys typed meanwhile don't queue up
             done.wait(0.05)
     finally:
@@ -207,8 +234,24 @@ def geocode_with_spinner(app: "App", query: str) -> Optional[Tuple[str, float, f
     return result.get("value")
 
 
+def covered_or_flash(app: "App", name: str, lat: float, lon: float, unchanged: str) -> bool:
+    """True if the NWS covers the point; otherwise say why it was refused.
+    `unchanged` ends the message, e.g. "Location unchanged."."""
+    try:
+        if nws_covers(app, lat, lon):
+            return True
+        app._flash(f"{name} is outside NWS coverage (US and territories only). {unchanged}",
+                   4.0)
+    except Exception as e:
+        app._flash(f"Couldn't reach NWS to check {name}: {e}. {unchanged}", 4.0)
+    return False
+
+
 def _confirm_location(app: "App", name: str, lat: float, lon: float) -> None:
-    """Ask before switching: a search can land somewhere unexpected."""
+    """Ask before switching: a search can land somewhere unexpected, and
+    only a place the NWS covers is accepted."""
+    if not covered_or_flash(app, name, lat, lon, "Location unchanged."):
+        return
     confirm = prompt_line(app, f"Apply '{name}'? (y/n): ", max_len=3)
     if confirm and confirm.lower().startswith("y"):
         app._apply_location(name, lat, lon)
@@ -231,7 +274,8 @@ def search_location(app: "App") -> bool:
             return True
         g = geocode_with_spinner(app, q)
         if not g:
-            app._flash(f"No match found for '{q}'.", 2.5)
+            app._flash(f"No US match for '{q}'. Only US places, ZIP codes and "
+                       "coordinates work.", 3.5)
             return True
         _confirm_location(app, *g)
     except Exception as e:

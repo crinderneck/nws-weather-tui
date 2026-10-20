@@ -39,7 +39,8 @@ def draw_header(app: "App", rows: int, cols: int) -> None:
         f" Fav:{app.fav_idx + 1}/{len(app.favorites)}"
         if app.favorites else " Fav:0"
     )
-    offline_tag = " [OFFLINE]" if app.offline_mode else ""
+    offline_tag = (" [OUTSIDE US]" if app.outside_coverage
+                   else " [OFFLINE]" if app.offline_mode else "")
     right = (
         f"[{view_label}]"
         f"{offline_tag}"

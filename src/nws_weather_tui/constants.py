@@ -25,6 +25,11 @@ STATE_PATH = os.path.join(CONFIG_DIR, "state.json")
 RADAR_LAST_PNG_PATH = os.path.join(CONFIG_DIR, "radar-last.png")
 DEBUG_LOG_PATH = os.path.join(CONFIG_DIR, "debug.log")
 
+# Countries (ISO 3166-1 alpha-2) the NWS forecasts for: the US and the
+# territories with their own codes (Puerto Rico, Guam, USVI, American Samoa,
+# Northern Marianas).
+NWS_COUNTRIES = frozenset({"US", "PR", "GU", "VI", "AS", "MP"})
+
 # ---------------------------------------------------------------------------
 # Default config
 # ---------------------------------------------------------------------------
@@ -45,6 +50,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "alert_notify": ["bell", "tab"],  # any of: bell, desktop, tab
     "music": True,  # play a weather tune once conditions load; M mutes
     "splash": True,  # show the sky and load progress while starting up
+    "detect_location": True,  # warn at startup when the IP address is outside the US
     "favorites": [],
     "radar": {
         "show_state_lines": True,

@@ -206,6 +206,7 @@ def _busy(app: Any) -> bool:
         app._bg_weather_running or app._bg_radar_running or app._bg_dash_running
         or app._bg_weather_pending is not None or app._bg_radar_pending is not None
         or app._bg_dash_pending is not None
+        or bool(app._ip_wait_until)  # the startup IP lookup hasn't answered
     )
 
 
@@ -242,7 +243,9 @@ def _run(stdscr: Any, args: argparse.Namespace, tap: ScreenTap, out: Dict[str, A
         "utc_aware": dt.datetime.now(dt.timezone.utc).isoformat(),
         "epoch": time.time(),
     }
-    app = App(stdscr, app_config_full(args.location))
+    cfg = app_config_full(args.location)
+    cfg.update(json.loads(args.config) if args.config else {})
+    app = App(stdscr, cfg)
     try:
         if args.keys is not None:
             _run_keys(app, tap, args.keys, out)
@@ -365,6 +368,8 @@ def main() -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--mode", choices=("replay", "record", "live"), default="replay")
     ap.add_argument("--fixture-dir", default=HTTP_FIXTURES_DIR)
+    ap.add_argument("--config", help="JSON object merged over the location's config, "
+                                     "e.g. to start somewhere outside the harness's three")
     ap.add_argument("--views", help="comma-separated views to render (default: all)")
     ap.add_argument("--keys", help="type these keys and run the main loop instead "
                                    "(<down>, <enter>, ... for named keys)")

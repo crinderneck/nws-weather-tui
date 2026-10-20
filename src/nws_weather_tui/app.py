@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional
 import curses
 
 from nws_weather_tui.api.client import NWSClient
+from nws_weather_tui.api.ip_locate import IPLocation
 from nws_weather_tui.constants import (
     DEFAULT_CONFIG,
     MIN_COLS,
@@ -51,8 +52,13 @@ from nws_weather_tui.views import (
     draw_hwo,
     draw_dashboard,
 )
+from nws_weather_tui.views.coverage import draw_ip_notice
 from nws_weather_tui.views.splash import draw_splash
 from nws_weather_tui.weather_refresh import SPLASH_HOLD_S, refresh_all
+
+# How long the splash waits for the IP lookup before drawing, so a notice
+# replaces it rather than flashing up over it.
+IP_WAIT_S = 1.5
 
 _DRAWERS = {
     "current": draw_current,
@@ -155,6 +161,15 @@ class App:
         self.next_refresh: float = 0.0
         self.offline_mode: bool = False
         self.offline_reason: str = ""
+        # The location has no NWS data (outside the US and its territories);
+        # every panel says so instead of drawing.
+        self.outside_coverage: bool = False
+        # Where the IP address is, when that's outside the US: the notice
+        # shows in place of the splash until Enter (ip_notice).
+        self.ip_location: Optional[IPLocation] = None
+        self.ip_notice: bool = False
+        self._ip_wait_until: float = 0.0
+        self._bg_ip_pending: Optional[List[Optional[IPLocation]]] = None
 
         # --- Scroll positions ---
         self.fc_scroll: int = 0
@@ -176,7 +191,26 @@ class App:
         init_curses(self.stdscr)
         self.radar.has_256color = init_radar_colors()
 
+        if cfg.get("detect_location", True):
+            self._ip_wait_until = time.time() + IP_WAIT_S
+            threading.Thread(target=self._bg_locate_ip, daemon=True).start()
         refresh_all(self, force=True, allow_offline=True)
+
+    def _bg_locate_ip(self) -> None:
+        loc = self.client.locate_ip()
+        with self._bg_lock:
+            self._bg_ip_pending = [loc]
+
+    def _apply_ip_location(self) -> None:
+        with self._bg_lock:
+            pending, self._bg_ip_pending = self._bg_ip_pending, None
+        if pending is None:
+            return
+        self._ip_wait_until = 0.0
+        loc = pending[0]
+        if loc is not None and not loc.in_nws_area:
+            self.ip_location = loc
+            self.ip_notice = True
 
     # ------------------------------------------------------------------
     # Status / loading messages
@@ -211,6 +245,7 @@ class App:
         self.radar_station = None
         self.state_code = None
         self.office_id = None
+        self.outside_coverage = False
         self.afd = None
         self.afd_earlier = []
         self.area_alerts = []
@@ -281,6 +316,8 @@ class App:
         if self._bg_dash_pending is not None:
             from nws_weather_tui.dashboard import apply_bg_dashboard
             apply_bg_dashboard(self)
+        if self._bg_ip_pending is not None:
+            self._apply_ip_location()
 
         if self.splash and self.splash_until and time.time() >= self.splash_until:
             self.splash = False
@@ -319,6 +356,8 @@ class App:
             wait_ms = min(wait_ms, int(self.radar.anim_interval * 1000))
         if self._bg_weather_running or self._bg_radar_running:
             wait_ms = min(wait_ms, 200)
+        if self._ip_wait_until:
+            wait_ms = min(wait_ms, 50)
         self.stdscr.timeout(clamp(wait_ms, 50, 1000))
         self._draw()
 
@@ -342,6 +381,14 @@ class App:
             )
             safe_addstr(self.stdscr, 2, 0, "Resize and try again.  Press q to quit.")
             self.stdscr.refresh()
+            return
+
+        if self.ip_notice:
+            draw_ip_notice(self, rows, cols)
+            self.stdscr.refresh()
+            return
+        if self.splash and time.time() < self._ip_wait_until:
+            self.stdscr.refresh()  # blank until the IP lookup says which screen
             return
 
         if self.splash:

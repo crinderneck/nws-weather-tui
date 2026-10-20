@@ -17,12 +17,19 @@ import curses
 from nws_weather_tui.formatting import fmt_time
 from nws_weather_tui.helpers import safe_addstr, wrap_lines
 from nws_weather_tui.views.afd import draw_text_product
+from nws_weather_tui.views.coverage import draw_no_coverage
 
 if TYPE_CHECKING:
     from nws_weather_tui.app import App
 
 
 def draw_hwo(app: "App", win) -> None:
+    if app.outside_coverage:
+        win.erase()
+        draw_no_coverage(app, win, "hazardous weather outlook")
+        win.noutrefresh()
+        return
+
     def empty(win, rows: int, cols: int) -> None:
         office = app.office_id or "this office"
         safe_addstr(win, 0, 0, f"No Hazardous Weather Outlook from {office} right now"[: cols - 1],

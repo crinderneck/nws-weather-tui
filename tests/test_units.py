@@ -292,6 +292,7 @@ class _RadarApp:
         from nws_weather_tui.radar.state import RadarState
 
         self.show_radar_map = True
+        self.outside_coverage = False
         self.radar = RadarState()
         self._bg_radar_running = False
         self.cfg = {"cache_ttls": {"radar": 300}}

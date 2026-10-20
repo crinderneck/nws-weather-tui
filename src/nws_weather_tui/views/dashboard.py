@@ -38,6 +38,9 @@ def _row(app: "App", data: Optional[Dict[str, Any]]) -> Dict[str, Tuple[str, int
     """Cell text + attr for one favorite, keyed by column."""
     if data is None:
         return {"temp": ("loading…", curses.A_DIM)}
+    if data.get("error") == "outside NWS coverage":
+        return {"temp": ("—", curses.A_DIM),
+                "cond": ("outside NWS coverage", curses.color_pair(4))}
     if data.get("error"):
         return {"temp": ("—", curses.A_DIM), "cond": ("(unavailable)", curses.A_DIM)}
     c = data["current"]

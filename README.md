@@ -1,6 +1,16 @@
 # NWS Weather TUI
 
-A terminal weather app for the US, powered by the [National Weather Service API](https://www.weather.gov/documentation/services-web-api). Built with Python and curses. Every view adapts to the size of your terminal, from an 80-column window up to an ultrawide one.
+A terminal weather app for the US and its territories, powered by the [National Weather Service API](https://www.weather.gov/documentation/services-web-api). Built with Python and curses. Every view adapts to the size of your terminal, from an 80-column window up to an ultrawide one.
+
+Developed and tested mainly on Linux. macOS works but gets less testing.
+
+> [!IMPORTANT]
+> **Privacy: every launch sends your IP address to a third party.**
+> To warn you if you're outside the US, the app asks [ipinfo.io](https://ipinfo.io/) where your IP address is each time it starts. ipinfo.io sees your IP address and answers with its country and city. The app uses that answer only to decide whether to show the warning; it doesn't save it or send it anywhere else, and it never changes your location.
+>
+> To turn this off, set `"detect_location": false` in `~/.config/nws-weather-tui/config.json`.
+>
+> Like any weather app, every other request also shows your IP address to the server it goes to; those are all listed under [Data sources](#data-sources).
 
 ![Python 3](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -92,6 +102,11 @@ A terminal weather app for the US, powered by the [National Weather Service API]
 - `M` mutes it, or plays it again from the latest conditions
 - On Linux it plays through `pw-play`, `paplay` or `aplay`, whichever is installed; on macOS it plays through CoreAudio with [sounddevice](https://python-sounddevice.readthedocs.io/), which is installed with the app there
 - Set `"music": false` to keep it from starting on its own
+
+### Outside the US
+- At startup the app looks up roughly where your IP address is. If that's outside the US and its territories, a notice replaces the splash: the NWS has nothing for you there. `Enter` continues, `q` quits; set `"detect_location": false` to skip the check
+- If the location itself is outside NWS coverage, every panel says so in place of its data, the header shows `[OUTSIDE US]`, and nothing more is fetched for it
+- Location search and adding a favorite refuse places the NWS doesn't cover (it decides, so Windsor, Ontario is refused while Detroit across the river works)
 
 ### Everything else
 - Location search by city/state, ZIP code, or `lat,lon` (`l`)
@@ -191,6 +206,7 @@ Settings live in `~/.config/nws-weather-tui/config.json`, which is created with 
 | `show_radar_map` | `true` | Show radar on the current conditions view |
 | `music` | `true` | Play the weather tune once conditions load (`M` mutes it either way) |
 | `splash` | `true` | Show the sky and load progress at startup |
+| `detect_location` | `true` | At startup, ask [ipinfo.io](https://ipinfo.io/) for your IP address's country and warn if it's outside the US (see the privacy note at the top). It never changes your location |
 | `favorites` | `[]` | Saved locations (`name`, `lat`, `lon`) |
 | `radar.animation_frames` | `8` | Frames in the radar animation |
 | `radar.animation_interval_s` | `0.5` | Seconds between animation frames |
@@ -228,11 +244,11 @@ All code lives in the `src/nws_weather_tui/` package.
 ## Requirements
 
 - Python 3.9+
-- Linux or macOS, in a terminal with curses support. Windows is not supported: Python on Windows has no `curses` module, so the app won't start there
+- Linux (primary, tested) or macOS (supported, less tested), in a terminal with curses support. Windows is not supported: Python on Windows has no `curses` module, so the app won't start there
 - A 256-color terminal is recommended for radar; it falls back to ASCII automatically
 - `astral`, `numpy`, `pillow` and `requests`, plus `sounddevice` on macOS (installed automatically)
 - Optional on Linux, for the weather tune: `pw-play` (PipeWire), `paplay` (PulseAudio) or `aplay` (ALSA)
 
 ## Data sources
 
-Weather data comes from the [National Weather Service API](https://api.weather.gov), which is free, needs no API key, and covers the United States. Air quality and UV index come from the free [Open-Meteo API](https://open-meteo.com/) (no key needed) and never take the app offline if unavailable.
+Weather data comes from the [National Weather Service API](https://api.weather.gov), which is free, needs no API key, and covers the United States and its territories. Air quality and UV index come from the free [Open-Meteo API](https://open-meteo.com/) (no key needed) and never take the app offline if unavailable. Radar comes from NOAA's MRMS composite (`mapservices.weather.noaa.gov`), Iowa State's [IEM](https://mesonet.agron.iastate.edu/) and the NWS (`opengeo.ncep.noaa.gov`). Location search uses [Nominatim](https://nominatim.openstreetmap.org/) (OpenStreetMap) for places and [Zippopotam.us](https://api.zippopotam.us/) for ZIP codes. The startup location check asks [ipinfo.io](https://ipinfo.io/) for your IP address's country (see the privacy note at the top and `detect_location`).

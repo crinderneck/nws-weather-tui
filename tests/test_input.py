@@ -28,6 +28,7 @@ class FakeApp:
         self.units, self.use_24h, self.paused = "us", False, False
         self.show_radar_map = True
         self.splash = False
+        self.ip_notice = False
         self.radar = RadarState()
         self.forecast_periods: List[Any] = [object()] * 7
         self.hourly_periods: List[Any] = [object()] * 48

@@ -19,6 +19,7 @@ python tests/profile_app.py           # profile startup, data and every screen (
 | `test_persistence.py` | Config: first run, partial files merged over defaults, a broken file kept aside rather than overwritten. Saved state: everything a refresh produces survives the round trip with its types; bad or old state loads field by field. |
 | `test_input.py` | Every view key the help screen documents, the favorites editor and dashboard keys (bounds, reorder, delete, jump), F/n/b, scrolling, lat/lon entry, radar city clicks. |
 | `test_error_paths.py` | Server failures: NWS retries and backoff, failures never cached, AFD/HWO failing quietly, radar falling back MRMS → IEM → station WMS → single frame, location search (ZIP, place names, network errors vs. no match). |
+| `test_coverage.py` | Outside NWS coverage: the startup IP check and its notice, every panel's message for a location outside the US (London, end to end), search and favorites refusing such places, and moving back to a US one. |
 | `test_conversions.py` | Unit conversions and dew point against exact definitions and standard values. |
 | `test_profile.py` | The profiler runs end to end: startup, data phases and every screen are timed, every screen gets a flame graph (fast); the memory pass attributes allocations to the app, not the harness's emulator (slow). |
 | `test_compat.py` | `vermin --target=3.9` (fast); the fast suite under Python 3.9, installed from source, and `pipx install --force .` into a throwaway `PIPX_HOME` that then launches, draws and quits cleanly (slow). |

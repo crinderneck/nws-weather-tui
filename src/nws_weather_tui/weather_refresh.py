@@ -11,6 +11,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
 
+from nws_weather_tui.api.client import OutsideCoverageError
 from nws_weather_tui.helpers import dbg
 from nws_weather_tui.models import (
     AlertItem,
@@ -255,6 +256,10 @@ def _bg_weather_fetch(app: "App", ctx: Dict[str, Any], gen: int) -> None:
             result["hwo"] = fetched["hwo"]
         result["ok"] = True
 
+    except OutsideCoverageError:
+        # Not offline: there's nothing to fetch here, now or on a retry.
+        progress["location"] = ("fail", "outside NWS coverage")
+        result["outside"] = True
     except Exception as e:
         progress.setdefault("location", ("fail", None))
         result["error"] = f"{type(e).__name__}: {e}"
@@ -277,7 +282,17 @@ def apply_bg_weather(app: "App") -> None:
     app._bg_weather_running = False
     app._is_loading = False
 
-    if result.get("ok"):
+    if result.get("outside"):
+        _clear_weather(app)
+        app.outside_coverage = True
+        app.offline_mode = False
+        app.offline_reason = ""
+        app.last_refresh = time.time()
+        app.next_refresh = time.time() + app.auto_refresh_seconds
+        app._flash(f"{app.location_name} is outside NWS coverage. Press l for a US location.",
+                   8.0)
+    elif result.get("ok"):
+        app.outside_coverage = False
         if "points_data" in result:
             app.points_data = result["points_data"]
         if "forecast_url" in result:
@@ -344,3 +359,17 @@ def apply_bg_weather(app: "App") -> None:
     if app.startup_warning:
         app._flash(app.startup_warning, 10.0)
         app.startup_warning = None
+
+
+def _clear_weather(app: "App") -> None:
+    """Drop the last location's data, so no panel shows it as this one's."""
+    app.current = None
+    app.forecast_periods = []
+    app.hourly_periods = []
+    app.alerts = []
+    app.area_alerts = []
+    app.air_quality = None
+    app.uv_index = None
+    app.afd = None
+    app.afd_earlier = []
+    app.hwo = None

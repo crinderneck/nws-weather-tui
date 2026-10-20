@@ -132,7 +132,9 @@ def _fav_edit_rename(app: "App") -> None:
 
 
 def _fav_edit_add(app: "App") -> None:
-    from nws_weather_tui.input_handler import geocode_with_spinner, prompt_line
+    from nws_weather_tui.input_handler import (
+        covered_or_flash, geocode_with_spinner, prompt_line,
+    )
     q = prompt_line(app, "Add favorite (city/state or ZIP): ")
     if q is None or not q.strip():
         app._flash("Add canceled.", 1.2)
@@ -143,6 +145,8 @@ def _fav_edit_add(app: "App") -> None:
             app._flash(f"No match found for '{q}'.", 2.5)
             return
         name, lat, lon = g
+        if not covered_or_flash(app, name, lat, lon, "Not added."):
+            return
         app.favorites.append({"name": name, "lat": lat, "lon": lon})
         app.fav_edit_idx = len(app.favorites) - 1
         app._flash(f"Added: {name}", 1.5)

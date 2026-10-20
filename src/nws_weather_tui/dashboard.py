@@ -10,6 +10,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, TYPE_CHECKING
 
+from nws_weather_tui.api.client import OutsideCoverageError
 from nws_weather_tui.helpers import dbg
 from nws_weather_tui.models import extract_alerts, extract_current, extract_forecast
 
@@ -65,6 +66,8 @@ def _fetch_one(app: "App", fav: Dict[str, Any]) -> Dict[str, Any]:
         except Exception as ae:
             dbg(f"Dashboard alerts fetch failed for {fav.get('name')}: {ae}")
         return data
+    except OutsideCoverageError:
+        return {"error": "outside NWS coverage"}
     except Exception as e:
         return {"error": str(e)}
 

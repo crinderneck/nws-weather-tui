@@ -19,9 +19,24 @@ from nws_weather_tui.api.fixtures import (
 )
 from nws_weather_tui.api.geo_boundaries import BoundaryClient
 from nws_weather_tui.api.geocode import Geocoder
+from nws_weather_tui.api.ip_locate import IPLocation, locate_ip
 from nws_weather_tui.api.uv_index import UVIndexClient
 from nws_weather_tui.constants import BASE
 from nws_weather_tui.radar.client import RadarFetcher
+
+
+# The IP lookup runs at startup, before anything is on screen; don't let a
+# slow answer hold that up for the full http_timeout.
+IP_LOCATE_TIMEOUT_S = 3
+
+
+class OutsideCoverageError(requests.HTTPError):
+    """The NWS has no forecast data for the point: it's outside the US and
+    its territories (or offshore). /points answers 404 for those."""
+
+    def __init__(self, lat: float, lon: float, response: Any = None) -> None:
+        super().__init__(f"{lat:.4f}, {lon:.4f} is outside NWS coverage", response=response)
+        self.lat, self.lon = lat, lon
 
 
 # Concurrent fetches (the weather refresh fans out, and radar frames and the
@@ -121,8 +136,17 @@ class NWSClient:
     # ------------------------------------------------------------------
 
     def points(self, lat: float, lon: float) -> Dict[str, Any]:
+        """Raises OutsideCoverageError for a point the NWS doesn't cover."""
         url = f"{BASE}/points/{lat:.4f},{lon:.4f}"
-        return self._get_json(url, ttl=self.ttls["points"])
+        try:
+            return self._get_json(url, ttl=self.ttls["points"])
+        except requests.HTTPError as e:
+            if getattr(e.response, "status_code", None) == 404:
+                raise OutsideCoverageError(lat, lon, e.response) from e
+            raise
+
+    def locate_ip(self) -> Optional[IPLocation]:
+        return locate_ip(self.s, min(self.timeout, IP_LOCATE_TIMEOUT_S))
 
     def stations(self, stations_url: str) -> Dict[str, Any]:
         return self._get_json(stations_url, ttl=self.ttls["stations"])

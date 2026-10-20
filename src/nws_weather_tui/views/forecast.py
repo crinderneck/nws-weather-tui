@@ -17,6 +17,7 @@ from nws_weather_tui.geo import clamp
 from nws_weather_tui.helpers import get_sunrise_sunset, safe_addstr, wrap_lines
 from nws_weather_tui.icons import ICON_BIG
 from nws_weather_tui.models import ForecastPeriod
+from nws_weather_tui.views.coverage import draw_no_coverage
 from nws_weather_tui.views.style import temp_attr
 
 if TYPE_CHECKING:
@@ -193,6 +194,10 @@ def _card_label(card: DayCard, w: int) -> str:
 def draw_forecast(app: "App", win) -> None:
     win.erase()
     rows, cols = win.getmaxyx()
+    if app.outside_coverage:
+        draw_no_coverage(app, win, "forecast")
+        win.noutrefresh()
+        return
     periods = app.forecast_periods
     if not periods:
         safe_addstr(win, 0, 0, "No forecast yet. Press r to refresh.", curses.A_DIM)
